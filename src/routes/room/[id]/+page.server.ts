@@ -21,6 +21,7 @@ function getRoomStateOrDefault(roomId: string): RoomState {
 			users: {},
 			showResults: false,
 			selectableNumbers: [0, 1, 2, 3, 5, 8, 13, 21],
+			adminDeviceId: null,
 		}
 	);
 }
@@ -59,7 +60,49 @@ function setSelectedNumberForRoom(
 	setRoomState(roomId, roomState);
 }
 
+function getDeviceIdFromName(roomId: string, name: string): string | null {
+	const roomState = getRoomStateOrDefault(roomId);
+	for (const [deviceId, value] of Object.entries(roomState.users)) {
+		if (value.name === name) {
+			return deviceId;
+		}
+	}
+	return null;
+}
+
 export const actions = {
+	setName: async ({ request, locals, params }) => {
+		const formData = await request.formData();
+
+		const schema = z.string();
+
+		const parsedName = schema.safeParse(formData.get("name"));
+		if (!parsedName.success) {
+			return {
+				body: "Name is required",
+				status: 400,
+			};
+		}
+
+		const nameAlreadyPresent =
+			getDeviceIdFromName(params.id, parsedName.data) !== null;
+		if (nameAlreadyPresent) {
+			return {
+				body: "Name already exists",
+				status: 400,
+			};
+		}
+
+		// if there's no devices in the room already, set this device as admin
+		const roomState = getRoomStateOrDefault(params.id);
+		if (roomState.adminDeviceId === null) {
+			roomState.adminDeviceId = locals.deviceId;
+		}
+		setRoomState(params.id, roomState);
+
+		setNameForRoom(params.id, locals.deviceId, parsedName.data);
+		return {};
+	},
 	submitNumber: async ({ request, params, locals }) => {
 		const formData = await request.formData();
 
@@ -75,33 +118,6 @@ export const actions = {
 		}
 
 		setSelectedNumberForRoom(params.id, locals.deviceId, parsedNumber.data);
-		return {};
-	},
-	setName: async ({ request, locals, params }) => {
-		const formData = await request.formData();
-
-		const schema = z.string();
-
-		const parsedName = schema.safeParse(formData.get("name"));
-		if (!parsedName.success) {
-			return {
-				body: "Name is required",
-				status: 400,
-			};
-		}
-		// Check name doesn't already exist for some other device
-		const roomState = getRoomStateOrDefault(params.id);
-		for (const [deviceId, value] of Object.entries(roomState.users)) {
-			if (value.name === parsedName.data && deviceId !== locals.deviceId) {
-				return {
-					body: "Name already exists",
-					status: 400,
-				};
-			}
-		}
-
-		setNameForRoom(params.id, locals.deviceId, parsedName.data);
-
 		return {};
 	},
 	inverseDisplay: async ({ params }) => {

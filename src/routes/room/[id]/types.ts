@@ -10,4 +10,5 @@ export type RoomState = {
 	};
 	showResults: boolean;
 	selectableNumbers: number[];
+	adminDeviceId: string | null;
 };

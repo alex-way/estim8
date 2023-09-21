@@ -74,6 +74,9 @@
 		Room ID: {$page.params.id}
 		<Button variant="secondary" on:click={onClickCopy}>{copyText}</Button>
 	</h1>
+	{#if roomState.adminDeviceId}
+		<p>Admin: {roomState.users[roomState.adminDeviceId]?.name}</p>
+	{/if}
 
 	<form
 		method="post"
