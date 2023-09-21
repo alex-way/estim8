@@ -104,7 +104,7 @@ export const actions = {
 
 		return {};
 	},
-	inverseDisplay: async ({ request, locals, params }) => {
+	inverseDisplay: async ({ params }) => {
 		const roomState = getRoomStateOrDefault(params.id);
 
 		roomState.showResults = !roomState.showResults;
@@ -112,11 +112,12 @@ export const actions = {
 		setRoomState(params.id, roomState);
 		return {};
 	},
-	clear: async ({ request, locals, params }) => {
+	clear: async ({ params }) => {
 		const roomState = getRoomStateOrDefault(params.id);
 		for (const [_, value] of Object.entries(roomState.users)) {
 			value.chosenNumber = null;
 		}
+		roomState.showResults = false;
 
 		setRoomState(params.id, roomState);
 		return {};

@@ -10,6 +10,7 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Progress } from '$lib/components/ui/progress';
 	import JSConfetti from 'js-confetti';
+	import ResultsPanel from './components/ResultsPanel.svelte';
 
 	export let data: PageData;
 
@@ -52,14 +53,27 @@
 		percentOfPeopleVoted == 100 &&
 		Object.values(roomState.users).every((user) => user.chosenNumber === roomState.users[data.deviceId]?.chosenNumber);
 
-	$: if (roomState.showResults && consensus && peopleInRoom > 1) {
+	$: if (roomState.showResults && consensus) {
 		jsConfetti?.addConfetti();
 	}
 	$: numberSelected = roomState.users[data.deviceId]?.chosenNumber;
+
+	let copyText = 'Copy';
+
+	function onClickCopy() {
+		navigator.clipboard.writeText($page.url.toString());
+		copyText = 'Copied!';
+		setTimeout(() => {
+			copyText = 'Copy';
+		}, 2000);
+	}
 </script>
 
 <div class="w-full max-w-7xl mx-auto">
-	<h1 class="text-center text-2xl my-4">Room ID: {$page.params.id}</h1>
+	<h1 class="text-center text-2xl my-4">
+		Room ID: {$page.params.id}
+		<Button variant="secondary" on:click={onClickCopy}>{copyText}</Button>
+	</h1>
 
 	<form
 		method="post"
@@ -71,7 +85,7 @@
 			};
 		}}
 	>
-		<Input type="text" name="name" placeholder="Name" bind:value={name} />
+		<Input type="text" name="name" placeholder="Name" maxlength={16} bind:value={name} />
 		{#if !nameExistsInRoom}
 			<Button type="submit">Set</Button>
 		{/if}
@@ -82,7 +96,7 @@
 			<p>Waiting for {peopleInRoomWithNullSelection.length} more people to vote</p>
 		{/if}
 		<Progress value={percentOfPeopleVoted} class="my-4" />
-		<div class="flex w-full max-w-sm items-center space-x-2 my-4">
+		<div class="flex w-full items-center space-x-2 my-4 justify-center">
 			{#each data.roomState.selectableNumbers as number}
 				<form
 					method="post"
@@ -98,29 +112,23 @@
 						type="submit"
 						name="chosenNumber"
 						value={number}
+						class="text-2xl p-6"
 						disabled={data.roomState.showResults || numberSelected === number}>{number}</Button
 					>
 				</form>
 			{/each}
 		</div>
 
-		<form method="post" action="?/inverseDisplay" use:enhance>
+		<form method="post" action="?/inverseDisplay" use:enhance class="inline-block">
 			<Button type="submit" disabled={!roomState.showResults && peopleInRoomWithNullSelection.length !== 0}
 				>{roomState.showResults ? 'Hide' : 'Reveal'}</Button
 			>
 		</form>
 
-		<form method="post" action="?/clear" use:enhance>
-			<Button type="submit" variant="outline">Clear all</Button>
+		<form method="post" action="?/clear" use:enhance class="inline-block">
+			<Button type="submit" variant="outline" disabled={percentOfPeopleVoted === 0}>Clear all</Button>
 		</form>
 
-		{#if roomState}
-			{#each Object.keys(roomState.users) as deviceId}
-				<p>
-					{roomState.users[deviceId].name}: {#if roomState.showResults}{roomState.users[deviceId]
-							.chosenNumber}{:else}???{/if}
-				</p>
-			{/each}
-		{/if}
+		<ResultsPanel {roomState} />
 	{/if}
 </div>
