@@ -4,6 +4,7 @@ import { env as privateEnv } from "$env/dynamic/private";
 import { env as publicEnv } from "$env/dynamic/public";
 import z from "zod";
 import type { RoomState } from "./types";
+import { createClient } from "@vercel/kv";
 
 const pusher = new Pusher({
 	appId: privateEnv.PUSHER_APP_ID,
@@ -15,9 +16,15 @@ const pusher = new Pusher({
 
 const globalRoomState = new Map<string, RoomState>();
 
-function getRoomStateOrDefault(roomId: string): RoomState {
+async function getRoomStateOrDefault(roomId: string): Promise<RoomState> {
+	const kv = createClient({
+		token: privateEnv.KV_REST_API_TOKEN,
+		url: privateEnv.KV_REST_API_URL,
+	});
+	const existingRoomState = await kv.get<RoomState>(roomId);
+
 	return (
-		globalRoomState.get(roomId) || {
+		existingRoomState || {
 			users: {},
 			showResults: false,
 			selectableNumbers: [0, 1, 2, 3, 5, 8, 13, 21],
@@ -26,13 +33,19 @@ function getRoomStateOrDefault(roomId: string): RoomState {
 	);
 }
 
-function setRoomState(roomId: string, roomState: RoomState) {
+async function setRoomState(roomId: string, roomState: RoomState) {
+	const kv = createClient({
+		token: privateEnv.KV_REST_API_TOKEN,
+		url: privateEnv.KV_REST_API_URL,
+	});
+	await kv.set(roomId, roomState);
+
 	globalRoomState.set(roomId, roomState);
 	pusher.trigger(roomId, "room-update", roomState);
 }
 
-function setNameForRoom(roomId: string, deviceId: string, name: string) {
-	const roomState = getRoomStateOrDefault(roomId);
+async function setNameForRoom(roomId: string, deviceId: string, name: string) {
+	const roomState = await getRoomStateOrDefault(roomId);
 	roomState.users[deviceId] = roomState.users[deviceId] || {
 		name: "",
 		chosenNumber: null,
@@ -41,15 +54,15 @@ function setNameForRoom(roomId: string, deviceId: string, name: string) {
 
 	roomState.users[deviceId].name = name;
 
-	setRoomState(roomId, roomState);
+	await setRoomState(roomId, roomState);
 }
 
-function setSelectedNumberForRoom(
+async function setSelectedNumberForRoom(
 	roomId: string,
 	deviceId: string,
 	chosenNumber: number,
 ) {
-	const roomState = getRoomStateOrDefault(roomId) || {};
+	const roomState = (await getRoomStateOrDefault(roomId)) || {};
 	roomState.users[deviceId] = roomState.users[deviceId] || {
 		name: "",
 		chosenNumber: null,
@@ -57,11 +70,14 @@ function setSelectedNumberForRoom(
 
 	roomState.users[deviceId].chosenNumber = chosenNumber;
 
-	setRoomState(roomId, roomState);
+	await setRoomState(roomId, roomState);
 }
 
-function getDeviceIdFromName(roomId: string, name: string): string | null {
-	const roomState = getRoomStateOrDefault(roomId);
+async function getDeviceIdFromName(
+	roomId: string,
+	name: string,
+): Promise<string | null> {
+	const roomState = await getRoomStateOrDefault(roomId);
 	for (const [deviceId, value] of Object.entries(roomState.users)) {
 		if (value.name === name) {
 			return deviceId;
@@ -85,7 +101,7 @@ export const actions = {
 		}
 
 		const nameAlreadyPresent =
-			getDeviceIdFromName(params.id, parsedName.data) !== null;
+			(await getDeviceIdFromName(params.id, parsedName.data)) !== null;
 		if (nameAlreadyPresent) {
 			return {
 				body: "Name already exists",
@@ -94,13 +110,13 @@ export const actions = {
 		}
 
 		// if there's no devices in the room already, set this device as admin
-		const roomState = getRoomStateOrDefault(params.id);
+		const roomState = await getRoomStateOrDefault(params.id);
 		if (roomState.adminDeviceId === null) {
 			roomState.adminDeviceId = locals.deviceId;
 		}
-		setRoomState(params.id, roomState);
+		await setRoomState(params.id, roomState);
 
-		setNameForRoom(params.id, locals.deviceId, parsedName.data);
+		await setNameForRoom(params.id, locals.deviceId, parsedName.data);
 		return {};
 	},
 	submitNumber: async ({ request, params, locals }) => {
@@ -121,27 +137,27 @@ export const actions = {
 		return {};
 	},
 	inverseDisplay: async ({ params }) => {
-		const roomState = getRoomStateOrDefault(params.id);
+		const roomState = await getRoomStateOrDefault(params.id);
 
 		roomState.showResults = !roomState.showResults;
 
-		setRoomState(params.id, roomState);
+		await setRoomState(params.id, roomState);
 		return {};
 	},
 	clear: async ({ params }) => {
-		const roomState = getRoomStateOrDefault(params.id);
+		const roomState = await getRoomStateOrDefault(params.id);
 		for (const [_, value] of Object.entries(roomState.users)) {
 			value.chosenNumber = null;
 		}
 		roomState.showResults = false;
 
-		setRoomState(params.id, roomState);
+		await setRoomState(params.id, roomState);
 		return {};
 	},
 } satisfies Actions;
 
 export const load = async ({ params, locals }) => {
-	const roomState = getRoomStateOrDefault(params.id);
+	const roomState = await getRoomStateOrDefault(params.id);
 	const name = roomState.users[locals.deviceId]?.name;
 	return {
 		deviceId: locals.deviceId,

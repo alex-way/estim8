@@ -35,15 +35,15 @@
 			roomState = newRoomState;
 			// set name in localstorage, if it's not already set
 			if (!name) {
-				name = roomState.users[$page.data.deviceId].name;
+				name = roomState.users[data.deviceId].name;
 				localStorage.setItem('name', name);
 			}
 		});
 	});
 
 	let deviceExistsInRoom: boolean;
-	$: deviceExistsInRoom = !!roomState && !!name && $page.data.deviceId in roomState.users;
-	$: nameExistsInRoom = deviceExistsInRoom && roomState.users[$page.data.deviceId].name === name;
+	$: deviceExistsInRoom = !!roomState && !!name && data.deviceId in roomState.users;
+	$: nameExistsInRoom = deviceExistsInRoom && roomState.users[data.deviceId].name === name;
 	$: peopleInRoom = Object.keys(roomState.users).length;
 	$: peopleInRoomWithNullSelection = Object.keys(roomState.users).filter(
 		(deviceId) => roomState.users[deviceId].chosenNumber === null
@@ -100,7 +100,7 @@
 		{/if}
 		<Progress value={percentOfPeopleVoted} class="my-4" />
 
-		<NumberPicker {roomState} deviceId={$page.data.deviceId} />
+		<NumberPicker {roomState} deviceId={data.deviceId} />
 
 		<form method="post" action="?/inverseDisplay" use:enhance class="inline-block">
 			<Button type="submit" disabled={!roomState.showResults && peopleInRoomWithNullSelection.length !== 0}
