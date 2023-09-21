@@ -30,7 +30,7 @@ async function getRoomStateOrDefault(roomId: string): Promise<RoomState> {
 		({
 			users: {},
 			showResults: false,
-			selectableNumbers: [1, 2, 3, 5, 8, 13, 21],
+			selectableNumbers: [2, 5, 8, 13],
 			adminDeviceId: null,
 		} as RoomState)
 	);
