@@ -11,6 +11,7 @@
 	import { Progress } from '$lib/components/ui/progress';
 	import JSConfetti from 'js-confetti';
 	import ResultsPanel from './components/ResultsPanel.svelte';
+	import NumberPicker from './components/NumberPicker.svelte';
 
 	export let data: PageData;
 
@@ -56,7 +57,6 @@
 	$: if (roomState.showResults && consensus) {
 		jsConfetti?.addConfetti();
 	}
-	$: numberSelected = roomState.users[data.deviceId]?.chosenNumber;
 
 	let copyText = 'Copy';
 
@@ -96,28 +96,8 @@
 			<p>Waiting for {peopleInRoomWithNullSelection.length} more people to vote</p>
 		{/if}
 		<Progress value={percentOfPeopleVoted} class="my-4" />
-		<div class="flex w-full items-center space-x-2 my-4 justify-center">
-			{#each data.roomState.selectableNumbers as number}
-				<form
-					method="post"
-					action="?/submitNumber"
-					class="inline-block"
-					use:enhance={() => {
-						return async ({ update }) => {
-							update({ reset: false });
-						};
-					}}
-				>
-					<Button
-						type="submit"
-						name="chosenNumber"
-						value={number}
-						class="text-2xl p-6"
-						disabled={data.roomState.showResults || numberSelected === number}>{number}</Button
-					>
-				</form>
-			{/each}
-		</div>
+
+		<NumberPicker {roomState} deviceId={$page.data.deviceId} />
 
 		<form method="post" action="?/inverseDisplay" use:enhance class="inline-block">
 			<Button type="submit" disabled={!roomState.showResults && peopleInRoomWithNullSelection.length !== 0}
