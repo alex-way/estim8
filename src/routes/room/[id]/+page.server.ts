@@ -24,12 +24,13 @@ async function getRoomStateOrDefault(roomId: string): Promise<RoomState> {
 	const existingRoomState = await kv.get<RoomState>(roomId);
 
 	return (
-		existingRoomState || {
+		existingRoomState ||
+		({
 			users: {},
 			showResults: false,
-			selectableNumbers: [0, 1, 2, 3, 5, 8, 13, 21],
+			selectableNumbers: [1, 2, 3, 5, 8, 13, 21],
 			adminDeviceId: null,
-		}
+		} as RoomState)
 	);
 }
 

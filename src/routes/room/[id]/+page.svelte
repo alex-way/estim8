@@ -103,13 +103,15 @@
 		<NumberPicker {roomState} deviceId={data.deviceId} />
 
 		<form method="post" action="?/inverseDisplay" use:enhance class="inline-block">
-			<Button type="submit" disabled={!roomState.showResults && peopleInRoomWithNullSelection.length !== 0}
-				>{roomState.showResults ? 'Hide' : 'Reveal'}</Button
+			<Button
+				type="submit"
+				disabled={(!roomState.showResults && peopleInRoomWithNullSelection.length !== 0) || roomState.showResults}
+				>Reveal</Button
 			>
 		</form>
 
 		<form method="post" action="?/clear" use:enhance class="inline-block">
-			<Button type="submit" variant="outline" disabled={percentOfPeopleVoted === 0}>Clear all</Button>
+			<Button type="submit" variant="outline" disabled={percentOfPeopleVoted === 0}>Clear</Button>
 		</form>
 
 		<ResultsPanel {roomState} />
