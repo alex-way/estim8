@@ -41,7 +41,7 @@ async function setRoomState(roomId: string, roomState: RoomState) {
 	await kv.set(roomId, roomState);
 
 	globalRoomState.set(roomId, roomState);
-	pusher.trigger(roomId, "room-update", roomState);
+	await pusher.trigger(roomId, "room-update", roomState);
 }
 
 async function setNameForRoom(roomId: string, deviceId: string, name: string) {
