@@ -55,6 +55,7 @@
 	$: if (roomState.showResults && consensus && peopleInRoom > 1) {
 		jsConfetti?.addConfetti();
 	}
+	$: numberSelected = roomState.users[data.deviceId]?.chosenNumber;
 </script>
 
 <div class="w-full max-w-7xl mx-auto">
@@ -93,8 +94,12 @@
 						};
 					}}
 				>
-					<input type="number" name="chosenNumber" value={number} hidden />
-					<Button type="submit" disabled={data.roomState.showResults}>{number}</Button>
+					<Button
+						type="submit"
+						name="chosenNumber"
+						value={number}
+						disabled={data.roomState.showResults || numberSelected === number}>{number}</Button
+					>
 				</form>
 			{/each}
 		</div>
