@@ -133,7 +133,11 @@ export const actions = {
 			};
 		}
 
-		setSelectedNumberForRoom(params.id, locals.deviceId, parsedNumber.data);
+		await setSelectedNumberForRoom(
+			params.id,
+			locals.deviceId,
+			parsedNumber.data,
+		);
 		return {};
 	},
 	inverseDisplay: async ({ params }) => {
