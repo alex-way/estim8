@@ -6,6 +6,8 @@ import z from "zod";
 import type { RoomState } from "./types";
 import { createClient } from "@vercel/kv";
 
+const TEN_MINUTES = 60 * 10;
+
 const pusher = new Pusher({
 	appId: privateEnv.PUSHER_APP_ID,
 	key: publicEnv.PUBLIC_PUSHER_APP_KEY,
@@ -39,7 +41,9 @@ async function setRoomState(roomId: string, roomState: RoomState) {
 		token: privateEnv.KV_REST_API_TOKEN,
 		url: privateEnv.KV_REST_API_URL,
 	});
-	await kv.set(roomId, roomState);
+	await kv.set(roomId, roomState, {
+		ex: TEN_MINUTES,
+	});
 
 	globalRoomState.set(roomId, roomState);
 	await pusher.trigger(roomId, "room-update", roomState);
