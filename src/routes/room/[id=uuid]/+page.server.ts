@@ -56,6 +56,11 @@ export const actions = {
 		room.invertShowResults();
 		await room.save();
 	},
+	inverseSnooping: async ({ params }) => {
+		const room = await Room.getRoom(params.id);
+		room.invertSnooping();
+		await room.save();
+	},
 	inverseParticipation: async ({ request, params, locals }) => {
 		const room = await Room.getRoom(params.id);
 

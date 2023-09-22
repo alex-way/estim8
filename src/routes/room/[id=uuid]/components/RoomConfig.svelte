@@ -17,11 +17,21 @@
 		<Button type="submit" size="sm" class="inline-block">{participating ? 'Participating' : 'Observing'}</Button>
 	</form>
 
+	<form method="post" action="?/inverseSnooping" use:enhance class="inline-block my-4">
+		<Button type="submit" size="sm" class="inline-block"
+			>{roomState.config.allowObserversToSnoop ? 'Disable Snooping' : 'Allow Snooping'}</Button
+		>
+	</form>
+
 	<h1 class="text-xl">Participants</h1>
 
 	<div class="grid grid-cols-1 gap-2 my-4">
-		{#each Object.entries(roomState.users) as [_, user] (deviceId)}
-			<Context adminDeviceId={roomState.adminDeviceId || ''} userDeviceId={deviceId} deviceId={user.deviceId}>
+		{#each Object.entries(roomState.users) as [_, user] (user.deviceId)}
+			<Context
+				currentUserDeviceId={deviceId}
+				adminDeviceId={roomState.adminDeviceId || ''}
+				userDeviceId={user.deviceId}
+			>
 				<p>
 					<span
 						class={`animate-pulse ${

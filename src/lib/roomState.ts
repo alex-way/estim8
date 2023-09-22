@@ -175,6 +175,11 @@ export class Room {
 		this.state.showResults = !this.state.showResults;
 	}
 
+	invertSnooping() {
+		this.state.config.allowObserversToSnoop =
+			!this.state.config.allowObserversToSnoop;
+	}
+
 	clearSelectedNumbers() {
 		for (const [_, user] of Object.entries(this.state.users)) {
 			user.chosenNumber = null;
