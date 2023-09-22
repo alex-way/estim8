@@ -126,19 +126,15 @@ export const actions = {
 export const load = async ({ params, locals }) => {
 	const room = await Room.getRoom(params.id);
 
-	let modified = false;
-
 	if (locals.name && room.getDeviceIdFromName(locals.name) === null) {
 		room.setNameForDeviceId(locals.deviceId, locals.name);
-		modified = true;
 	}
 
 	if (room.state.adminDeviceId === null) {
 		room.setAdmin(locals.deviceId);
-		modified = true;
 	}
 
-	if (modified) await room.save();
+	if (room.isModified()) await room.save();
 
 	return {
 		deviceId: locals.deviceId,
