@@ -63,7 +63,7 @@
 					</Card.Header>
 					<Card.Content>
 						<p class="text-3xl text-center">
-							{#if roomState.showResults || (isObserving && user.chosenNumber !== null)}
+							{#if roomState.showResults || (roomState.config.allowObserversToSnoop && isObserving && user.chosenNumber !== null)}
 								{user.chosenNumber}
 							{:else}
 								<Skeleton

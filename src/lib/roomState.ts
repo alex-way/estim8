@@ -10,7 +10,10 @@ export type RoomState = {
 		[name: string]: RoomUser;
 	};
 	showResults: boolean;
-	selectableNumbers: number[];
+	config: {
+		selectableNumbers: number[];
+		allowObserversToSnoop: boolean;
+	};
 	adminDeviceId: string | null;
 };
 
@@ -107,8 +110,11 @@ export class Room {
 			existingRoomState ||
 			({
 				users: {},
+				config: {
+					selectableNumbers: [2, 5, 8, 13],
+					allowObserversToSnoop: false,
+				},
 				showResults: false,
-				selectableNumbers: [2, 5, 8, 13],
 				adminDeviceId: null,
 			} as RoomState);
 
@@ -175,7 +181,7 @@ export class Room {
 	}
 
 	updateSelectableNumbers(selectableNumbers: number[]) {
-		this.state.selectableNumbers = selectableNumbers;
+		this.state.config.selectableNumbers = selectableNumbers;
 		this.clearSelectedNumbers();
 	}
 

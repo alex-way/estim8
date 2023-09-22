@@ -12,7 +12,7 @@
 </script>
 
 <div class="flex w-full items-center space-x-2 my-4 justify-center">
-	{#each roomState.selectableNumbers as number (number)}
+	{#each roomState.config.selectableNumbers as number (number)}
 		<form
 			method="post"
 			action="?/submitNumber"
