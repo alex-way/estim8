@@ -212,7 +212,6 @@ export class Room {
 			ex: TEN_MINUTES,
 		});
 
-		globalRoomState.set(this.id, this.state);
 		await pusher.trigger(this.id, "room-update", this.state);
 		return this;
 	}
