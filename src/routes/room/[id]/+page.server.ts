@@ -28,7 +28,7 @@ export const actions = {
 		}
 
 		if (room.state.adminDeviceId === null) {
-			room.state.adminDeviceId = locals.deviceId;
+			room.setAdmin(locals.deviceId);
 		}
 
 		room.setNameForDeviceId(locals.deviceId, parsedName.data);
@@ -39,11 +39,9 @@ export const actions = {
 	},
 	submitNumber: async ({ request, params, locals }) => {
 		const formData = await request.formData();
-
 		const schema = z.coerce.number();
 
 		const parsedNumber = schema.safeParse(formData.get("chosenNumber"));
-
 		if (!parsedNumber.success) {
 			return {
 				body: parsedNumber.error,
@@ -58,8 +56,51 @@ export const actions = {
 	},
 	inverseDisplay: async ({ params }) => {
 		const room = await Room.getRoom(params.id);
-
 		room.invertShowResults();
+		await room.save();
+
+		return {};
+	},
+	inverseParticipation: async ({ request, params, locals }) => {
+		const room = await Room.getRoom(params.id);
+		if (room.state.adminDeviceId !== locals.deviceId) {
+			return {
+				body: "Only the admin can do this",
+				status: 403,
+			};
+		}
+
+		const formData = await request.formData();
+		const schema = z.string();
+
+		const parsedDeviceId = schema.safeParse(formData.get("deviceId"));
+		if (!parsedDeviceId.success) {
+			return {
+				body: parsedDeviceId.error.toString(),
+				status: 400,
+			};
+		}
+
+		room.inverseUserParticipation(parsedDeviceId.data);
+		await room.save();
+
+		return {};
+	},
+	removeUserFromRoom: async ({ request, params, locals }) => {
+		const formData = await request.formData();
+		const schema = z.coerce.number();
+
+		const parsedNumber = schema.safeParse(formData.get("chosenNumber"));
+		if (!parsedNumber.success) {
+			return {
+				body: parsedNumber.error,
+				status: 400,
+			};
+		}
+
+		const room = await Room.getRoom(params.id);
+
+		room.removeUser(locals.deviceId);
 
 		await room.save();
 

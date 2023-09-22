@@ -7,6 +7,8 @@
 	export let deviceId: string;
 
 	$: numberSelected = roomState.users[deviceId]?.chosenNumber;
+
+	$: participating = roomState.users[deviceId]?.isParticipant ?? true;
 </script>
 
 <div class="flex w-full items-center space-x-2 my-4 justify-center">
@@ -26,7 +28,7 @@
 				name="chosenNumber"
 				value={number}
 				class="text-2xl p-6"
-				disabled={roomState.showResults || numberSelected === number}>{number}</Button
+				disabled={!participating || roomState.showResults || numberSelected === number}>{number}</Button
 			>
 		</form>
 	{/each}

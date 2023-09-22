@@ -12,6 +12,7 @@
 	import JSConfetti from 'js-confetti';
 	import ResultsPanel from './components/ResultsPanel.svelte';
 	import NumberPicker from './components/NumberPicker.svelte';
+	import RoomConfig from './components/RoomConfig.svelte';
 
 	export let data: PageData;
 
@@ -44,15 +45,17 @@
 	let deviceExistsInRoom: boolean;
 	$: deviceExistsInRoom = !!roomState && !!name && data.deviceId in roomState.users;
 	$: nameExistsInRoom = deviceExistsInRoom && roomState.users[data.deviceId].name === name;
-	$: peopleInRoom = Object.keys(roomState.users).length;
-	$: peopleInRoomWithNullSelection = Object.keys(roomState.users).filter(
-		(deviceId) => roomState.users[deviceId].chosenNumber === null
-	);
-	$: percentOfPeopleVoted = Math.round(((peopleInRoom - peopleInRoomWithNullSelection.length) / peopleInRoom) * 100);
+
+	$: participants = Object.values(roomState.users).filter((user) => user.isParticipant);
+
+	$: participantsWithNullSelection = participants.filter((user) => user.chosenNumber === null);
+	$: percentOfPeopleVoted =
+		participants.length === 0
+			? 0
+			: Math.round(((participants.length - participantsWithNullSelection.length) / participants.length) * 100);
 
 	$: consensus =
-		percentOfPeopleVoted == 100 &&
-		Object.values(roomState.users).every((user) => user.chosenNumber === roomState.users[data.deviceId]?.chosenNumber);
+		percentOfPeopleVoted == 100 && participants.every((user) => user.chosenNumber === participants.at(0)?.chosenNumber);
 
 	$: if (roomState.showResults && consensus) {
 		jsConfetti?.addConfetti();
@@ -69,51 +72,51 @@
 	}
 </script>
 
-<div class="w-full max-w-7xl mx-auto">
-	<h1 class="text-center text-2xl my-4">
-		Room ID: {$page.params.id}
-		<Button variant="secondary" on:click={onClickCopy}>{copyText}</Button>
-	</h1>
-	{#if roomState.adminDeviceId}
-		<p>Admin: {roomState.users[roomState.adminDeviceId]?.name}</p>
-	{/if}
+<div class="w-full grid grid-cols-12 min-h-screen">
+	<div class="w-full max-w-7xl col-span-10 mx-auto">
+		<h1 class="text-center text-2xl my-4">
+			Room ID: {$page.params.id}
+			<Button variant="secondary" on:click={onClickCopy}>{copyText}</Button>
+		</h1>
 
-	<form
-		method="post"
-		action="?/setName"
-		class="flex w-full max-w-sm items-center space-x-2"
-		use:enhance={() => {
-			return async ({ update }) => {
-				update({ reset: false });
-			};
-		}}
-	>
-		<Input type="text" name="name" placeholder="Name" maxlength={16} bind:value={name} />
-		{#if !nameExistsInRoom}
-			<Button type="submit">Set</Button>
-		{/if}
-	</form>
-
-	{#if deviceExistsInRoom}
-		{#if peopleInRoomWithNullSelection.length}
-			<p>Waiting for {peopleInRoomWithNullSelection.length} more people to vote</p>
-		{/if}
-		<Progress value={percentOfPeopleVoted} class="my-4" />
-
-		<NumberPicker {roomState} deviceId={data.deviceId} />
-
-		<form method="post" action="?/inverseDisplay" use:enhance class="inline-block">
-			<Button
-				type="submit"
-				disabled={(!roomState.showResults && peopleInRoomWithNullSelection.length !== 0) || roomState.showResults}
-				>Reveal</Button
-			>
+		<form
+			method="post"
+			action="?/setName"
+			class="flex w-full max-w-sm items-center space-x-2 mx-auto"
+			use:enhance={() => {
+				return async ({ update }) => {
+					update({ reset: false });
+				};
+			}}
+		>
+			<Input type="text" name="name" placeholder="Name" maxlength={16} bind:value={name} />
+			{#if !nameExistsInRoom}
+				<Button type="submit">Set</Button>
+			{/if}
 		</form>
 
-		<form method="post" action="?/clear" use:enhance class="inline-block">
-			<Button type="submit" variant="outline" disabled={percentOfPeopleVoted === 0}>Clear</Button>
-		</form>
+		{#if deviceExistsInRoom}
+			<Progress value={percentOfPeopleVoted} class="my-4" />
 
-		<ResultsPanel {roomState} />
-	{/if}
+			<NumberPicker {roomState} deviceId={data.deviceId} />
+
+			<form method="post" action="?/inverseDisplay" use:enhance class="inline-block">
+				<Button
+					type="submit"
+					disabled={participants.length === 0 ||
+						(!roomState.showResults && participantsWithNullSelection.length !== 0) ||
+						roomState.showResults}>Reveal</Button
+				>
+			</form>
+
+			<form method="post" action="?/clear" use:enhance class="inline-block">
+				<Button type="submit" variant="outline" disabled={participants.length === 0 || percentOfPeopleVoted === 0}
+					>Clear</Button
+				>
+			</form>
+
+			<ResultsPanel {roomState} />
+		{/if}
+	</div>
+	<div class="col-span-2"><RoomConfig {roomState} deviceId={data.deviceId} /></div>
 </div>

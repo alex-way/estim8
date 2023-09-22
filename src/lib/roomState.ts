@@ -118,13 +118,13 @@ export class Room {
 		return new Room(id, state);
 	}
 
+	setAdmin(deviceId: string) {
+		this.state.adminDeviceId = deviceId;
+	}
+
 	setNameForDeviceId(deviceId: string, name: string) {
-		this.state.users[deviceId] = this.state.users[deviceId] || {
-			name: "",
-			chosenNumber: null,
-			isParticipant: true,
-		};
-		this.state.users[deviceId].name = name;
+		const user = this.getUserOrDefault(deviceId);
+		user.name = name;
 		return this;
 	}
 
@@ -153,9 +153,7 @@ export class Room {
 	}
 
 	setChosenNumberForDeviceId(deviceId: string, chosenNumber: number) {
-		const user =
-			this.getUserFromDeviceId(deviceId) ||
-			new RoomUser(deviceId, "", null, true);
+		const user = this.getUserOrDefault(deviceId);
 		user.chosenNumber = chosenNumber;
 	}
 
@@ -176,35 +174,30 @@ export class Room {
 	}
 
 	getUserOrDefault(deviceId: string): RoomUser {
-		this.state.users[deviceId] = this.state.users[deviceId] || {
-			name: "",
-			chosenNumber: null,
-			isParticipant: true,
-		};
-		return new RoomUser(
-			this.state.users[deviceId].deviceId,
-			this.state.users[deviceId].name,
-			this.state.users[deviceId].chosenNumber,
-			this.state.users[deviceId].isParticipant,
-		);
+		const existingUser = this.getUserFromDeviceId(deviceId);
+		if (existingUser) return existingUser;
+
+		this.state.users[deviceId] = new RoomUser(deviceId, "", null, true);
+		return this.state.users[deviceId];
 	}
 
 	setUserAsObserver(deviceId: string) {
-		this.state.users[deviceId] = this.state.users[deviceId] || {
-			name: "",
-			chosenNumber: null,
-			isParticipant: true,
-		};
-		this.state.users[deviceId].isParticipant = false;
+		const user = this.getUserOrDefault(deviceId);
+		user.isParticipant = false;
 	}
 
 	setUserAsParticipant(deviceId: string) {
-		this.state.users[deviceId] = this.state.users[deviceId] || {
-			name: "",
-			chosenNumber: null,
-			isParticipant: true,
-		};
-		this.state.users[deviceId].isParticipant = true;
+		const user = this.getUserOrDefault(deviceId);
+		user.isParticipant = true;
+	}
+
+	inverseUserParticipation(deviceId: string) {
+		const user = this.getUserOrDefault(deviceId);
+		user.isParticipant = !user.isParticipant;
+	}
+
+	removeUser(deviceId: string) {
+		delete this.state.users[deviceId];
 	}
 
 	async save(): Promise<Room> {
