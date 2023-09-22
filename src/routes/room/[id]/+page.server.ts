@@ -63,17 +63,22 @@ export const actions = {
 	},
 	inverseParticipation: async ({ request, params, locals }) => {
 		const room = await Room.getRoom(params.id);
-		if (room.state.adminDeviceId !== locals.deviceId) {
+
+		const formData = await request.formData();
+		const schema = z.string();
+
+		const formDeviceId = formData.get("deviceId");
+
+		if (
+			room.state.adminDeviceId !== locals.deviceId &&
+			locals.deviceId !== formDeviceId
+		) {
 			return {
 				body: "Only the admin can do this",
 				status: 403,
 			};
 		}
-
-		const formData = await request.formData();
-		const schema = z.string();
-
-		const parsedDeviceId = schema.safeParse(formData.get("deviceId"));
+		const parsedDeviceId = schema.safeParse(formDeviceId);
 		if (!parsedDeviceId.success) {
 			return {
 				body: parsedDeviceId.error.toString(),
