@@ -112,7 +112,7 @@ export const actions = {
 	clear: async ({ params }) => {
 		const room = await Room.getRoom(params.id);
 		room.clearSelectedNumbers();
-		room.save();
+		await room.save();
 		return {};
 	},
 } satisfies Actions;
