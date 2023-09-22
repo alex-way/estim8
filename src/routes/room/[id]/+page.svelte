@@ -34,7 +34,6 @@
 		var channel = pusher.subscribe($page.params.id);
 		channel.bind('room-update', function (newRoomState: RoomState) {
 			roomState = newRoomState;
-			name = roomState.users[data.deviceId].name;
 		});
 	});
 
