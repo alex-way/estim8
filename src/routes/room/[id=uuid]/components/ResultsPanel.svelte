@@ -3,8 +3,6 @@
 	import * as Card from '$lib/components/ui/card';
 	import { Skeleton } from '$lib/components/ui/skeleton';
 	import Progress from '$lib/components/ui/progress/progress.svelte';
-	import * as ContextMenu from '$lib/components/ui/context-menu';
-	import { enhance } from '$app/forms';
 	import Context from './Context.svelte';
 
 	export let roomState: RoomState;
@@ -13,10 +11,7 @@
 
 	$: participants = Object.values(roomState.users).filter((user) => user.isParticipant);
 
-	$: countOfParticipantsVoted = Object.keys(roomState.users).filter(
-		(deviceId) => roomState.users[deviceId].chosenNumber !== null
-	).length;
-	$: countOfParticipantsNotVoted = participants.length - countOfParticipantsVoted;
+	$: countOfParticipantsVoted = participants.filter((user) => user.chosenNumber !== null).length;
 
 	$: isObserving = roomState.users[deviceId].isParticipant === false;
 

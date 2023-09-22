@@ -171,6 +171,6 @@ export const load = async ({ params, locals }) => {
 	return {
 		deviceId: locals.deviceId,
 		name: locals.name,
-		roomState: JSON.parse(JSON.stringify(room.state)) as RoomState,
+		roomState: room.state,
 	};
 };

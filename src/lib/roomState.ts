@@ -4,6 +4,16 @@ import { env as publicEnv } from "$env/dynamic/public";
 import { createClient } from "@vercel/kv";
 import { dev } from "$app/environment";
 
+export type RoomUser = {
+	deviceId: string;
+	name: string;
+	chosenNumber: number | null;
+	isParticipant: boolean;
+	config?: {
+		cardBackground?: "green" | "red" | "blue" | "yellow" | "white";
+	};
+};
+
 export type RoomState = {
 	// session
 	users: {
@@ -28,25 +38,6 @@ export const pusher = new Pusher({
 });
 
 const globalRoomState = new Map<string, RoomState>();
-
-export class RoomUser {
-	deviceId: string;
-	name: string;
-	chosenNumber: number | null;
-	isParticipant: boolean;
-
-	constructor(
-		deviceId: string,
-		name: string,
-		chosenNumber: number | null,
-		isParticipant: boolean,
-	) {
-		this.deviceId = deviceId;
-		this.name = name;
-		this.chosenNumber = chosenNumber;
-		this.isParticipant = isParticipant;
-	}
-}
 
 interface PersistentStorage {
 	get<T>(key: string): Promise<T | null>;
@@ -196,7 +187,13 @@ export class Room {
 		const existingUser = this.getUserFromDeviceId(deviceId);
 		if (existingUser) return existingUser;
 
-		this.state.users[deviceId] = new RoomUser(deviceId, "", null, true);
+		this.state.users[deviceId] = {
+			deviceId,
+			name: "",
+			chosenNumber: null,
+			isParticipant: true,
+		};
+
 		return this.state.users[deviceId];
 	}
 
