@@ -3,6 +3,7 @@
 	import Badge from '$lib/components/ui/badge/badge.svelte';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import type { RoomState } from '$lib/roomState';
+	import Context from './Context.svelte';
 
 	export let roomState: RoomState;
 	export let deviceId: string;
@@ -19,21 +20,23 @@
 	<h1 class="text-xl">Participants</h1>
 
 	<div class="grid grid-cols-1 gap-2 my-4">
-		{#each Object.entries(roomState.users) as [deviceId, user] (deviceId)}
-			<p>
-				<span
-					class={`animate-pulse ${
-						!user.isParticipant ? 'text-yellow-500' : user.chosenNumber != null ? 'text-emerald-500' : 'text-white'
-					}`}>●</span
-				>
-				{user.name}
-				{#if !user.isParticipant}
-					<small class="text-xs text-slate-400">(Observing)</small>
-				{/if}
-				{#if roomState.adminDeviceId === deviceId}
-					<Badge variant="secondary">Admin</Badge>
-				{/if}
-			</p>
+		{#each Object.entries(roomState.users) as [_, user] (deviceId)}
+			<Context adminDeviceId={roomState.adminDeviceId || ''} userDeviceId={deviceId} deviceId={user.deviceId}>
+				<p>
+					<span
+						class={`animate-pulse ${
+							!user.isParticipant ? 'text-yellow-500' : user.chosenNumber != null ? 'text-emerald-500' : 'text-white'
+						}`}>●</span
+					>
+					{user.name}
+					{#if !user.isParticipant}
+						<small class="text-xs text-slate-400">(Observing)</small>
+					{/if}
+					{#if roomState.adminDeviceId === user.deviceId}
+						<Badge variant="secondary">Admin</Badge>
+					{/if}
+				</p>
+			</Context>
 		{/each}
 	</div>
 </div>

@@ -5,6 +5,7 @@
 	import Progress from '$lib/components/ui/progress/progress.svelte';
 	import * as ContextMenu from '$lib/components/ui/context-menu';
 	import { enhance } from '$app/forms';
+	import Context from './Context.svelte';
 
 	export let roomState: RoomState;
 
@@ -55,52 +56,26 @@
 
 <div class="flex gap-4 justify-evenly my-16 px-4">
 	{#each participants as user (user.deviceId)}
-		<ContextMenu.Root>
-			<ContextMenu.Trigger class="cursor-pointer">
-				<Card.Root class="bg-secondary min-w-[100px]">
-					<Card.Header>
-						<Card.Title class="text-xl text-center">{user.name}</Card.Title>
-					</Card.Header>
-					<Card.Content>
-						<p class="text-3xl text-center">
-							{#if roomState.showResults || (roomState.config.allowObserversToSnoop && isObserving && user.chosenNumber !== null)}
-								{user.chosenNumber}
-							{:else}
-								<Skeleton
-									class={`w-[48px] h-[36px] rounded-lg mx-auto bg-primary/20 ${
-										user.chosenNumber !== null ? 'bg-emerald-300' : ''
-									}`}
-								/>
-							{/if}
-						</p>
-					</Card.Content>
-				</Card.Root>
-			</ContextMenu.Trigger>
-			{#if roomState.adminDeviceId === deviceId}
-				<ContextMenu.Content>
-					<ContextMenu.Item>
-						<form method="post" action="?/inverseParticipation" use:enhance>
-							<input type="hidden" name="deviceId" value={user.deviceId} />
-							<button type="submit">Make observer</button>
-						</form>
-					</ContextMenu.Item>
-					<ContextMenu.Item>
-						<form method="post" action="?/setAdmin" use:enhance>
-							<input type="hidden" name="deviceId" value={user.deviceId} />
-							<button type="submit">Make room admin</button>
-						</form>
-					</ContextMenu.Item>
-					{#if user.deviceId !== deviceId}
-						<ContextMenu.Item>
-							<form method="post" action="?/removeUserFromRoom" use:enhance>
-								<input type="hidden" name="deviceId" value={user.deviceId} />
-								<button type="submit">Remove from room</button>
-							</form>
-						</ContextMenu.Item>
-					{/if}
-				</ContextMenu.Content>
-			{/if}
-		</ContextMenu.Root>
+		<Context adminDeviceId={roomState.adminDeviceId || ''} userDeviceId={deviceId} deviceId={user.deviceId}>
+			<Card.Root class="bg-secondary min-w-[100px]">
+				<Card.Header>
+					<Card.Title class="text-xl text-center">{user.name}</Card.Title>
+				</Card.Header>
+				<Card.Content>
+					<p class="text-3xl text-center">
+						{#if roomState.showResults || (roomState.config.allowObserversToSnoop && isObserving && user.chosenNumber !== null)}
+							{user.chosenNumber}
+						{:else}
+							<Skeleton
+								class={`w-[48px] h-[36px] rounded-lg mx-auto bg-primary/20 ${
+									user.chosenNumber !== null ? 'bg-emerald-300' : ''
+								}`}
+							/>
+						{/if}
+					</p>
+				</Card.Content>
+			</Card.Root>
+		</Context>
 	{/each}
 </div>
 
