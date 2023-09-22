@@ -27,11 +27,7 @@
 
 	<div class="grid grid-cols-1 gap-2 my-4">
 		{#each Object.entries(roomState.users) as [_, user] (user.deviceId)}
-			<Context
-				currentUserDeviceId={deviceId}
-				adminDeviceId={roomState.adminDeviceId || ''}
-				userDeviceId={user.deviceId}
-			>
+			<Context currentUserDeviceId={deviceId} adminDeviceId={roomState.adminDeviceId || ''} {user}>
 				<p>
 					<span
 						class={`animate-pulse ${

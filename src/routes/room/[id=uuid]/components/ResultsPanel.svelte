@@ -56,7 +56,7 @@
 
 <div class="flex gap-4 justify-evenly my-16">
 	{#each participants as user (user.deviceId)}
-		<Context currentUserDeviceId={deviceId} adminDeviceId={roomState.adminDeviceId || ''} userDeviceId={user.deviceId}>
+		<Context currentUserDeviceId={deviceId} adminDeviceId={roomState.adminDeviceId || ''} {user}>
 			<Card.Root class="bg-secondary w-32 h-48">
 				<Card.Header>
 					<Card.Title class="text-xl text-center">{user.name}</Card.Title>
