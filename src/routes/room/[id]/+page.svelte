@@ -34,11 +34,8 @@
 		var channel = pusher.subscribe($page.params.id);
 		channel.bind('room-update', function (newRoomState: RoomState) {
 			roomState = newRoomState;
-			// set name in localstorage, if it's not already set
-			if (!name) {
-				name = roomState.users[data.deviceId].name;
-				localStorage.setItem('name', name);
-			}
+			name = roomState.users[data.deviceId].name;
+			localStorage.setItem('name', name);
 		});
 	});
 

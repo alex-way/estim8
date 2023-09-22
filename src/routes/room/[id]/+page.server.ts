@@ -1,6 +1,6 @@
 import type { Actions } from "./$types";
 import z from "zod";
-import { Room } from "$lib/roomState";
+import { Room, type RoomState } from "$lib/roomState";
 
 export const actions = {
 	setName: async ({ request, locals, params }) => {
@@ -126,6 +126,6 @@ export const load = async ({ params, locals }) => {
 	return {
 		deviceId: locals.deviceId,
 		name,
-		roomState: room.state,
+		roomState: JSON.parse(JSON.stringify(room.state)) as RoomState,
 	};
 };

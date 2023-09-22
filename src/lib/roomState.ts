@@ -2,6 +2,7 @@ import Pusher from "pusher";
 import { env as privateEnv } from "$env/dynamic/private";
 import { env as publicEnv } from "$env/dynamic/public";
 import { createClient } from "@vercel/kv";
+import { dev } from "$app/environment";
 
 export type RoomState = {
 	// session
@@ -23,44 +24,7 @@ export const pusher = new Pusher({
 	useTLS: true,
 });
 
-export const globalRoomState = new Map<string, RoomState>();
-
-export async function getRoomStateOrDefault(
-	roomId: string,
-): Promise<RoomState> {
-	const kv = createClient({
-		token: privateEnv.KV_REST_API_TOKEN,
-		url: privateEnv.KV_REST_API_URL,
-	});
-	const existingRoomState = await kv.get<RoomState>(roomId);
-
-	return (
-		existingRoomState ||
-		({
-			users: {},
-			showResults: false,
-			selectableNumbers: [2, 5, 8, 13],
-			adminDeviceId: null,
-		} as RoomState)
-	);
-}
-
-async function setRoomState(
-	roomId: string,
-	roomState: RoomState,
-): Promise<RoomState> {
-	const kv = createClient({
-		token: privateEnv.KV_REST_API_TOKEN,
-		url: privateEnv.KV_REST_API_URL,
-	});
-	await kv.set(roomId, roomState, {
-		ex: TEN_MINUTES,
-	});
-
-	globalRoomState.set(roomId, roomState);
-	await pusher.trigger(roomId, "room-update", roomState);
-	return roomState;
-}
+const globalRoomState = new Map<string, RoomState>();
 
 export class RoomUser {
 	deviceId: string;
@@ -78,6 +42,28 @@ export class RoomUser {
 		this.name = name;
 		this.chosenNumber = chosenNumber;
 		this.isParticipant = isParticipant;
+	}
+}
+
+interface PersistentStorage {
+	get<T>(key: string): Promise<T | null>;
+	set<T>(key: string, value: T, options?: { ex?: number }): Promise<void>;
+}
+
+class MemoryStorage implements PersistentStorage {
+	async get<T>(key: string): Promise<T | null> {
+		const value = globalRoomState.get(key);
+		if (!value) return null;
+		return value as T;
+	}
+
+	async set<T>(
+		key: string,
+		value: T,
+		options?: { ex?: number },
+	): Promise<void> {
+		// @ts-ignore
+		globalRoomState.set(key, value);
 	}
 }
 
@@ -114,8 +100,29 @@ export class Room {
 	 * in the "ready" data to the `constructor`.
 	 */
 	static async getRoom(id: string) {
-		const state = await getRoomStateOrDefault(id);
+		const kv = Room.getPersistentStorage();
+		const existingRoomState = await kv.get<RoomState>(id);
+
+		const state =
+			existingRoomState ||
+			({
+				users: {},
+				showResults: false,
+				selectableNumbers: [2, 5, 8, 13],
+				adminDeviceId: null,
+			} as RoomState);
+
 		return new Room(id, state);
+	}
+
+	private static getPersistentStorage(): PersistentStorage {
+		if (dev) {
+			return new MemoryStorage();
+		}
+		return createClient({
+			token: privateEnv.KV_REST_API_TOKEN,
+			url: privateEnv.KV_REST_API_URL,
+		}) as PersistentStorage;
 	}
 
 	setAdmin(deviceId: string) {
@@ -201,7 +208,13 @@ export class Room {
 	}
 
 	async save(): Promise<Room> {
-		await setRoomState(this.id, this.state);
+		const kv = Room.getPersistentStorage();
+		await kv.set(this.id, this.state, {
+			ex: TEN_MINUTES,
+		});
+
+		globalRoomState.set(this.id, this.state);
+		await pusher.trigger(this.id, "room-update", this.state);
 		return this;
 	}
 }
