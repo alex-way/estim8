@@ -57,7 +57,11 @@
 					{#if roomState.showResults}
 						{roomState.users[deviceId].chosenNumber || '?'}
 					{:else}
-						<Skeleton class="w-[48px] h-[36px] rounded-lg mx-auto bg-primary/20" />
+						<Skeleton
+							class={`w-[48px] h-[36px] rounded-lg mx-auto bg-primary/20 ${
+								roomState.users[deviceId].chosenNumber != null && 'bg-emerald-300'
+							}`}
+						/>
 					{/if}
 				</p>
 			</Card.Content>
