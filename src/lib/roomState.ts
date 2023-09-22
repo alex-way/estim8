@@ -132,7 +132,6 @@ export class Room {
 	setNameForDeviceId(deviceId: string, name: string) {
 		const user = this.getUserOrDefault(deviceId);
 		user.name = name;
-		return this;
 	}
 
 	getDeviceIdFromName(name: string): string | null {

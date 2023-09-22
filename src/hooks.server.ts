@@ -13,6 +13,10 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 	event.locals.deviceId = deviceId;
 
+	const name = event.cookies.get("name");
+
+	event.locals.name = name;
+
 	const response = await resolve(event);
 
 	return response;

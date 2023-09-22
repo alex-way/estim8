@@ -3,7 +3,7 @@ import z from "zod";
 import { Room, type RoomState } from "$lib/roomState";
 
 export const actions = {
-	setName: async ({ request, locals, params }) => {
+	setName: async ({ request, locals, params, cookies }) => {
 		const formData = await request.formData();
 
 		const schema = z.string();
@@ -27,13 +27,11 @@ export const actions = {
 			};
 		}
 
-		if (room.state.adminDeviceId === null) {
-			room.setAdmin(locals.deviceId);
-		}
-
 		room.setNameForDeviceId(locals.deviceId, parsedName.data);
 
 		await room.save();
+
+		cookies.set("name", parsedName.data);
 
 		return {};
 	},
@@ -122,10 +120,23 @@ export const actions = {
 export const load = async ({ params, locals }) => {
 	const room = await Room.getRoom(params.id);
 
-	const name = room.state.users[locals.deviceId]?.name;
+	let modified = false;
+
+	if (locals.name && room.getDeviceIdFromName(locals.name) === null) {
+		room.setNameForDeviceId(locals.deviceId, locals.name);
+		modified = true;
+	}
+
+	if (room.state.adminDeviceId === null) {
+		room.setAdmin(locals.deviceId);
+		modified = true;
+	}
+
+	if (modified) await room.save();
+
 	return {
 		deviceId: locals.deviceId,
-		name,
+		name: locals.name,
 		roomState: JSON.parse(JSON.stringify(room.state)) as RoomState,
 	};
 };

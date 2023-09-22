@@ -18,14 +18,11 @@
 
 	let roomState = data.roomState;
 
-	let name: string | null = data.name;
+	let name: string | undefined = data.name;
 	let jsConfetti: JSConfetti | undefined;
 
 	onMount(() => {
 		jsConfetti = new JSConfetti();
-		if (!name) {
-			name = localStorage.getItem('name');
-		}
 
 		var pusher = new Pusher(env.PUBLIC_PUSHER_APP_KEY, {
 			cluster: 'eu'
