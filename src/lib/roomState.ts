@@ -64,7 +64,7 @@ class MemoryStorage implements PersistentStorage {
 export class Room {
 	id: string;
 	state: RoomState;
-	#lastSavedState: RoomState;
+	#lastSavedState: string;
 
 	/**
 	 * NOTE: The constructor is now `private`.
@@ -84,7 +84,7 @@ export class Room {
 	private constructor(id: string, state: RoomState) {
 		this.id = id;
 		this.state = state;
-		this.#lastSavedState = state;
+		this.#lastSavedState = JSON.stringify(state);
 	}
 
 	/**
@@ -217,16 +217,15 @@ export class Room {
 	}
 
 	isModified(): boolean {
-		return this.#lastSavedState !== this.state;
+		return this.#lastSavedState !== JSON.stringify(this.state);
 	}
 
 	async save(): Promise<Room> {
-		if (!this.isModified()) return this;
 		const kv = Room.getPersistentStorage();
 		await kv.set(this.id, this.state, {
 			ex: TEN_MINUTES,
 		});
-		this.#lastSavedState = this.state;
+		this.#lastSavedState = JSON.stringify(this.state);
 
 		await pusher.trigger(this.id, "room-update", this.state);
 		return this;
