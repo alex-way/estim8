@@ -59,7 +59,7 @@
 					{:else}
 						<Skeleton
 							class={`w-[48px] h-[36px] rounded-lg mx-auto bg-primary/20 ${
-								roomState.users[deviceId].chosenNumber != null && 'bg-emerald-300'
+								roomState.users[deviceId].chosenNumber != null ? 'bg-emerald-300' : ''
 							}`}
 						/>
 					{/if}
@@ -75,10 +75,14 @@
 		<div class="grid grid-cols-12 gap-2">
 			{#if roomState.showResults}
 				{#each results as result}
-					<div class="col-span-11">
+					<div class="col-span-10">
 						<Progress value={result.percentage} class="h-2 inline-block" />
 					</div>
-					<p class="inline-block text-lg font-semibold text-center">{result.number}</p>
+					<div class="col-span-2">
+						<p class="text-lg font-semibold text-center">
+							{result.number} <small class="text-xs">({result.count} vote{result.count > 1 ? 's' : ''})</small>
+						</p>
+					</div>
 				{/each}
 			{/if}
 		</div>
