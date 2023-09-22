@@ -1,6 +1,7 @@
 import type { Actions } from "./$types";
 import z from "zod";
 import { Room, type RoomState } from "$lib/roomState";
+import { fail } from "@sveltejs/kit";
 
 export const actions = {
 	setName: async ({ request, locals, params, cookies }) => {
@@ -10,10 +11,11 @@ export const actions = {
 
 		const parsedName = schema.safeParse(formData.get("name"));
 		if (!parsedName.success) {
-			return {
-				body: "Name is required",
-				status: 400,
-			};
+			return fail(400, {
+				errors: {
+					name: "Name is required",
+				},
+			});
 		}
 
 		const room = await Room.getRoom(params.id);
@@ -21,10 +23,11 @@ export const actions = {
 		const nameAlreadyPresent =
 			room.getDeviceIdFromName(parsedName.data) !== null;
 		if (nameAlreadyPresent) {
-			return {
-				body: "Name already exists",
-				status: 400,
-			};
+			return fail(400, {
+				errors: {
+					name: "Name already taken.",
+				},
+			});
 		}
 
 		room.setNameForDeviceId(locals.deviceId, parsedName.data);
@@ -32,8 +35,6 @@ export const actions = {
 		await room.save();
 
 		cookies.set("name", parsedName.data);
-
-		return {};
 	},
 	submitNumber: async ({ request, params, locals }) => {
 		const formData = await request.formData();
@@ -41,23 +42,19 @@ export const actions = {
 
 		const parsedNumber = schema.safeParse(formData.get("chosenNumber"));
 		if (!parsedNumber.success) {
-			return {
+			return fail(400, {
 				body: parsedNumber.error,
-				status: 400,
-			};
+			});
 		}
 
 		const room = await Room.getRoom(params.id);
 		room.setChosenNumberForDeviceId(locals.deviceId, parsedNumber.data);
 		await room.save();
-		return {};
 	},
 	inverseDisplay: async ({ params }) => {
 		const room = await Room.getRoom(params.id);
 		room.invertShowResults();
 		await room.save();
-
-		return {};
 	},
 	inverseParticipation: async ({ request, params, locals }) => {
 		const room = await Room.getRoom(params.id);
@@ -71,23 +68,19 @@ export const actions = {
 			room.state.adminDeviceId !== locals.deviceId &&
 			locals.deviceId !== formDeviceId
 		) {
-			return {
+			return fail(403, {
 				body: "Only the admin can do this",
-				status: 403,
-			};
+			});
 		}
 		const parsedDeviceId = schema.safeParse(formDeviceId);
 		if (!parsedDeviceId.success) {
-			return {
+			return fail(400, {
 				body: parsedDeviceId.error.toString(),
-				status: 400,
-			};
+			});
 		}
 
 		room.inverseUserParticipation(parsedDeviceId.data);
 		await room.save();
-
-		return {};
 	},
 	removeUserFromRoom: async ({ request, params, locals }) => {
 		const formData = await request.formData();
@@ -95,10 +88,9 @@ export const actions = {
 
 		const parsedNumber = schema.safeParse(formData.get("chosenNumber"));
 		if (!parsedNumber.success) {
-			return {
+			return fail(400, {
 				body: parsedNumber.error,
-				status: 400,
-			};
+			});
 		}
 
 		const room = await Room.getRoom(params.id);
@@ -106,14 +98,11 @@ export const actions = {
 		room.removeUser(locals.deviceId);
 
 		await room.save();
-
-		return {};
 	},
 	clear: async ({ params }) => {
 		const room = await Room.getRoom(params.id);
 		room.clearSelectedNumbers();
 		await room.save();
-		return {};
 	},
 } satisfies Actions;
 
