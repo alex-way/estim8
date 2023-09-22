@@ -4,7 +4,7 @@
 	import { env } from '$env/dynamic/public';
 	import Pusher from 'pusher-js';
 	import { onMount } from 'svelte';
-	import type { RoomState } from './types';
+	import type { RoomState } from '$lib/roomState';
 	import type { PageData } from './$types';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';

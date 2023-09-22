@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { RoomState } from '../types';
+	import type { RoomState } from '$lib/roomState';
 	import * as Card from '$lib/components/ui/card';
 	import { Skeleton } from '$lib/components/ui/skeleton';
 	import Progress from '$lib/components/ui/progress/progress.svelte';
