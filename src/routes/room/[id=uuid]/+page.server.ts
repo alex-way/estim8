@@ -116,6 +116,33 @@ export const actions = {
 
 		await room.save();
 	},
+	setAdmin: async ({ request, params, locals }) => {
+		const room = await Room.getRoom(params.id);
+
+		const formData = await request.formData();
+		const schema = z.string();
+
+		const formDeviceId = formData.get("deviceId");
+
+		const isAdmin = room.state.adminDeviceId === locals.deviceId;
+
+		if (!isAdmin) {
+			return fail(403, {
+				body: "Only the admin can do this",
+			});
+		}
+
+		const parsedDeviceId = schema.safeParse(formDeviceId);
+		if (!parsedDeviceId.success) {
+			return fail(400, {
+				body: parsedDeviceId.error.toString(),
+			});
+		}
+
+		room.setAdmin(parsedDeviceId.data);
+
+		await room.save();
+	},
 	clear: async ({ params }) => {
 		const room = await Room.getRoom(params.id);
 		room.clearSelectedNumbers();

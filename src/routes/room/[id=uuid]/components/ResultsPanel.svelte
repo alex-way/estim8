@@ -56,8 +56,8 @@
 <div class="flex gap-4 justify-evenly my-16 px-4">
 	{#each participants as user (user.deviceId)}
 		<ContextMenu.Root>
-			<ContextMenu.Trigger class="cursor-pointer"
-				><Card.Root class="bg-secondary min-w-[100px]">
+			<ContextMenu.Trigger class="cursor-pointer">
+				<Card.Root class="bg-secondary min-w-[100px]">
 					<Card.Header>
 						<Card.Title class="text-xl text-center">{user.name}</Card.Title>
 					</Card.Header>
@@ -74,22 +74,32 @@
 							{/if}
 						</p>
 					</Card.Content>
-				</Card.Root></ContextMenu.Trigger
-			>
-			<ContextMenu.Content>
-				<ContextMenu.Item>
-					<form method="post" action="?/inverseParticipation" use:enhance>
-						<input type="hidden" name="deviceId" value={user.deviceId} />
-						<button type="submit">Mark as observer</button>
-					</form>
-				</ContextMenu.Item>
-				<ContextMenu.Item>
-					<form method="post" action="?/removeUserFromRoom" use:enhance>
-						<input type="hidden" name="deviceId" value={user.deviceId} />
-						<button type="submit">Remove from room</button>
-					</form>
-				</ContextMenu.Item>
-			</ContextMenu.Content>
+				</Card.Root>
+			</ContextMenu.Trigger>
+			{#if roomState.adminDeviceId === deviceId}
+				<ContextMenu.Content>
+					<ContextMenu.Item>
+						<form method="post" action="?/inverseParticipation" use:enhance>
+							<input type="hidden" name="deviceId" value={user.deviceId} />
+							<button type="submit">Make observer</button>
+						</form>
+					</ContextMenu.Item>
+					<ContextMenu.Item>
+						<form method="post" action="?/setAdmin" use:enhance>
+							<input type="hidden" name="deviceId" value={user.deviceId} />
+							<button type="submit">Make room admin</button>
+						</form>
+					</ContextMenu.Item>
+					{#if user.deviceId !== deviceId}
+						<ContextMenu.Item>
+							<form method="post" action="?/removeUserFromRoom" use:enhance>
+								<input type="hidden" name="deviceId" value={user.deviceId} />
+								<button type="submit">Remove from room</button>
+							</form>
+						</ContextMenu.Item>
+					{/if}
+				</ContextMenu.Content>
+			{/if}
 		</ContextMenu.Root>
 	{/each}
 </div>
