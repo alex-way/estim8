@@ -221,6 +221,7 @@ export class Room {
 	}
 
 	async save(): Promise<Room> {
+		if (!this.isModified()) return this;
 		const kv = Room.getPersistentStorage();
 		await kv.set(this.id, this.state, {
 			ex: TEN_MINUTES,

@@ -166,7 +166,10 @@ export const load = async ({ params, locals }) => {
 		room.setAdmin(locals.deviceId);
 	}
 
-	if (room.isModified()) await room.save();
+	if (room.isModified()) {
+		console.log("Saving room because the state was modified");
+		await room.save();
+	}
 
 	return {
 		deviceId: locals.deviceId,
