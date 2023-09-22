@@ -35,7 +35,6 @@
 		channel.bind('room-update', function (newRoomState: RoomState) {
 			roomState = newRoomState;
 			name = roomState.users[data.deviceId].name;
-			localStorage.setItem('name', name);
 		});
 	});
 
@@ -81,6 +80,7 @@
 			action="?/setName"
 			class="flex w-full max-w-sm items-center space-x-2 mx-auto"
 			use:enhance={() => {
+				localStorage.setItem('name', name || '');
 				return async ({ update }) => {
 					update({ reset: false });
 				};
