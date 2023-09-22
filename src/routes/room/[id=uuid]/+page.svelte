@@ -59,6 +59,11 @@
 		jsConfetti?.addConfetti();
 	}
 
+	$: disableRevealButton =
+		participants.length === 0 ||
+		(!roomState.showResults && participantsWithNullSelection.length !== 0) ||
+		roomState.showResults;
+
 	let copyText = 'Copy';
 
 	function onClickCopy() {
@@ -106,12 +111,7 @@
 			<NumberPicker {roomState} deviceId={data.deviceId} />
 
 			<form method="post" action="?/inverseDisplay" use:enhance class="inline-block">
-				<Button
-					type="submit"
-					disabled={participants.length === 0 ||
-						(!roomState.showResults && participantsWithNullSelection.length !== 0) ||
-						roomState.showResults}>Reveal</Button
-				>
+				<Button type="submit" disabled={disableRevealButton}>Reveal</Button>
 			</form>
 
 			<form method="post" action="?/clear" use:enhance class="inline-block">
