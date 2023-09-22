@@ -13,6 +13,7 @@
 	import ResultsPanel from './components/ResultsPanel.svelte';
 	import NumberPicker from './components/NumberPicker.svelte';
 	import RoomConfig from './components/RoomConfig.svelte';
+	import * as Alert from '$lib/components/ui/alert';
 
 	export let data: PageData;
 
@@ -35,7 +36,7 @@
 	});
 
 	let deviceExistsInRoom: boolean;
-	$: deviceExistsInRoom = !!roomState && !!name && data.deviceId in roomState.users;
+	$: deviceExistsInRoom = !!name && data.deviceId in roomState.users;
 	$: nameExistsInRoom = deviceExistsInRoom && roomState.users[data.deviceId].name === name;
 
 	$: participants = Object.values(roomState.users).filter((user) => user.isParticipant);
@@ -109,6 +110,11 @@
 			</form>
 
 			<ResultsPanel {roomState} />
+		{:else}
+			<p class="text-center" />
+			<Alert.Root class="my-4 max-w-lg mx-auto">
+				<Alert.Title>Please enter your name to continue.</Alert.Title>
+			</Alert.Root>
 		{/if}
 	</div>
 	<div class="col-span-2"><RoomConfig {roomState} deviceId={data.deviceId} /></div>
