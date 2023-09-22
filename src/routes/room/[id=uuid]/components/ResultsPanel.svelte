@@ -8,12 +8,16 @@
 
 	export let roomState: RoomState;
 
+	export let deviceId: string;
+
 	$: participants = Object.values(roomState.users).filter((user) => user.isParticipant);
 
 	$: countOfParticipantsVoted = Object.keys(roomState.users).filter(
 		(deviceId) => roomState.users[deviceId].chosenNumber !== null
 	).length;
 	$: countOfParticipantsNotVoted = participants.length - countOfParticipantsVoted;
+
+	$: isObserving = roomState.users[deviceId].isParticipant === false;
 
 	type Result = {
 		number: number;
@@ -59,12 +63,12 @@
 					</Card.Header>
 					<Card.Content>
 						<p class="text-3xl text-center">
-							{#if roomState.showResults}
-								{user.chosenNumber || '?'}
+							{#if roomState.showResults || (isObserving && user.chosenNumber !== null)}
+								{user.chosenNumber}
 							{:else}
 								<Skeleton
 									class={`w-[48px] h-[36px] rounded-lg mx-auto bg-primary/20 ${
-										user.chosenNumber != null ? 'bg-emerald-300' : ''
+										user.chosenNumber !== null ? 'bg-emerald-300' : ''
 									}`}
 								/>
 							{/if}

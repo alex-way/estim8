@@ -120,7 +120,7 @@
 				>
 			</form>
 
-			<ResultsPanel {roomState} />
+			<ResultsPanel {roomState} deviceId={data.deviceId} />
 		{:else}
 			<p class="text-center" />
 			<Alert.Root class="my-4 max-w-lg mx-auto">
