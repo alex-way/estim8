@@ -90,7 +90,7 @@
 		>
 			<div class="grid w-full max-w-sm items-center gap-1.5">
 				<div class="flex">
-					<Input type="text" name="name" placeholder="Name" maxlength={16} bind:value={name} />
+					<Input type="text" name="name" placeholder="Name" maxlength={8} bind:value={name} />
 					<Button type="submit" disabled={nameAlreadyExists} class={`${nameExistsInRoom ? 'hidden' : ''}`}>Set</Button>
 				</div>
 				<p class="text-sm text-muted-foreground" class:hidden={!nameAlreadyExists}>This name is already taken.</p>

@@ -54,25 +54,23 @@
 		.sort((a, b) => b.count - a.count);
 </script>
 
-<div class="flex gap-4 justify-evenly my-16 px-4">
+<div class="flex gap-4 justify-evenly my-16">
 	{#each participants as user (user.deviceId)}
 		<Context currentUserDeviceId={deviceId} adminDeviceId={roomState.adminDeviceId || ''} userDeviceId={user.deviceId}>
-			<Card.Root class="bg-secondary min-w-[100px]">
+			<Card.Root class="bg-secondary w-32 h-48">
 				<Card.Header>
 					<Card.Title class="text-xl text-center">{user.name}</Card.Title>
 				</Card.Header>
 				<Card.Content>
-					<p class="text-3xl text-center">
-						{#if roomState.showResults || (roomState.config.allowObserversToSnoop && isObserving && user.chosenNumber !== null)}
-							{user.chosenNumber}
-						{:else}
-							<Skeleton
-								class={`w-[48px] h-[36px] rounded-lg mx-auto bg-primary/20 ${
-									user.chosenNumber !== null ? 'bg-emerald-300' : ''
-								}`}
-							/>
-						{/if}
-					</p>
+					{#if roomState.showResults || (roomState.config.allowObserversToSnoop && isObserving && user.chosenNumber !== null)}
+						<p class="text-6xl text-center mt-2">
+							{user.chosenNumber || ''}
+						</p>
+					{:else}
+						<Skeleton
+							class={`w-16 h-20 rounded-lg mx-auto bg-primary/20 ${user.chosenNumber !== null ? 'bg-emerald-300' : ''}`}
+						/>
+					{/if}
 				</Card.Content>
 			</Card.Root>
 		</Context>
