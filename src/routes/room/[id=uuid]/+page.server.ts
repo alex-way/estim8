@@ -64,10 +64,9 @@ export const actions = {
 
 		const formDeviceId = formData.get("deviceId");
 
-		if (
-			room.state.adminDeviceId !== locals.deviceId &&
-			locals.deviceId !== formDeviceId
-		) {
+		const isAdmin = room.state.adminDeviceId === locals.deviceId;
+		const isOwnDevice = locals.deviceId === formDeviceId;
+		if (!isAdmin && !isOwnDevice) {
 			return fail(403, {
 				body: "Only the admin can do this",
 			});
@@ -83,19 +82,37 @@ export const actions = {
 		await room.save();
 	},
 	removeUserFromRoom: async ({ request, params, locals }) => {
-		const formData = await request.formData();
-		const schema = z.coerce.number();
+		const room = await Room.getRoom(params.id);
 
-		const parsedNumber = schema.safeParse(formData.get("chosenNumber"));
-		if (!parsedNumber.success) {
-			return fail(400, {
-				body: parsedNumber.error,
+		const formData = await request.formData();
+		const schema = z.string();
+
+		const formDeviceId = formData.get("deviceId");
+
+		const isAdmin = room.state.adminDeviceId === locals.deviceId;
+
+		if (!isAdmin) {
+			return fail(403, {
+				body: "Only the admin can do this",
 			});
 		}
 
-		const room = await Room.getRoom(params.id);
+		const parsedDeviceId = schema.safeParse(formDeviceId);
+		if (!parsedDeviceId.success) {
+			return fail(400, {
+				body: parsedDeviceId.error.toString(),
+			});
+		}
 
-		room.removeUser(locals.deviceId);
+		const isAdminBeingRemoved = room.state.adminDeviceId === formDeviceId;
+
+		if (isAdminBeingRemoved) {
+			return fail(403, {
+				body: "The admin cannot be removed",
+			});
+		}
+
+		room.removeUser(parsedDeviceId.data);
 
 		await room.save();
 	},

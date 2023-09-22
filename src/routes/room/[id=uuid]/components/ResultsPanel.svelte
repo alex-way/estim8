@@ -79,7 +79,12 @@
 						<button type="submit">Mark as observer</button>
 					</form>
 				</ContextMenu.Item>
-				<ContextMenu.Item>Remove from room</ContextMenu.Item>
+				<ContextMenu.Item>
+					<form method="post" action="?/removeUserFromRoom" use:enhance>
+						<input type="hidden" name="deviceId" value={user.deviceId} />
+						<button type="submit">Remove from room</button>
+					</form>
+				</ContextMenu.Item>
 			</ContextMenu.Content>
 		</ContextMenu.Root>
 	{/each}
