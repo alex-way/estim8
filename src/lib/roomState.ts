@@ -6,13 +6,7 @@ import { createClient } from "@vercel/kv";
 export type RoomState = {
 	// session
 	users: {
-		[name: string]: {
-			deviceId: string;
-			name: string;
-			chosenNumber: number | null;
-			// todo: change this to non-optional, default to false or rename to isParticipant
-			isParticipant: boolean;
-		};
+		[name: string]: RoomUser;
 	};
 	showResults: boolean;
 	selectableNumbers: number[];
@@ -135,8 +129,8 @@ export class Room {
 	}
 
 	getDeviceIdFromName(name: string): string | null {
-		for (const [deviceId, value] of Object.entries(this.state.users)) {
-			if (value.name === name) {
+		for (const [deviceId, user] of Object.entries(this.state.users)) {
+			if (user.name === name) {
 				return deviceId;
 			}
 		}
@@ -144,14 +138,9 @@ export class Room {
 	}
 
 	getUserFromName(name: string): RoomUser | null {
-		for (const [deviceId, value] of Object.entries(this.state.users)) {
-			if (value.name === name) {
-				return new RoomUser(
-					value.deviceId,
-					value.name,
-					value.chosenNumber,
-					value.isParticipant,
-				);
+		for (const [_, user] of Object.entries(this.state.users)) {
+			if (user.name === name) {
+				return user;
 			}
 		}
 		return null;
@@ -159,24 +148,15 @@ export class Room {
 
 	getUserFromDeviceId(deviceId: string): RoomUser | null {
 		const user = this.state.users[deviceId];
-		if (user) {
-			return new RoomUser(
-				user.deviceId,
-				user.name,
-				user.chosenNumber,
-				user.isParticipant,
-			);
-		}
+		if (user) return user;
 		return null;
 	}
 
 	setChosenNumberForDeviceId(deviceId: string, chosenNumber: number) {
-		this.state.users[deviceId] = this.state.users[deviceId] || {
-			name: "",
-			chosenNumber: null,
-			isParticipant: true,
-		};
-		this.state.users[deviceId].chosenNumber = chosenNumber;
+		const user =
+			this.getUserFromDeviceId(deviceId) ||
+			new RoomUser(deviceId, "", null, true);
+		user.chosenNumber = chosenNumber;
 	}
 
 	invertShowResults() {
@@ -184,10 +164,47 @@ export class Room {
 	}
 
 	clearSelectedNumbers() {
-		for (const [_, value] of Object.entries(this.state.users)) {
-			value.chosenNumber = null;
+		for (const [_, user] of Object.entries(this.state.users)) {
+			user.chosenNumber = null;
 		}
 		this.state.showResults = false;
+	}
+
+	updateSelectableNumbers(selectableNumbers: number[]) {
+		this.state.selectableNumbers = selectableNumbers;
+		this.clearSelectedNumbers();
+	}
+
+	getUserOrDefault(deviceId: string): RoomUser {
+		this.state.users[deviceId] = this.state.users[deviceId] || {
+			name: "",
+			chosenNumber: null,
+			isParticipant: true,
+		};
+		return new RoomUser(
+			this.state.users[deviceId].deviceId,
+			this.state.users[deviceId].name,
+			this.state.users[deviceId].chosenNumber,
+			this.state.users[deviceId].isParticipant,
+		);
+	}
+
+	setUserAsObserver(deviceId: string) {
+		this.state.users[deviceId] = this.state.users[deviceId] || {
+			name: "",
+			chosenNumber: null,
+			isParticipant: true,
+		};
+		this.state.users[deviceId].isParticipant = false;
+	}
+
+	setUserAsParticipant(deviceId: string) {
+		this.state.users[deviceId] = this.state.users[deviceId] || {
+			name: "",
+			chosenNumber: null,
+			isParticipant: true,
+		};
+		this.state.users[deviceId].isParticipant = true;
 	}
 
 	async save(): Promise<Room> {
