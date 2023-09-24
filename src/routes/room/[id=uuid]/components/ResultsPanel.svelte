@@ -1,9 +1,8 @@
 <script lang="ts">
 	import type { RoomState } from '$lib/roomState';
-	import * as Card from '$lib/components/ui/card';
-	import { Skeleton } from '$lib/components/ui/skeleton';
 	import Progress from '$lib/components/ui/progress/progress.svelte';
 	import Context from './Context.svelte';
+	import Card from '$lib/components/Card.svelte';
 
 	export let roomState: RoomState;
 
@@ -52,22 +51,14 @@
 <div class="flex gap-4 justify-evenly my-16">
 	{#each participants as user (user.deviceId)}
 		<Context currentUserDeviceId={deviceId} adminDeviceId={roomState.adminDeviceId || ''} {user}>
-			<Card.Root class="bg-secondary w-32 h-48">
-				<Card.Header>
-					<Card.Title class="text-xl text-center">{user.name}</Card.Title>
-				</Card.Header>
-				<Card.Content>
-					{#if roomState.showResults || (roomState.config.allowObserversToSnoop && isObserving && user.chosenNumber !== null)}
-						<p class="text-6xl text-center mt-2">
-							{user.chosenNumber || ''}
-						</p>
-					{:else}
-						<Skeleton
-							class={`w-16 h-20 rounded-lg mx-auto bg-primary/20 ${user.chosenNumber !== null ? 'bg-emerald-300' : ''}`}
-						/>
-					{/if}
-				</Card.Content>
-			</Card.Root>
+			<Card
+				title={user.name}
+				pending={user.chosenNumber === null}
+				reveal={roomState.showResults ||
+					(roomState.config.allowObserversToSnoop && isObserving && user.chosenNumber !== null)}
+			>
+				{user.chosenNumber || ''}
+			</Card>
 		</Context>
 	{/each}
 </div>
