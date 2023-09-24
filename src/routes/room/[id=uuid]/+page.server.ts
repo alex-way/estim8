@@ -56,8 +56,16 @@ export const actions = {
 		room.invertShowResults();
 		await room.save();
 	},
-	inverseSnooping: async ({ params }) => {
+	inverseSnooping: async ({ params, locals }) => {
 		const room = await Room.getRoom(params.id);
+		const isAdmin = room.state.adminDeviceId === locals.deviceId;
+
+		if (!isAdmin) {
+			return fail(403, {
+				body: "Only the admin can do this",
+			});
+		}
+
 		room.invertSnooping();
 		await room.save();
 	},

@@ -10,6 +10,7 @@
 	export let deviceId: string;
 
 	$: participating = roomState.users[deviceId]?.isParticipant ?? true;
+	$: userIsAdmin = roomState.adminDeviceId === deviceId;
 </script>
 
 <div class="border-white border-opacity-20 border-l-2 h-full p-4">
@@ -17,7 +18,7 @@
 		<form method="post" action="?/inverseParticipation" use:enhance>
 			<input type="hidden" name="deviceId" value={deviceId} />
 			<Tooltip.Root>
-				<Tooltip.Trigger>
+				<Tooltip.Trigger type="button">
 					<Button type="submit" size="sm" class="inline-block">{participating ? 'Participating' : 'Observing'}</Button>
 				</Tooltip.Trigger>
 				<Tooltip.Content>
@@ -28,8 +29,8 @@
 
 		<form method="post" action="?/inverseSnooping" use:enhance>
 			<Tooltip.Root>
-				<Tooltip.Trigger>
-					<Button type="submit" size="sm" class="inline-block"
+				<Tooltip.Trigger type="button">
+					<Button type="submit" size="sm" class="inline-block" disabled={!userIsAdmin}
 						>{roomState.config.allowObserversToSnoop ? 'Disable Snooping' : 'Allow Snooping'}</Button
 					>
 				</Tooltip.Trigger>
