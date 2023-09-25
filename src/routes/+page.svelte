@@ -10,7 +10,7 @@
 
 	$: choices = form?.choices ?? data.choices;
 
-	let newNumber = '';
+	let newNumber = '20';
 </script>
 
 <div class="flex justify-center">
@@ -35,12 +35,12 @@
 						type="number"
 						name="choices"
 						bind:value={newNumber}
-						class="text-center text-2xl"
+						class="text-center py-6 text-3xl bg-slate-700"
 						min={0}
 						max={999}
 						required
 					/>
-					<Button type="submit">+</Button>
+					<Button type="submit" size="lg">+</Button>
 				</form>
 			</Card>
 		</div>
