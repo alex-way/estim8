@@ -18,11 +18,16 @@
 		<p class="text-center text-4xl">Selectable Choices</p>
 
 		<div class="flex gap-2 m-2">
-			{#each choices as choice}
-				<Card reveal={true} revealText={choice.toString()} />
-			{/each}
+			<form action="?/removeChoice" method="post" use:enhance>
+				{#each choices as choice}
+					<input type="hidden" name="choices" value={choice} />
+					<button type="submit" name="toRemove" value={choice}
+						><Card reveal={true} revealText={choice.toString()} /></button
+					>
+				{/each}
+			</form>
 			<Card reveal={true}>
-				<form method="post" class="grid gap-4" use:enhance>
+				<form action="?/addChoice" method="post" class="grid gap-4" use:enhance>
 					{#each choices as choice}
 						<input type="hidden" name="choices" value={choice} />
 					{/each}

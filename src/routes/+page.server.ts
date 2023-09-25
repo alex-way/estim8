@@ -2,7 +2,7 @@ import type { Actions, PageServerLoad } from "./$types";
 import { DEFAULT_CHOICES } from "$lib/constants";
 
 export const actions = {
-	default: async ({ request, cookies }) => {
+	addChoice: async ({ request, cookies }) => {
 		const formData = await request.formData();
 		const choicesParam = formData.getAll("choices");
 
@@ -17,6 +17,36 @@ export const actions = {
 		).sort((a, b) => a - b);
 
 		const choices = new Set(parsedChoices);
+
+		cookies.set("choices", Array.from(choices).join(","), {
+			path: "/",
+		});
+
+		return { choices };
+	},
+	removeChoice: async ({ request, cookies }) => {
+		const formData = await request.formData();
+		const choicesParam = formData.getAll("choices");
+		const toRemove = formData.get("toRemove");
+
+		const parsedChoices = (
+			choicesParam
+				.map((choice) => {
+					const parsed = parseInt(choice.toString());
+					if (isNaN(parsed)) return null;
+					return parsed;
+				})
+				.filter((choice) => choice !== null) as number[]
+		).sort((a, b) => a - b);
+
+		const choices = new Set(parsedChoices);
+
+		if (!toRemove) return choices;
+
+		const parsedToRemove = parseInt(toRemove.toString());
+		if (isNaN(parsedToRemove)) return choices;
+
+		choices.delete(parsedToRemove);
 
 		cookies.set("choices", Array.from(choices).join(","), {
 			path: "/",
