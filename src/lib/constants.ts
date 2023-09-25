@@ -1,1 +1,1 @@
-export const DEFAULT_CHOICES = [2, 5, 8, 13];
+export const DEFAULT_CHOICES = new Set([2, 5, 8, 13]);

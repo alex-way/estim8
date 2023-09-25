@@ -1,23 +1,14 @@
 <script lang="ts">
 	import Button from '$lib/components/ui/button/button.svelte';
 	import Card from '$lib/components/Card.svelte';
-	import { DEFAULT_CHOICES } from '$lib/constants';
 	import Input from '$lib/components/ui/input/input.svelte';
 	import { enhance } from '$app/forms';
-	import { page } from '$app/stores';
+	import type { ActionData, PageData } from './$types';
 
-	const choicesParam = $page.url.searchParams.getAll('choices');
+	export let data: PageData;
+	export let form: ActionData;
 
-	const parsedChoices = choicesParam
-		.map((choice) => {
-			const parsed = parseInt(choice);
-			if (isNaN(parsed)) return null;
-			return parsed;
-		})
-		.filter((choice) => choice !== null) as number[];
-
-	let choices = parsedChoices.length ? new Set(parsedChoices) : new Set(DEFAULT_CHOICES);
-	$: sortedChoices = [...choices].sort((a, b) => a - b);
+	$: choices = form?.choices ?? data.choices;
 
 	let newNumber = '';
 </script>
@@ -27,12 +18,12 @@
 		<p class="text-center text-4xl">Selectable Choices</p>
 
 		<div class="flex gap-2 m-2">
-			{#each sortedChoices as choice}
+			{#each choices as choice}
 				<Card reveal={true} revealText={choice.toString()} />
 			{/each}
 			<Card reveal={true}>
-				<form method="get" class="grid gap-4" use:enhance>
-					{#each sortedChoices as choice}
+				<form method="post" class="grid gap-4" use:enhance>
+					{#each choices as choice}
 						<input type="hidden" name="choices" value={choice} />
 					{/each}
 					<Input
@@ -48,8 +39,8 @@
 				</form>
 			</Card>
 		</div>
-		<form action="/room/new" method="get" use:enhance>
-			{#each sortedChoices as choice}
+		<form action="/room/new" method="get">
+			{#each choices as choice}
 				<input type="hidden" name="choices" value={choice} />
 			{/each}
 			<Button type="submit" size="lg" class="w-full">Start a new room</Button>

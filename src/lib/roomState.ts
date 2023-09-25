@@ -95,7 +95,7 @@ export class Room {
 		const state = {
 			users: {},
 			config: {
-				selectableNumbers: config.choices ?? DEFAULT_CHOICES,
+				selectableNumbers: config.choices ?? [...DEFAULT_CHOICES],
 				allowObserversToSnoop: false,
 			},
 			showResults: false,
