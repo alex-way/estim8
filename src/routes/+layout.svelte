@@ -2,6 +2,7 @@
 	import '../app.css';
 </script>
 
-<div class="relative flex min-h-screen flex-col bg-background" id="page">
+<div class="min-h-screen bg-background" id="page">
+	<nav class="w-full border-b-2 border-white border-opacity-20 p-2 text-2xl px-40"><a href="/">Estim8</a></nav>
 	<slot />
 </div>

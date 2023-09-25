@@ -1,9 +1,18 @@
 import { redirect } from "@sveltejs/kit";
-import { randomUUID } from "crypto";
-import type { PageLoad } from "./$types";
+import type { PageServerLoad } from "./$types";
+import { Room } from "$lib/roomState";
 
-export const load: PageLoad = ({ params }) => {
-	const random = randomUUID();
+export const load: PageServerLoad = async ({ url }) => {
+	const choicesParam = url.searchParams.getAll("choices");
 
-	throw redirect(303, `/room/${random}`);
+	const parsedChoices = choicesParam
+		.map((choice) => {
+			const parsed = parseInt(choice);
+			if (isNaN(parsed)) return null;
+			return parsed;
+		})
+		.filter((choice) => choice !== null) as number[];
+	const room = await Room.createRoom({ choices: parsedChoices });
+
+	throw redirect(303, `/room/${room.id}`);
 };

@@ -55,6 +55,9 @@ devDependencies:
   '@typescript-eslint/parser':
     specifier: ^6.0.0
     version: 6.7.2(eslint@8.49.0)(typescript@5.2.2)
+  '@vitejs/plugin-basic-ssl':
+    specifier: ^1.0.1
+    version: 1.0.1(vite@4.4.9)
   autoprefixer:
     specifier: ^10.4.15
     version: 10.4.15(postcss@8.4.30)
@@ -726,6 +729,15 @@ packages:
     transitivePeerDependencies:
       - encoding
     dev: false
+
+  /@vitejs/plugin-basic-ssl@1.0.1(vite@4.4.9):
+    resolution: {integrity: sha512-pcub+YbFtFhaGRTo1832FQHQSHvMrlb43974e2eS8EKleR3p1cDdkJFPci1UhwkEf1J9Bz+wKBSzqpKp7nNj2A==}
+    engines: {node: '>=14.6.0'}
+    peerDependencies:
+      vite: ^3.0.0 || ^4.0.0
+    dependencies:
+      vite: 4.4.9(@types/node@20.6.2)
+    dev: true
 
   /@vitest/expect@0.32.4:
     resolution: {integrity: sha512-m7EPUqmGIwIeoU763N+ivkFjTzbaBn0n9evsTOcde03ugy2avPs3kZbYmw3DkcH1j5mxhMhdamJkLQ6dM1bk/A==}

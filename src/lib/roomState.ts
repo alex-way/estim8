@@ -3,6 +3,8 @@ import { env as privateEnv } from "$env/dynamic/private";
 import { env as publicEnv } from "$env/dynamic/public";
 import { createClient } from "@vercel/kv";
 import { dev } from "$app/environment";
+import { randomUUID } from "crypto";
+import { DEFAULT_CHOICES } from "./constants";
 
 export type RoomUser = {
 	deviceId: string;
@@ -87,6 +89,25 @@ export class Room {
 		this.#lastSavedState = JSON.stringify(state);
 	}
 
+	static async createRoom(config: { id?: string; choices?: number[] }) {
+		const roomId = config.id ?? randomUUID();
+
+		const state = {
+			users: {},
+			config: {
+				selectableNumbers: config.choices ?? DEFAULT_CHOICES,
+				allowObserversToSnoop: false,
+			},
+			showResults: false,
+			adminDeviceId: null,
+		} as RoomState;
+
+		const room = new Room(roomId, state);
+		await room.save();
+
+		return room;
+	}
+
 	/**
 	 * This static factory function now serves as
 	 * the user-facing constructor for this class.
@@ -99,19 +120,9 @@ export class Room {
 		const kv = Room.getPersistentStorage();
 		const existingRoomState = await kv.get<RoomState>(id);
 
-		const state =
-			existingRoomState ||
-			({
-				users: {},
-				config: {
-					selectableNumbers: [2, 5, 8, 13],
-					allowObserversToSnoop: false,
-				},
-				showResults: false,
-				adminDeviceId: null,
-			} as RoomState);
-
-		return new Room(id, state);
+		return existingRoomState
+			? new Room(id, existingRoomState)
+			: Room.createRoom({ id });
 	}
 
 	private static getPersistentStorage(): PersistentStorage {

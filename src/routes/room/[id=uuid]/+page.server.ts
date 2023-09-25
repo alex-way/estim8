@@ -34,7 +34,7 @@ export const actions = {
 
 		await room.save();
 
-		cookies.set("name", parsedName.data);
+		cookies.set("name", parsedName.data, { path: "/" });
 	},
 	submitNumber: async ({ request, params, locals }) => {
 		const formData = await request.formData();
@@ -175,7 +175,6 @@ export const load = async ({ params, locals }) => {
 	}
 
 	if (room.isModified()) {
-		console.log("Saving room because the state was modified");
 		await room.save();
 	}
 

@@ -75,7 +75,7 @@
 	}
 </script>
 
-<div class="w-full grid grid-cols-12 min-h-screen">
+<div class="w-full grid grid-cols-12 min-h-full">
 	<div class="w-full max-w-7xl col-span-10 mx-auto p-4">
 		<h1 class="text-center text-2xl my-4">
 			Room ID: {$page.params.id}
@@ -128,5 +128,7 @@
 			</Alert.Root>
 		{/if}
 	</div>
-	<div class="col-span-2"><RoomConfig {roomState} deviceId={data.deviceId} /></div>
+	<div class="col-span-2 border-white border-opacity-20 border-l-2">
+		<RoomConfig {roomState} deviceId={data.deviceId} />
+	</div>
 </div>
