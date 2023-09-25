@@ -56,9 +56,8 @@
 				pending={user.chosenNumber === null}
 				reveal={roomState.showResults ||
 					(roomState.config.allowObserversToSnoop && isObserving && user.chosenNumber !== null)}
-			>
-				{user.chosenNumber || ''}
-			</Card>
+				revealText={user.chosenNumber?.toString() || ''}
+			/>
 		</Context>
 	{/each}
 </div>
