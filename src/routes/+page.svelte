@@ -10,7 +10,7 @@
 
 	$: choices = form?.choices ?? data.choices;
 
-	let newNumber = '20';
+	let newNumber = '';
 </script>
 
 <div class="flex justify-center">
@@ -38,6 +38,7 @@
 						class="text-center py-6 text-3xl bg-slate-700"
 						min={0}
 						max={999}
+						autofocus
 						required
 					/>
 					<Button type="submit" size="lg">+</Button>
