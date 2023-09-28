@@ -41,7 +41,6 @@
 	"type": "module",
 	"dependencies": {
 		"@libsql/client": "^0.3.5",
-		"@vercel/kv": "^0.2.3",
 		"bits-ui": "^0.5.7",
 		"clsx": "^2.0.0",
 		"confetti-js": "^0.0.18",
