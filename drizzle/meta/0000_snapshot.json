@@ -1,0 +1,53 @@
+{
+	"version": "5",
+	"dialect": "sqlite",
+	"id": "e0ad9c91-72ec-49fd-9f58-7ed626fdd60d",
+	"prevId": "00000000-0000-0000-0000-000000000000",
+	"tables": {
+		"rooms": {
+			"name": "rooms",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "text(128)",
+					"primaryKey": true,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"state": {
+					"name": "state",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false,
+					"autoincrement": false
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": false,
+					"autoincrement": false,
+					"default": "CURRENT_TIMESTAMP"
+				},
+				"updated_at": {
+					"name": "updated_at",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": false,
+					"autoincrement": false,
+					"default": "CURRENT_TIMESTAMP"
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {}
+		}
+	},
+	"enums": {},
+	"_meta": {
+		"schemas": {},
+		"tables": {},
+		"columns": {}
+	}
+}

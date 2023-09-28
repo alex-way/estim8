@@ -1,33 +1,12 @@
 import Pusher from "pusher";
 import { env as privateEnv } from "$env/dynamic/private";
 import { env as publicEnv } from "$env/dynamic/public";
-import { createClient } from "@vercel/kv";
 import { dev } from "$app/environment";
 import { randomUUID } from "crypto";
 import { DEFAULT_CHOICES } from "./constants";
-
-export type RoomUser = {
-	deviceId: string;
-	name: string;
-	chosenNumber: number | null;
-	isParticipant: boolean;
-	config?: {
-		cardBackground?: "green" | "red" | "blue" | "yellow" | "white";
-	};
-};
-
-export type RoomState = {
-	// session
-	users: {
-		[name: string]: RoomUser;
-	};
-	showResults: boolean;
-	config: {
-		selectableNumbers: number[];
-		allowObserversToSnoop: boolean;
-	};
-	adminDeviceId: string | null;
-};
+import type { PersistentStorage } from "$lib/storage/base";
+import type { RoomState, RoomUser } from "$lib/types";
+import { MemoryStorage, TursoStorage } from "$lib/storage";
 
 const TEN_MINUTES = 60 * 10;
 
@@ -38,30 +17,6 @@ export const pusher = new Pusher({
 	cluster: "eu",
 	useTLS: true,
 });
-
-const globalRoomState = new Map<string, RoomState>();
-
-interface PersistentStorage {
-	get<T>(key: string): Promise<T | null>;
-	set<T>(key: string, value: T, options?: { ex?: number }): Promise<void>;
-}
-
-class MemoryStorage implements PersistentStorage {
-	async get<T>(key: string): Promise<T | null> {
-		const value = globalRoomState.get(key);
-		if (!value) return null;
-		return value as T;
-	}
-
-	async set<T>(
-		key: string,
-		value: T,
-		options?: { ex?: number },
-	): Promise<void> {
-		// @ts-ignore
-		globalRoomState.set(key, value);
-	}
-}
 
 export class Room {
 	id: string;
@@ -118,7 +73,7 @@ export class Room {
 	 */
 	static async getRoom(id: string) {
 		const kv = Room.getPersistentStorage();
-		const existingRoomState = await kv.get<RoomState>(id);
+		const existingRoomState = await kv.get(id);
 
 		return existingRoomState
 			? new Room(id, existingRoomState)
@@ -129,10 +84,7 @@ export class Room {
 		if (dev) {
 			return new MemoryStorage();
 		}
-		return createClient({
-			token: privateEnv.KV_REST_API_TOKEN,
-			url: privateEnv.KV_REST_API_URL,
-		}) as PersistentStorage;
+		return new TursoStorage();
 	}
 
 	setAdmin(deviceId: string) {
