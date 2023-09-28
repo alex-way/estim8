@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import type { RoomState } from '$lib/roomState';
+	import type { RoomState } from '$lib/types';
 	import { Button } from '$lib/components/ui/button';
 
 	export let roomState: RoomState;

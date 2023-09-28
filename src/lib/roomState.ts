@@ -190,7 +190,7 @@ export class Room {
 		});
 		this.#lastSavedState = JSON.stringify(this.state);
 
-		await pusher.trigger(this.id, "room-update", this.state);
+		await pusher.trigger(`cache-${this.id}`, "room-update", this.state);
 		return this;
 	}
 }

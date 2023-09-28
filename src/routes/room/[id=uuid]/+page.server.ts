@@ -1,6 +1,6 @@
 import type { Actions } from "./$types";
 import z from "zod";
-import { Room, type RoomState } from "$lib/roomState";
+import { Room } from "$lib/roomState";
 import { fail } from "@sveltejs/kit";
 
 export const actions = {

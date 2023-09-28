@@ -1,7 +1,7 @@
 <script lang="ts">
 	import * as ContextMenu from '$lib/components/ui/context-menu';
 	import { enhance } from '$app/forms';
-	import type { RoomUser } from '$lib/roomState';
+	import type { RoomUser } from '$lib/types';
 
 	export let currentUserDeviceId: string;
 	export let adminDeviceId: string;

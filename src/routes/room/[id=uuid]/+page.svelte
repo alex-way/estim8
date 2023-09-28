@@ -4,7 +4,7 @@
 	import { env } from '$env/dynamic/public';
 	import Pusher from 'pusher-js';
 	import { onMount } from 'svelte';
-	import type { RoomState } from '$lib/roomState';
+	import type { RoomState } from '$lib/types';
 	import type { ActionData, PageData } from './$types';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
@@ -30,7 +30,7 @@
 			cluster: 'eu'
 		});
 
-		var channel = pusher.subscribe($page.params.id);
+		var channel = pusher.subscribe(`cache-${$page.params.id}`);
 		channel.bind('room-update', function (newRoomState: RoomState) {
 			roomState = newRoomState;
 		});
