@@ -38,9 +38,6 @@ dependencies:
   tailwind-variants:
     specifier: ^0.1.14
     version: 0.1.14(tailwindcss@3.3.3)
-  zod:
-    specifier: ^3.22.3
-    version: 3.22.3
 
 devDependencies:
   '@playwright/test':
@@ -106,6 +103,9 @@ devDependencies:
   vitest:
     specifier: ^0.34.6
     version: 0.34.6
+  zod:
+    specifier: ^3.22.3
+    version: 3.22.3
 
 packages:
 
@@ -3275,3 +3275,4 @@ packages:
 
   /zod@3.22.3:
     resolution: {integrity: sha512-EjIevzuJRiRPbVH4mGc8nApb/lVLKVpmUhAaR5R5doKGfAnGJ6Gr3CViAVjP+4FWSxCsybeWQdcgCtbX+7oZug==}
+    dev: true
