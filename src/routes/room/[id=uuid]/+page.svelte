@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { page } from '$app/stores';
-	import { env } from '$env/dynamic/public';
+	import { PUBLIC_PUSHER_APP_KEY } from '$env/static/public';
 	import Pusher from 'pusher-js';
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import type { RoomState } from '$lib/types';
 	import type { ActionData, PageData } from './$types';
 	import { Button } from '$lib/components/ui/button';
@@ -22,11 +22,12 @@
 
 	let name: string | undefined = data.name;
 	let jsConfetti: JSConfetti | undefined;
+	let pusher: Pusher | undefined;
 
 	onMount(() => {
 		jsConfetti = new JSConfetti();
 
-		var pusher = new Pusher(env.PUBLIC_PUSHER_APP_KEY, {
+		pusher = new Pusher(PUBLIC_PUSHER_APP_KEY, {
 			cluster: 'eu'
 		});
 
@@ -34,6 +35,11 @@
 		channel.bind('room-update', function (newRoomState: RoomState) {
 			roomState = newRoomState;
 		});
+
+	});
+
+	onDestroy(() => {
+		pusher?.disconnect();
 	});
 
 	let deviceExistsInRoom: boolean;

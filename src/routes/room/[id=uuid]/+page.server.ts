@@ -1,7 +1,7 @@
 import type { Actions } from "./$types";
 import z from "zod";
 import { Room } from "$lib/roomState";
-import { fail } from "@sveltejs/kit";
+import { fail, error } from "@sveltejs/kit";
 
 export const actions = {
 	setName: async ({ request, locals, params, cookies }) => {
@@ -19,6 +19,7 @@ export const actions = {
 		}
 
 		const room = await Room.getRoom(params.id);
+		if (room === null) return fail(404, { body: "That room doesn't exist" });
 
 		const nameAlreadyPresent =
 			room.getDeviceIdFromName(parsedName.data) !== null;
@@ -48,16 +49,19 @@ export const actions = {
 		}
 
 		const room = await Room.getRoom(params.id);
+		if (room === null) return fail(404, { body: "That room doesn't exist" });
 		room.setChosenNumberForDeviceId(locals.deviceId, parsedNumber.data);
 		await room.save();
 	},
 	inverseDisplay: async ({ params }) => {
 		const room = await Room.getRoom(params.id);
+		if (room === null) return fail(404, { body: "That room doesn't exist" });
 		room.invertShowResults();
 		await room.save();
 	},
 	inverseSnooping: async ({ params, locals }) => {
 		const room = await Room.getRoom(params.id);
+		if (room === null) return fail(404, { body: "That room doesn't exist" });
 		const isAdmin = room.state.adminDeviceId === locals.deviceId;
 
 		if (!isAdmin) {
@@ -71,6 +75,7 @@ export const actions = {
 	},
 	inverseParticipation: async ({ request, params, locals }) => {
 		const room = await Room.getRoom(params.id);
+		if (room === null) return fail(404, { body: "That room doesn't exist" });
 
 		const formData = await request.formData();
 		const schema = z.string();
@@ -96,6 +101,7 @@ export const actions = {
 	},
 	removeUserFromRoom: async ({ request, params, locals }) => {
 		const room = await Room.getRoom(params.id);
+		if (room === null) return fail(404, { body: "That room doesn't exist" });
 
 		const formData = await request.formData();
 		const schema = z.string();
@@ -131,6 +137,7 @@ export const actions = {
 	},
 	setAdmin: async ({ request, params, locals }) => {
 		const room = await Room.getRoom(params.id);
+		if (room === null) return fail(404, { body: "That room doesn't exist" });
 
 		const formData = await request.formData();
 		const schema = z.string();
@@ -158,6 +165,7 @@ export const actions = {
 	},
 	clear: async ({ params }) => {
 		const room = await Room.getRoom(params.id);
+		if (room === null) return fail(404, { body: "That room doesn't exist" });
 		room.clearSelectedNumbers();
 		await room.save();
 	},
@@ -165,6 +173,10 @@ export const actions = {
 
 export const load = async ({ params, locals }) => {
 	const room = await Room.getRoom(params.id);
+	if (room === null)
+		throw error(404, {
+			message: "That room doesn't exist",
+		});
 
 	if (locals.name && room.getDeviceIdFromName(locals.name) === null) {
 		room.setNameForDeviceId(locals.deviceId, locals.name);
