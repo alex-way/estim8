@@ -4,6 +4,7 @@
 	import Input from '$lib/components/ui/input/input.svelte';
 	import { enhance } from '$app/forms';
 	import type { ActionData, PageData } from './$types';
+	import { navigating } from '$app/stores';
 
 	export let data: PageData;
 	export let form: ActionData;
@@ -47,7 +48,7 @@
 			{#each choices as choice}
 				<input type="hidden" name="choices" value={choice} />
 			{/each}
-			<Button type="submit" size="lg" class="w-full">Start a new room</Button>
+			<Button type="submit" size="lg" class="w-full" disabled={!!$navigating}>{!!$navigating ? "Loading..." : "Start a new room"}</Button>
 		</form>
 	</div>
 </div>
