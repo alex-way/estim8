@@ -15,8 +15,6 @@
 
 <div class="flex justify-center">
 	<div>
-		<p class="text-center text-4xl">Selectable Choices</p>
-
 		<div class="flex gap-2 m-2">
 			<form action="?/removeChoice" method="post" use:enhance>
 				{#each choices as choice}
