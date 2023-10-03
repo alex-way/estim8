@@ -23,6 +23,7 @@ export class Room extends BaseRoom {
 	id: string;
 	state: RoomState;
 	#lastSavedState: string;
+	#persistentStorage: PersistentStorage;
 
 	/**
 	 * NOTE: The constructor is now `private`.
@@ -44,6 +45,7 @@ export class Room extends BaseRoom {
 		this.id = id;
 		this.state = state;
 		this.#lastSavedState = JSON.stringify(state);
+		this.#persistentStorage = Room.getPersistentStorage();
 	}
 
 	static async createRoom(
@@ -93,8 +95,7 @@ export class Room extends BaseRoom {
 	}
 
 	async save(): Promise<Room> {
-		const kv = Room.getPersistentStorage();
-		await kv.set(this.id, this.state, {
+		await this.#persistentStorage.set(this.id, this.state, {
 			ex: TEN_MINUTES,
 		});
 		this.#lastSavedState = JSON.stringify(this.state);
