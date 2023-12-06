@@ -1,5 +1,5 @@
-import { DEFAULT_CHOICES } from "../constants";
 import type { RoomState, RoomUser } from "$lib/types";
+import { DEFAULT_CHOICES } from "../constants";
 
 export class BaseRoom {
 	state: RoomState;
@@ -96,6 +96,16 @@ export class BaseRoom {
 	inverseUserParticipation(deviceId: string) {
 		const user = this.getUserOrDefault(deviceId);
 		user.isParticipant = !user.isParticipant;
+	}
+
+	removeUsersNotInRoom(usersInRoom: string[]) {
+		const usersNotInRoom = Object.keys(this.state.users).filter(
+			(user) => !usersInRoom.includes(user),
+		);
+
+		for (const user of usersNotInRoom) {
+			this.removeUser(user);
+		}
 	}
 
 	removeUser(deviceId: string) {
