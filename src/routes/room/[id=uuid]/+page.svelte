@@ -2,7 +2,7 @@
 	import { enhance } from '$app/forms';
 	import { page } from '$app/stores';
 	import { PUBLIC_PUSHER_APP_KEY } from '$env/static/public';
-	import Pusher from 'pusher-js';
+	import Pusher, { PresenceChannel, type Members } from 'pusher-js';
 	import { onMount, onDestroy } from 'svelte';
 	import type { RoomState } from '$lib/types';
 	import type { ActionData, PageData } from './$types';
@@ -23,19 +23,72 @@
 	let name: string | undefined = data.name;
 	let jsConfetti: JSConfetti | undefined;
 	let pusher: Pusher | undefined;
+	let presenceChannel: PresenceChannel | undefined;
+
+	$: channelName = `presence-${$page.params.id}`;
+
+	let presenceInfo = {} as Record<string, Member['info']>;
+
+	type Member = {
+		id: string;
+		info: {
+			name?: string;
+		};
+	};
+
+	type PresenceSubscriptionData = {
+		count: number;
+		members: Record<string, Member['info']>;
+		me: Member;
+		myID: string;
+	};
 
 	onMount(() => {
 		jsConfetti = new JSConfetti();
 
 		pusher = new Pusher(PUBLIC_PUSHER_APP_KEY, {
-			cluster: 'eu'
+			cluster: 'eu',
+			userAuthentication: {
+				endpoint: '/pusher/user-auth',
+				transport: 'ajax'
+			},
+			channelAuthorization: {
+				endpoint: '/pusher/channel-auth',
+				transport: 'ajax'
+			}
 		});
 
-		var channel = pusher.subscribe(`cache-${$page.params.id}`);
-		channel.bind('room-update', function (newRoomState: RoomState) {
+		presenceChannel = pusher.subscribe(channelName) as PresenceChannel;
+
+		presenceChannel.bind('room-update', function (newRoomState: RoomState) {
+			console.log('room-update', newRoomState);
 			roomState = newRoomState;
 		});
 
+		presenceChannel.bind('pusher:subscription_succeeded', (members: PresenceSubscriptionData) => {
+			console.log('subscription_succeeded', members);
+			presenceInfo = members.members;
+		});
+
+		presenceChannel.bind('pusher:subscription_error', (error: any) => {
+			console.log('subscription_error', error);
+		});
+
+		presenceChannel.bind('pusher:member_added', (member: Member) => {
+			console.log('member_added', member);
+			presenceInfo[member.id] = member.info;
+		});
+
+		presenceChannel.bind('pusher:member_removed', (member: Member) => {
+			console.log('member_removed', member);
+			delete presenceInfo[member.id];
+			presenceInfo = presenceInfo;
+			roomState.users = Object.fromEntries(Object.entries(roomState.users).filter(([key]) => key !== member.id));
+		});
+
+		return () => {
+			pusher?.unsubscribe(channelName);
+		};
 	});
 
 	onDestroy(() => {
@@ -46,7 +99,9 @@
 	$: deviceExistsInRoom = !!name && data.deviceId in roomState.users;
 	$: nameExistsInRoom = deviceExistsInRoom && roomState.users[data.deviceId].name === name;
 
-	$: participants = Object.values(roomState.users).filter((user) => user.isParticipant);
+	$: participants = Object.values(roomState.users)
+		.filter((user) => user.deviceId in (presenceInfo || {}))
+		.filter((user) => user.isParticipant);
 
 	$: participantsWithNullSelection = participants.filter((user) => user.chosenNumber === null);
 	$: percentOfPeopleVoted =
@@ -126,7 +181,7 @@
 				>
 			</form>
 
-			<ResultsPanel {roomState} deviceId={data.deviceId} />
+			<ResultsPanel {roomState} deviceId={data.deviceId} presenceInfo={presenceInfo || {}} />
 		{:else}
 			<p class="text-center" />
 			<Alert.Root class="my-4 max-w-lg mx-auto">
@@ -135,6 +190,6 @@
 		{/if}
 	</div>
 	<div class="col-span-3 xl:col-span-2 border-white border-opacity-20 border-t-2 lg:border-t-0 lg:border-l-2">
-		<RoomConfig {roomState} deviceId={data.deviceId} />
+		<RoomConfig {roomState} deviceId={data.deviceId} presenceInfo={presenceInfo || {}} />
 	</div>
 </div>

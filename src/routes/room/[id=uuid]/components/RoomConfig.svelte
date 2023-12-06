@@ -8,6 +8,9 @@
 
 	export let roomState: RoomState;
 	export let deviceId: string;
+	export let presenceInfo: Record<string, any>;
+
+	$: participants = Object.values(roomState.users).filter((user) => user.deviceId in (presenceInfo || {}));
 
 	$: participating = roomState.users[deviceId]?.isParticipant ?? true;
 	$: userIsAdmin = roomState.adminDeviceId === deviceId;
@@ -45,7 +48,7 @@
 		<h1 class="text-xl">Participants</h1>
 
 		<div class="grid grid-cols-1 gap-2 my-4">
-			{#each Object.entries(roomState.users) as [_, user] (user.deviceId)}
+			{#each Object.entries(participants) as [_, user] (user.deviceId)}
 				<Context currentUserDeviceId={deviceId} adminDeviceId={roomState.adminDeviceId || ''} {user}>
 					<p>
 						<span

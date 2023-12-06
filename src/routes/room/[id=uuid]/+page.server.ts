@@ -1,7 +1,7 @@
-import type { Actions } from "./$types";
+import { Room, pusher } from "$lib/roomState";
+import { error, fail } from "@sveltejs/kit";
 import z from "zod";
-import { Room } from "$lib/roomState";
-import { fail, error } from "@sveltejs/kit";
+import type { Actions } from "./$types";
 
 export const actions = {
 	setName: async ({ request, locals, params, cookies }) => {
@@ -31,8 +31,17 @@ export const actions = {
 			});
 		}
 
-		room.setNameForDeviceId(locals.deviceId, parsedName.data);
+		const channelName = `presence-${room.id}`;
+		const usersResponse = await pusher.get({
+			path: `/channels/${channelName}/users`,
+		});
+		const usersJson: { users: { id: string }[] } = await usersResponse.json();
 
+		// Remove all users from the room that aren't in the room anymore
+		const usersInRoom = usersJson.users.map((user) => user.id);
+		room.removeUsersNotInRoom(usersInRoom);
+
+		room.setNameForDeviceId(locals.deviceId, parsedName.data);
 		await room.save();
 
 		cookies.set("name", parsedName.data, { path: "/" });

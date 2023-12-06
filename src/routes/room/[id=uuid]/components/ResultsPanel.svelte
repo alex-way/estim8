@@ -5,10 +5,12 @@
 	import Card from '$lib/components/Card.svelte';
 
 	export let roomState: RoomState;
-
 	export let deviceId: string;
+	export let presenceInfo: Record<string, any>;
 
-	$: participants = Object.values(roomState.users).filter((user) => user.isParticipant);
+	$: participants = Object.values(roomState.users)
+		.filter((user) => user.isParticipant)
+		.filter((user) => user.deviceId in (presenceInfo || {}));
 
 	$: countOfParticipantsVoted = participants.filter((user) => user.chosenNumber !== null).length;
 
