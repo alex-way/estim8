@@ -3,6 +3,8 @@ import { error, fail } from "@sveltejs/kit";
 import z from "zod";
 import type { Actions } from "./$types";
 
+const ONE_YEAR = 1000 * 60 * 60 * 24 * 365;
+
 export const actions = {
 	setName: async ({ request, locals, params, cookies }) => {
 		const formData = await request.formData();
@@ -44,7 +46,13 @@ export const actions = {
 		room.setNameForDeviceId(locals.deviceId, parsedName.data);
 		await room.save();
 
-		cookies.set("name", parsedName.data, { path: "/" });
+		cookies.set("name", parsedName.data, {
+			secure: true,
+			path: "/",
+			sameSite: "lax",
+			httpOnly: true,
+			expires: new Date(Date.now() + ONE_YEAR),
+		});
 	},
 	submitNumber: async ({ request, params, locals }) => {
 		const formData = await request.formData();
