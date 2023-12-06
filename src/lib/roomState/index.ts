@@ -1,12 +1,12 @@
-import Pusher from "pusher";
+import { randomUUID } from "crypto";
+import { dev } from "$app/environment";
 import { env as privateEnv } from "$env/dynamic/private";
 import { env as publicEnv } from "$env/dynamic/public";
-import { dev } from "$app/environment";
-import { randomUUID } from "crypto";
-import { DEFAULT_CHOICES } from "../constants";
+import { MemoryStorage, TursoStorage } from "$lib/storage";
 import type { PersistentStorage } from "$lib/storage/base";
 import type { RoomState } from "$lib/types";
-import { MemoryStorage, TursoStorage } from "$lib/storage";
+import Pusher from "pusher";
+import { DEFAULT_CHOICES } from "../constants";
 import { BaseRoom } from "./base";
 
 const TEN_MINUTES = 60 * 10;
@@ -100,7 +100,7 @@ export class Room extends BaseRoom {
 		});
 		this.#lastSavedState = JSON.stringify(this.state);
 
-		await pusher.trigger(`cache-${this.id}`, "room-update", this.state);
+		await pusher.trigger(`presence-${this.id}`, "room-update", this.state);
 		return this;
 	}
 }
