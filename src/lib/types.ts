@@ -10,9 +10,7 @@ export type RoomUser = {
 
 export type RoomState = {
 	// session
-	users: {
-		[name: string]: RoomUser;
-	};
+	users: Record<string, RoomUser>;
 	showResults: boolean;
 	config: {
 		selectableNumbers: number[];
