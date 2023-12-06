@@ -31,9 +31,7 @@
 
 	type Member = {
 		id: string;
-		info: {
-			name?: string;
-		};
+		info: {};
 	};
 
 	type PresenceSubscriptionData = {

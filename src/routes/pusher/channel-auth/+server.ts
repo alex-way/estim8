@@ -30,9 +30,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 	const presenceData: Pusher.PresenceChannelData = {
 		user_id: locals.deviceId,
-		user_info: {
-			name: locals.name,
-		},
+		user_info: {},
 	};
 
 	const auth = pusher.authorizeChannel(
