@@ -101,14 +101,14 @@
 		.filter((user) => user.deviceId in (presenceInfo || {}))
 		.filter((user) => user.isParticipant);
 
-	$: participantsWithNullSelection = participants.filter((user) => user.chosenNumber === null);
+	$: participantsWithNullSelection = participants.filter((user) => user.choice === null);
 	$: percentOfPeopleVoted =
 		participants.length === 0
 			? 0
 			: Math.round(((participants.length - participantsWithNullSelection.length) / participants.length) * 100);
 
 	$: consensus =
-		percentOfPeopleVoted == 100 && participants.every((user) => user.chosenNumber === participants.at(0)?.chosenNumber);
+		percentOfPeopleVoted == 100 && participants.every((user) => user.choice === participants.at(0)?.choice);
 
 	$: nameAlreadyExists = Object.values(roomState.users).some(
 		(user) => user.name === name && data.deviceId !== user.deviceId
@@ -167,7 +167,7 @@
 		{#if deviceExistsInRoom}
 			<Progress value={percentOfPeopleVoted} class="my-4" />
 
-			<NumberPicker {roomState} deviceId={data.deviceId} />
+			<NumberPicker {roomState} deviceId={data.deviceId} allowUnknown={true} />
 
 			<form method="post" action="?/inverseDisplay" use:enhance class="inline-block">
 				<Button type="submit" disabled={disableRevealButton}>Reveal</Button>

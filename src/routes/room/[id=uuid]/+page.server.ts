@@ -56,7 +56,7 @@ export const actions = {
 	},
 	submitNumber: async ({ request, params, locals }) => {
 		const formData = await request.formData();
-		const schema = z.coerce.number();
+		const schema = z.union([z.literal("?"), z.coerce.number()]);
 
 		const parsedNumber = schema.safeParse(formData.get("chosenNumber"));
 		if (!parsedNumber.success) {

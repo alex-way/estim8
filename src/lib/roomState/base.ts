@@ -1,5 +1,4 @@
-import type { RoomState, RoomUser } from "$lib/types";
-import { DEFAULT_CHOICES } from "../constants";
+import type { Choice, RoomState, RoomUser } from "$lib/types";
 
 export class BaseRoom {
 	state: RoomState;
@@ -43,9 +42,9 @@ export class BaseRoom {
 		return null;
 	}
 
-	setChosenNumberForDeviceId(deviceId: string, chosenNumber: number) {
+	setChosenNumberForDeviceId(deviceId: string, choice: Choice) {
 		const user = this.getUserOrDefault(deviceId);
-		user.chosenNumber = chosenNumber;
+		user.choice = choice;
 	}
 
 	invertShowResults() {
@@ -59,7 +58,7 @@ export class BaseRoom {
 
 	clearSelectedNumbers() {
 		for (const [_, user] of Object.entries(this.state.users)) {
-			user.chosenNumber = null;
+			user.choice = null;
 		}
 		this.state.showResults = false;
 	}
@@ -76,7 +75,7 @@ export class BaseRoom {
 		this.state.users[deviceId] = {
 			deviceId,
 			name: "",
-			chosenNumber: null,
+			choice: null,
 			isParticipant: true,
 		};
 

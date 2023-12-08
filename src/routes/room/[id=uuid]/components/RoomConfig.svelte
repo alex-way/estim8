@@ -53,7 +53,7 @@
 					<p>
 						<span
 							class={`animate-pulse ${
-								!user.isParticipant ? 'text-yellow-500' : user.chosenNumber != null ? 'text-emerald-500' : 'text-white'
+								!user.isParticipant ? 'text-yellow-500' : user.choice != null ? 'text-emerald-500' : 'text-white'
 							}`}>●</span
 						>
 						{user.name}

@@ -5,14 +5,17 @@
 
 	export let roomState: RoomState;
 	export let deviceId: string;
+	export let allowUnknown: boolean;
 
-	$: numberSelected = roomState.users[deviceId]?.chosenNumber;
+	$: numberSelected = roomState.users[deviceId]?.choice;
 
 	$: participating = roomState.users[deviceId]?.isParticipant ?? true;
+
+	$: choices = [...(allowUnknown ? ['?'] : []), ...roomState.config.selectableNumbers];
 </script>
 
 <div class="flex w-full items-center space-x-2 my-4 justify-center">
-	{#each roomState.config.selectableNumbers as number (number)}
+	{#each choices as choice (choice)}
 		<form
 			method="post"
 			action="?/submitNumber"
@@ -26,9 +29,9 @@
 			<Button
 				type="submit"
 				name="chosenNumber"
-				value={number}
+				value={choice}
 				class="text-2xl p-6"
-				disabled={!participating || roomState.showResults || numberSelected === number}>{number}</Button
+				disabled={!participating || roomState.showResults || numberSelected === choice}>{choice}</Button
 			>
 		</form>
 	{/each}

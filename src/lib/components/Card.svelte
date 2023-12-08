@@ -11,14 +11,14 @@
 	/**Whether we're still waiting for the user to select a number. */
 	export let pending = true;
 
-	export let revealText: string = '';
+	export let revealText: string | number = '';
 
 	type $$Props = {
 		class?: HTMLAttributes<HTMLDivElement>['class'];
 		title?: string;
 		reveal?: boolean;
 		pending?: boolean;
-		revealText?: string;
+		revealText?: string | number;
 	};
 
 	let className: $$Props['class'] = undefined;

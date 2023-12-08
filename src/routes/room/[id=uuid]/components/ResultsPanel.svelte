@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { RoomState } from '$lib/types';
+	import type { Choice, RoomState } from '$lib/types';
 	import Progress from '$lib/components/ui/progress/progress.svelte';
 	import Context from './Context.svelte';
 	import Card from '$lib/components/Card.svelte';
@@ -12,29 +12,29 @@
 		.filter((user) => user.isParticipant)
 		.filter((user) => user.deviceId in (presenceInfo || {}));
 
-	$: countOfParticipantsVoted = participants.filter((user) => user.chosenNumber !== null).length;
+	$: countOfParticipantsVoted = participants.filter((user) => user.choice !== null).length;
 
 	$: isObserving = roomState.users[deviceId].isParticipant === false;
 
 	type Result = {
-		number: number;
+		choice: Choice;
 		count: number;
 		percentage: number;
 	};
 
 	let results: Result[];
 	$: results = Object.values(roomState.users).reduce<Result[]>((acc, user) => {
-		if (user.chosenNumber === null) {
+		if (user.choice === null) {
 			return acc;
 		}
 
-		const existingResult = acc.find((result) => result.number === user.chosenNumber);
+		const existingResult = acc.find((result) => result.choice === user.choice);
 
 		if (existingResult) {
 			existingResult.count++;
 		} else {
 			acc.push({
-				number: user.chosenNumber,
+				choice: user.choice,
 				count: 1,
 				percentage: 0
 			});
@@ -55,10 +55,10 @@
 		<Context currentUserDeviceId={deviceId} adminDeviceId={roomState.adminDeviceId || ''} {user}>
 			<Card
 				title={user.name}
-				pending={user.chosenNumber === null}
+				pending={user.choice === null}
 				reveal={roomState.showResults ||
-					(roomState.config.allowObserversToSnoop && isObserving && user.chosenNumber !== null)}
-				revealText={user.chosenNumber?.toString() || ''}
+					(roomState.config.allowObserversToSnoop && isObserving && user.choice !== null)}
+				revealText={user.choice || ''}
 			/>
 		</Context>
 	{/each}
@@ -75,7 +75,7 @@
 					</div>
 					<div class="col-span-2">
 						<p class="text-lg font-semibold text-center">
-							{result.number} <small class="text-xs">({result.count} vote{result.count > 1 ? 's' : ''})</small>
+							{result.choice} <small class="text-xs">({result.count} vote{result.count > 1 ? 's' : ''})</small>
 						</p>
 					</div>
 				{/each}
