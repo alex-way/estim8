@@ -44,11 +44,13 @@
 				</form>
 			</Card>
 		</div>
-		<form action="/room/new" method="get">
+		<form action="?/createRoom" method="post" use:enhance>
 			{#each choices as choice}
 				<input type="hidden" name="choices" value={choice} />
 			{/each}
-			<Button type="submit" size="lg" class="w-full" disabled={!!$navigating}>{!!$navigating ? "Loading..." : "Start a new room"}</Button>
+			<Button type="submit" size="lg" class="w-full" disabled={!!$navigating}
+				>{!!$navigating ? 'Loading...' : 'Start a new room'}</Button
+			>
 		</form>
 	</div>
 </div>
