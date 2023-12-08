@@ -11,7 +11,7 @@
 	import { Progress } from '$lib/components/ui/progress';
 	import JSConfetti from 'js-confetti';
 	import ResultsPanel from './components/ResultsPanel.svelte';
-	import NumberPicker from './components/NumberPicker.svelte';
+	import ChoicePicker from './components/ChoicePicker.svelte';
 	import RoomConfig from './components/RoomConfig.svelte';
 	import * as Alert from '$lib/components/ui/alert';
 
@@ -167,7 +167,7 @@
 		{#if deviceExistsInRoom}
 			<Progress value={percentOfPeopleVoted} class="my-4" />
 
-			<NumberPicker {roomState} deviceId={data.deviceId} allowUnknown={true} />
+			<ChoicePicker {roomState} deviceId={data.deviceId} allowUnknown={true} />
 
 			<form method="post" action="?/inverseDisplay" use:enhance class="inline-block">
 				<Button type="submit" disabled={disableRevealButton}>Reveal</Button>
