@@ -20,7 +20,7 @@
 
 	let roomState = data.roomState;
 
-	let name: string | undefined = data.name;
+	let name = data.name;
 	let jsConfetti: JSConfetti | undefined;
 	let pusher: Pusher | undefined;
 	let presenceChannel: PresenceChannel | undefined;

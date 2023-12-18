@@ -2,6 +2,7 @@
 	"name": "estim8",
 	"version": "0.0.1",
 	"private": true,
+	"type": "module",
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build",
@@ -15,12 +16,25 @@
 		"test:unit": "vitest",
 		"drizzle-kit": "drizzle-kit"
 	},
+	"dependencies": {
+		"@libsql/client": "0.4.0-pre.5",
+		"bits-ui": "^0.11.7",
+		"clsx": "^2.0.0",
+		"confetti-js": "^0.0.18",
+		"drizzle-orm": "^0.29.1",
+		"js-confetti": "^0.12.0",
+		"pusher": "^5.2.0",
+		"pusher-js": "8.4.0-rc2",
+		"radix-icons-svelte": "^1.2.1",
+		"tailwind-merge": "^2.1.0",
+		"tailwind-variants": "^0.1.18"
+	},
 	"devDependencies": {
 		"@playwright/test": "^1.40.1",
 		"@sveltejs/adapter-auto": "^2.1.1",
 		"@sveltejs/kit": "^1.27.7",
-		"@typescript-eslint/eslint-plugin": "^6.13.2",
-		"@typescript-eslint/parser": "^6.13.2",
+		"@typescript-eslint/eslint-plugin": "^6.14.0",
+		"@typescript-eslint/parser": "^6.14.0",
 		"@vitejs/plugin-basic-ssl": "^1.0.2",
 		"autoprefixer": "^10.4.16",
 		"drizzle-kit": "^0.20.6",
@@ -38,19 +52,5 @@
 		"vite": "^4.5.1",
 		"vitest": "^1.0.4",
 		"zod": "^3.22.4"
-	},
-	"type": "module",
-	"dependencies": {
-		"@libsql/client": "0.4.0-pre.5",
-		"bits-ui": "^0.11.6",
-		"clsx": "^2.0.0",
-		"confetti-js": "^0.0.18",
-		"drizzle-orm": "^0.29.1",
-		"js-confetti": "^0.12.0",
-		"pusher": "^5.2.0",
-		"pusher-js": "8.4.0-rc2",
-		"radix-icons-svelte": "^1.2.1",
-		"tailwind-merge": "^2.1.0",
-		"tailwind-variants": "^0.1.18"
 	}
 }
