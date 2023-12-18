@@ -8,6 +8,9 @@ dependencies:
   '@libsql/client':
     specifier: 0.4.0-pre.5
     version: 0.4.0-pre.5
+  '@vercel/speed-insights':
+    specifier: ^1.0.2
+    version: 1.0.2
   bits-ui:
     specifier: ^0.11.8
     version: 0.11.8(svelte@4.2.8)
@@ -1469,6 +1472,11 @@ packages:
   /@ungap/structured-clone@1.2.0:
     resolution: {integrity: sha512-zuVdFrMJiuCDQUMCzQaD6KL28MjnqqN8XnAqiEq9PNm/hCPTSGfrXCOfwj1ow4LFb/tNymJPwsNbVePc1xFqrQ==}
     dev: true
+
+  /@vercel/speed-insights@1.0.2:
+    resolution: {integrity: sha512-y5HWeB6RmlyVYxJAMrjiDEz8qAIy2cit0fhBq+MD78WaUwQvuBnQlX4+5MuwVTWi46bV3klaRMq83u9zUy1KOg==}
+    requiresBuild: true
+    dev: false
 
   /@vitejs/plugin-basic-ssl@1.0.2(vite@5.0.10):
     resolution: {integrity: sha512-DKHKVtpI+eA5fvObVgQ3QtTGU70CcCnedalzqmGSR050AzKZMdUzgC8KmlOneHWH8dF2hJ3wkC9+8FDVAaDRCw==}
