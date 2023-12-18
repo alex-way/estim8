@@ -2,7 +2,7 @@
 	import { enhance } from '$app/forms';
 	import { page } from '$app/stores';
 	import { PUBLIC_PUSHER_APP_KEY } from '$env/static/public';
-	import Pusher, { PresenceChannel, type Members } from 'pusher-js';
+	import Pusher, { type PresenceChannel } from 'pusher-js';
 	import { onMount, onDestroy } from 'svelte';
 	import type { RoomState } from '$lib/types';
 	import type { ActionData, PageData } from './$types';
