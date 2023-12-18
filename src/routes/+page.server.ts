@@ -1,6 +1,6 @@
 import { redirect } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
 
-export const load: PageServerLoad = async ({ cookies }) => {
-	throw redirect(302, "/room/new");
+export const load: PageServerLoad = async () => {
+	return redirect(302, "/room/new");
 };

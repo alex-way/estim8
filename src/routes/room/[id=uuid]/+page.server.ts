@@ -191,7 +191,7 @@ export const actions = {
 export const load = async ({ params, locals }) => {
 	const room = await Room.getRoom(params.id);
 	if (room === null)
-		throw error(404, {
+		return error(404, {
 			message: "That room doesn't exist",
 		});
 

@@ -65,12 +65,12 @@ export const actions = {
 
 		const parsedChoices = schema.safeParse(choices);
 		if (parsedChoices.success === false) {
-			throw error(400, parsedChoices.error.message);
+			return error(400, parsedChoices.error.message);
 		}
 
 		const room = await Room.createRoom({ choices: parsedChoices.data });
 
-		throw redirect(303, `/room/${room.id}`);
+		return redirect(303, `/room/${room.id}`);
 	},
 } satisfies Actions;
 
