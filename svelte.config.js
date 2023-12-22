@@ -14,6 +14,7 @@ const config = {
 		adapter: adapter(),
 		alias: {
 			"$db/*": './src/db/*',
+			"$hooks/server": './src/hooks.server',
 		}
 	}
 };

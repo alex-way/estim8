@@ -1,4 +1,4 @@
-import { pusher } from "$lib/roomState/index";
+import { pusher } from "$hooks/server";
 import { json } from "@sveltejs/kit";
 import type Pusher from "pusher";
 import type { RequestHandler } from "./$types";

@@ -1,23 +1,15 @@
-import { randomUUID } from "crypto";
+import { randomUUID } from "node:crypto";
 import { dev } from "$app/environment";
-import { env as privateEnv } from "$env/dynamic/private";
-import { env as publicEnv } from "$env/dynamic/public";
+
 import { MemoryStorage, TursoStorage } from "$lib/storage";
 import type { PersistentStorage } from "$lib/storage/base";
 import type { RoomState } from "$lib/types";
-import Pusher from "pusher";
+
+import { pusher } from "$hooks/server";
 import { DEFAULT_CHOICES } from "../constants";
 import { BaseRoom } from "./base";
 
 const TEN_MINUTES = 60 * 10;
-
-export const pusher = new Pusher({
-	appId: privateEnv.PUSHER_APP_ID,
-	key: publicEnv.PUBLIC_PUSHER_APP_KEY,
-	secret: privateEnv.PUSHER_SECRET,
-	cluster: "eu",
-	useTLS: true,
-});
 
 export class Room extends BaseRoom {
 	id: string;

@@ -1,8 +1,28 @@
-import { randomUUID } from "crypto";
+import { randomUUID } from "node:crypto";
+import { env as privateEnv } from "$env/dynamic/private";
+import { env as publicEnv } from "$env/dynamic/public";
 import { signJWT, verifyJWT } from "$lib/server/token";
 import type { Handle } from "@sveltejs/kit";
-
+import Pusher from "pusher";
 const ONE_YEAR = 1000 * 60 * 60 * 24 * 365;
+
+if (!privateEnv.PUSHER_APP_ID) {
+	throw new Error("Missing PUSHER_APP_ID");
+}
+if (!privateEnv.PUSHER_SECRET) {
+	throw new Error("Missing PUSHER_SECRET");
+}
+if (!publicEnv.PUBLIC_PUSHER_APP_KEY) {
+	throw new Error("Missing PUBLIC_PUSHER_APP_KEY");
+}
+
+export const pusher = new Pusher({
+	appId: privateEnv.PUSHER_APP_ID,
+	key: publicEnv.PUBLIC_PUSHER_APP_KEY,
+	secret: privateEnv.PUSHER_SECRET,
+	cluster: "eu",
+	useTLS: true,
+});
 
 export const handle: Handle = async ({ event, resolve }) => {
 	event.locals.name = event.cookies.get("name");
