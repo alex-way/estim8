@@ -1,4 +1,5 @@
-import { Room, pusher } from "$lib/roomState";
+import { pusher } from "$hooks/server";
+import { Room } from "$lib/roomState";
 import { error, fail } from "@sveltejs/kit";
 import z from "zod";
 import type { Actions } from "./$types";
