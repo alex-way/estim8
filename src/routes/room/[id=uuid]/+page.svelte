@@ -3,7 +3,7 @@
 	import { page } from '$app/stores';
 	import { PUBLIC_PUSHER_APP_KEY } from '$env/static/public';
 	import Pusher, { type PresenceChannel } from 'pusher-js';
-	import { onMount, onDestroy } from 'svelte';
+	import { onMount } from 'svelte';
 	import type { RoomState } from '$lib/types';
 	import type { ActionData, PageData } from './$types';
 	import { Button } from '$lib/components/ui/button';
@@ -14,6 +14,7 @@
 	import ChoicePicker from './components/ChoicePicker.svelte';
 	import RoomConfig from './components/RoomConfig.svelte';
 	import * as Alert from '$lib/components/ui/alert';
+	import { browser } from '$app/environment';
 
 	export let data: PageData;
 	export let form: ActionData;
@@ -21,8 +22,7 @@
 	let roomState = data.roomState;
 
 	let name = data.name;
-	let jsConfetti: JSConfetti | undefined;
-	let pusher: Pusher | undefined;
+	const jsConfetti = browser ? new JSConfetti() : undefined;
 	let presenceChannel: PresenceChannel | undefined;
 
 	$: channelName = `presence-${$page.params.id}`;
@@ -42,9 +42,7 @@
 	};
 
 	onMount(() => {
-		jsConfetti = new JSConfetti();
-
-		pusher = new Pusher(PUBLIC_PUSHER_APP_KEY, {
+		const pusher = new Pusher(PUBLIC_PUSHER_APP_KEY, {
 			cluster: 'eu',
 			userAuthentication: {
 				endpoint: '/pusher/user-auth',
@@ -85,12 +83,9 @@
 		});
 
 		return () => {
-			pusher?.unsubscribe(channelName);
+			pusher.unsubscribe(channelName);
+			pusher.disconnect();
 		};
-	});
-
-	onDestroy(() => {
-		pusher?.disconnect();
 	});
 
 	let deviceExistsInRoom: boolean;
@@ -114,8 +109,8 @@
 		(user) => user.name === name && data.deviceId !== user.deviceId
 	);
 
-	$: if (roomState.showResults && consensus) {
-		jsConfetti?.addConfetti();
+	$: if (roomState.showResults && consensus && jsConfetti) {
+		jsConfetti.addConfetti();
 	}
 
 	$: disableRevealButton =
