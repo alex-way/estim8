@@ -11,7 +11,7 @@
 
 	$: participating = roomState.users[deviceId]?.isParticipant ?? true;
 
-	$: choices = [...(allowUnknown ? ['?'] : []), ...roomState.config.selectableNumbers];
+	$: choices = [...(allowUnknown ? ['?' as const] : []), ...roomState.config.selectableNumbers];
 </script>
 
 <div class="flex w-full items-center space-x-2 my-4 justify-center">
