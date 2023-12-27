@@ -20,7 +20,7 @@
 	export let data: PageData;
 	export let form: ActionData;
 
-	roomState.set(data.roomState);
+	$roomState = data.roomState;
 
 	let name = data.name;
 	const jsConfetti = browser ? new JSConfetti() : undefined;
@@ -59,7 +59,7 @@
 
 		presenceChannel.bind('room-update', function (newRoomState: RoomState) {
 			console.log('room-update', newRoomState);
-			roomState.set(newRoomState);
+			$roomState = newRoomState;
 		});
 
 		presenceChannel.bind('pusher:subscription_succeeded', (members: PresenceSubscriptionData) => {
