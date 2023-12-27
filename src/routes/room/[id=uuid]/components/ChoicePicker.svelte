@@ -19,6 +19,7 @@
 			action="?/submitNumber"
 			class="inline-block"
 			use:enhance={() => {
+				$roomState.users[deviceId].choice = choice;
 				return async ({ update }) => {
 					update({ reset: false, invalidateAll: false });
 				};
