@@ -58,6 +58,13 @@ export class BaseRoom {
 
 	invertAllowUnknown() {
 		this.state.config.allowUnknown = !this.state.config.allowUnknown;
+		if (!this.state.config.allowUnknown) {
+			for (const [_, user] of Object.entries(this.state.users).filter(
+				([_, user]) => user.choice === "?",
+			)) {
+				user.choice = null;
+			}
+		}
 	}
 
 	clearSelectedNumbers() {
