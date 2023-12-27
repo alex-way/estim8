@@ -15,11 +15,12 @@
 	import RoomConfig from './components/RoomConfig.svelte';
 	import * as Alert from '$lib/components/ui/alert';
 	import { browser } from '$app/environment';
+	import { roomState } from '$lib/stores/roomStateStore';
 
 	export let data: PageData;
 	export let form: ActionData;
 
-	let roomState = data.roomState;
+	roomState.set(data.roomState);
 
 	let name = data.name;
 	const jsConfetti = browser ? new JSConfetti() : undefined;
@@ -58,7 +59,7 @@
 
 		presenceChannel.bind('room-update', function (newRoomState: RoomState) {
 			console.log('room-update', newRoomState);
-			roomState = newRoomState;
+			roomState.set(newRoomState);
 		});
 
 		presenceChannel.bind('pusher:subscription_succeeded', (members: PresenceSubscriptionData) => {
@@ -79,7 +80,7 @@
 			console.log('member_removed', member);
 			delete presenceInfo[member.id];
 			presenceInfo = presenceInfo;
-			roomState.users = Object.fromEntries(Object.entries(roomState.users).filter(([key]) => key !== member.id));
+			$roomState.users = Object.fromEntries(Object.entries($roomState.users).filter(([key]) => key !== member.id));
 		});
 
 		return () => {
@@ -89,10 +90,10 @@
 	});
 
 	let deviceExistsInRoom: boolean;
-	$: deviceExistsInRoom = !!name && data.deviceId in roomState.users;
-	$: nameExistsInRoom = deviceExistsInRoom && roomState.users[data.deviceId].name === name;
+	$: deviceExistsInRoom = !!name && data.deviceId in $roomState.users;
+	$: nameExistsInRoom = deviceExistsInRoom && $roomState.users[data.deviceId].name === name;
 
-	$: participants = Object.values(roomState.users)
+	$: participants = Object.values($roomState.users)
 		.filter((user) => user.deviceId in (presenceInfo || {}))
 		.filter((user) => user.isParticipant);
 
@@ -105,18 +106,18 @@
 	$: consensus =
 		percentOfPeopleVoted == 100 && participants.every((user) => user.choice === participants.at(0)?.choice);
 
-	$: nameAlreadyExists = Object.values(roomState.users).some(
+	$: nameAlreadyExists = Object.values($roomState.users).some(
 		(user) => user.name === name && data.deviceId !== user.deviceId
 	);
 
-	$: if (roomState.showResults && consensus && jsConfetti) {
+	$: if ($roomState.showResults && consensus && jsConfetti) {
 		jsConfetti.addConfetti();
 	}
 
 	$: disableRevealButton =
 		participants.length === 0 ||
-		(!roomState.showResults && participantsWithNullSelection.length !== 0) ||
-		roomState.showResults;
+		(!$roomState.showResults && participantsWithNullSelection.length !== 0) ||
+		$roomState.showResults;
 
 	let copyText = 'Copy';
 
@@ -162,7 +163,7 @@
 		{#if deviceExistsInRoom}
 			<Progress value={percentOfPeopleVoted} class="my-4" />
 
-			<ChoicePicker {roomState} deviceId={data.deviceId} allowUnknown={true} />
+			<ChoicePicker deviceId={data.deviceId} allowUnknown={true} />
 
 			<form method="post" action="?/inverseDisplay" use:enhance class="inline-block">
 				<Button type="submit" disabled={disableRevealButton}>Reveal</Button>
@@ -174,7 +175,7 @@
 				>
 			</form>
 
-			<ResultsPanel {roomState} deviceId={data.deviceId} presenceInfo={presenceInfo || {}} />
+			<ResultsPanel deviceId={data.deviceId} presenceInfo={presenceInfo || {}} />
 		{:else}
 			<p class="text-center" />
 			<Alert.Root class="my-4 max-w-lg mx-auto">
@@ -183,6 +184,6 @@
 		{/if}
 	</div>
 	<div class="col-span-3 xl:col-span-2 border-white border-opacity-20 border-t-2 lg:border-t-0 lg:border-l-2">
-		<RoomConfig {roomState} deviceId={data.deviceId} presenceInfo={presenceInfo || {}} />
+		<RoomConfig deviceId={data.deviceId} presenceInfo={presenceInfo || {}} />
 	</div>
 </div>

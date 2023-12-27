@@ -5,15 +5,15 @@
 	import Button from '$lib/components/ui/button/button.svelte';
 	import * as Tooltip from '$lib/components/ui/tooltip';
 	import Context from './Context.svelte';
+	import { roomState } from '$lib/stores/roomStateStore';
 
-	export let roomState: RoomState;
 	export let deviceId: string;
 	export let presenceInfo: Record<string, any>;
 
-	$: participants = Object.values(roomState.users).filter((user) => user.deviceId in (presenceInfo || {}));
+	$: participants = Object.values($roomState.users).filter((user) => user.deviceId in (presenceInfo || {}));
 
-	$: participating = roomState.users[deviceId]?.isParticipant ?? true;
-	$: userIsAdmin = roomState.adminDeviceId === deviceId;
+	$: participating = $roomState.users[deviceId]?.isParticipant ?? true;
+	$: userIsAdmin = $roomState.adminDeviceId === deviceId;
 </script>
 
 <div class="p-4 grid gap-2">
@@ -34,7 +34,7 @@
 			<Tooltip.Root>
 				<Tooltip.Trigger type="button">
 					<Button type="submit" size="sm" class="inline-block" disabled={!userIsAdmin}
-						>{roomState.config.allowObserversToSnoop ? 'Disable Snooping' : 'Allow Snooping'}</Button
+						>{$roomState.config.allowObserversToSnoop ? 'Disable Snooping' : 'Allow Snooping'}</Button
 					>
 				</Tooltip.Trigger>
 				<Tooltip.Content>
@@ -49,7 +49,7 @@
 
 		<div class="grid grid-cols-1 gap-2 my-4">
 			{#each Object.entries(participants) as [_, user] (user.deviceId)}
-				<Context currentUserDeviceId={deviceId} adminDeviceId={roomState.adminDeviceId || ''} {user}>
+				<Context currentUserDeviceId={deviceId} adminDeviceId={$roomState.adminDeviceId || ''} {user}>
 					<p>
 						<span
 							class={`animate-pulse ${
@@ -60,7 +60,7 @@
 						{#if !user.isParticipant}
 							<small class="text-xs text-slate-400">(Observing)</small>
 						{/if}
-						{#if roomState.adminDeviceId === user.deviceId}
+						{#if $roomState.adminDeviceId === user.deviceId}
 							<Badge variant="secondary">Admin</Badge>
 						{/if}
 					</p>

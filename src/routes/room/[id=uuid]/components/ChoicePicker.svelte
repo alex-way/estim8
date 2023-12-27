@@ -1,17 +1,16 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import type { RoomState } from '$lib/types';
 	import { Button } from '$lib/components/ui/button';
+	import { roomState } from '$lib/stores/roomStateStore';
 
-	export let roomState: RoomState;
 	export let deviceId: string;
 	export let allowUnknown: boolean;
 
-	$: numberSelected = roomState.users[deviceId]?.choice;
+	$: numberSelected = $roomState.users[deviceId]?.choice;
 
-	$: participating = roomState.users[deviceId]?.isParticipant ?? true;
+	$: participating = $roomState.users[deviceId]?.isParticipant ?? true;
 
-	$: choices = [...(allowUnknown ? ['?' as const] : []), ...roomState.config.selectableNumbers];
+	$: choices = [...(allowUnknown ? ['?' as const] : []), ...$roomState.config.selectableNumbers];
 </script>
 
 <div class="flex w-full items-center space-x-2 my-4 justify-center">
@@ -31,7 +30,7 @@
 				name="chosenNumber"
 				value={choice}
 				class="text-2xl p-6"
-				disabled={!participating || roomState.showResults || numberSelected === choice}>{choice}</Button
+				disabled={!participating || $roomState.showResults || numberSelected === choice}>{choice}</Button
 			>
 		</form>
 	{/each}
