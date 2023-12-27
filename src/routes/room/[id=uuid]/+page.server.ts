@@ -6,6 +6,16 @@ import type { Actions } from "./$types";
 
 const ONE_YEAR = 1000 * 60 * 60 * 24 * 365;
 
+async function getUsersInRoom(roomId: string): Promise<string[]> {
+	const channelName = `presence-${roomId}`;
+	const usersResponse = await pusher.get({
+		path: `/channels/${channelName}/users`,
+	});
+	const usersJson: { users: { id: string }[] } = await usersResponse.json();
+
+	return usersJson.users.map((user) => user.id);
+}
+
 export const actions = {
 	setName: async ({ request, locals, params, cookies }) => {
 		const formData = await request.formData();
@@ -34,14 +44,8 @@ export const actions = {
 			});
 		}
 
-		const channelName = `presence-${room.id}`;
-		const usersResponse = await pusher.get({
-			path: `/channels/${channelName}/users`,
-		});
-		const usersJson: { users: { id: string }[] } = await usersResponse.json();
-
 		// Remove all users from the room that aren't in the room anymore
-		const usersInRoom = usersJson.users.map((user) => user.id);
+		const usersInRoom = await getUsersInRoom(room.id);
 		room.removeUsersNotInRoom(usersInRoom);
 
 		room.setNameForDeviceId(locals.deviceId, parsedName.data);
