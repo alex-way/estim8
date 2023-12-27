@@ -17,7 +17,15 @@
 <div class="flex justify-center">
 	<div>
 		<div class="flex gap-2 m-2">
-			<form action="?/removeChoice" method="post" use:enhance>
+			<form
+				action="?/removeChoice"
+				method="post"
+				use:enhance={() => {
+					return async ({ update }) => {
+						update({ reset: false, invalidateAll: false });
+					};
+				}}
+			>
 				{#each choices as choice}
 					<input type="hidden" name="choices" value={choice} />
 					<button type="submit" name="toRemove" value={choice}
@@ -26,7 +34,16 @@
 				{/each}
 			</form>
 			<Card reveal={true}>
-				<form action="?/addChoice" method="post" class="grid gap-4" use:enhance>
+				<form
+					action="?/addChoice"
+					method="post"
+					class="grid gap-4"
+					use:enhance={() => {
+						return async ({ update }) => {
+							update({ reset: false, invalidateAll: false });
+						};
+					}}
+				>
 					{#each choices as choice}
 						<input type="hidden" name="choices" value={choice} />
 					{/each}
@@ -44,7 +61,15 @@
 				</form>
 			</Card>
 		</div>
-		<form action="?/createRoom" method="post" use:enhance>
+		<form
+			action="?/createRoom"
+			method="post"
+			use:enhance={() => {
+				return async ({ update }) => {
+					update({ reset: false, invalidateAll: false });
+				};
+			}}
+		>
 			{#each choices as choice}
 				<input type="hidden" name="choices" value={choice} />
 			{/each}

@@ -199,7 +199,7 @@ export const actions = {
 	},
 } satisfies Actions;
 
-export const load = async ({ params, locals }) => {
+export const load = async ({ params, locals, isDataRequest, isSubRequest }) => {
 	const room = await Room.getRoom(params.id);
 	if (room === null)
 		return error(404, {

@@ -144,7 +144,7 @@
 			use:enhance={() => {
 				localStorage.setItem('name', name || '');
 				return async ({ update }) => {
-					update({ reset: false });
+					update({ reset: false, invalidateAll: false });
 				};
 			}}
 		>
@@ -165,11 +165,29 @@
 
 			<ChoicePicker deviceId={data.deviceId} />
 
-			<form method="post" action="?/inverseDisplay" use:enhance class="inline-block">
+			<form
+				method="post"
+				action="?/inverseDisplay"
+				use:enhance={() => {
+					return async ({ update }) => {
+						update({ invalidateAll: false });
+					};
+				}}
+				class="inline-block"
+			>
 				<Button type="submit" disabled={disableRevealButton}>Reveal</Button>
 			</form>
 
-			<form method="post" action="?/clear" use:enhance class="inline-block">
+			<form
+				method="post"
+				action="?/clear"
+				use:enhance={() => {
+					return async ({ update }) => {
+						update({ invalidateAll: false });
+					};
+				}}
+				class="inline-block"
+			>
 				<Button type="submit" variant="outline" disabled={participants.length === 0 || percentOfPeopleVoted === 0}
 					>Clear</Button
 				>

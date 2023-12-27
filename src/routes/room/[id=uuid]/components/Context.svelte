@@ -19,14 +19,30 @@
 	{#if currentUserIsAdmin}
 		<ContextMenu.Content>
 			<ContextMenu.Item>
-				<form method="post" action="?/inverseParticipation" use:enhance>
+				<form
+					method="post"
+					action="?/inverseParticipation"
+					use:enhance={() => {
+						return async ({ update }) => {
+							update({ reset: false, invalidateAll: false });
+						};
+					}}
+				>
 					<input type="hidden" name="deviceId" value={user.deviceId} />
 					<button type="submit">Make {user.isParticipant ? 'observer' : 'participant'}</button>
 				</form>
 			</ContextMenu.Item>
 			{#if !isAlreadyAdmin}
 				<ContextMenu.Item>
-					<form method="post" action="?/setAdmin" use:enhance>
+					<form
+						method="post"
+						action="?/setAdmin"
+						use:enhance={() => {
+							return async ({ update }) => {
+								update({ reset: false, invalidateAll: false });
+							};
+						}}
+					>
 						<input type="hidden" name="deviceId" value={user.deviceId} />
 						<button type="submit">Make room admin</button>
 					</form>
@@ -34,7 +50,15 @@
 			{/if}
 			{#if !isSelf}
 				<ContextMenu.Item>
-					<form method="post" action="?/removeUserFromRoom" use:enhance>
+					<form
+						method="post"
+						action="?/removeUserFromRoom"
+						use:enhance={() => {
+							return async ({ update }) => {
+								update({ reset: false, invalidateAll: false });
+							};
+						}}
+					>
 						<input type="hidden" name="deviceId" value={user.deviceId} />
 						<button type="submit">Remove from room</button>
 					</form>

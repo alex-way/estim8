@@ -18,7 +18,15 @@
 
 <div class="p-4 grid gap-2">
 	<div class="flex gap-2">
-		<form method="post" action="?/inverseParticipation" use:enhance>
+		<form
+			method="post"
+			action="?/inverseParticipation"
+			use:enhance={() => {
+				return async ({ update }) => {
+					update({ reset: false, invalidateAll: false });
+				};
+			}}
+		>
 			<input type="hidden" name="deviceId" value={deviceId} />
 			<Tooltip.Root>
 				<Tooltip.Trigger type="button">
@@ -30,7 +38,15 @@
 			</Tooltip.Root>
 		</form>
 
-		<form method="post" action="?/inverseSnooping" use:enhance>
+		<form
+			method="post"
+			action="?/inverseSnooping"
+			use:enhance={() => {
+				return async ({ update }) => {
+					update({ reset: false, invalidateAll: false });
+				};
+			}}
+		>
 			<Tooltip.Root>
 				<Tooltip.Trigger type="button">
 					<Button type="submit" size="sm" class="inline-block" disabled={!userIsAdmin}
@@ -43,7 +59,15 @@
 			</Tooltip.Root>
 		</form>
 
-		<form method="post" action="?/inverseAllowUnknown" use:enhance>
+		<form
+			method="post"
+			action="?/inverseAllowUnknown"
+			use:enhance={() => {
+				return async ({ update }) => {
+					update({ reset: false, invalidateAll: false });
+				};
+			}}
+		>
 			<Tooltip.Root>
 				<Tooltip.Trigger type="button">
 					<Button type="submit" size="sm" class="inline-block" disabled={!userIsAdmin}

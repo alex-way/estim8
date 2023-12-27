@@ -4,6 +4,7 @@
 	import Context from './Context.svelte';
 	import Card from '$lib/components/Card.svelte';
 	import { roomState } from '$lib/stores/roomStateStore';
+	import { fade } from 'svelte/transition';
 
 	export let deviceId: string;
 	export let presenceInfo: Record<string, any>;
@@ -70,7 +71,7 @@
 		<div class="grid grid-cols-12 gap-2">
 			{#if $roomState.showResults}
 				{#each results as result}
-					<div class="col-span-10">
+					<div transition:fade class="col-span-10">
 						<Progress value={result.percentage} class="h-2 inline-block" />
 					</div>
 					<div class="col-span-2">
