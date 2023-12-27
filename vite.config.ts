@@ -1,6 +1,6 @@
 import { sveltekit } from "@sveltejs/kit/vite";
-import { defineConfig } from "vitest/config";
 import basicSsl from "@vitejs/plugin-basic-ssl";
+import { defineConfig } from "vitest/config";
 
 export default defineConfig({
 	plugins: [basicSsl(), sveltekit()],
@@ -9,6 +9,5 @@ export default defineConfig({
 	},
 	server: {
 		host: "estim8.127.0.0.1.nip.io",
-		https: true,
 	},
 });
