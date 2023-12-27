@@ -51,6 +51,7 @@ export class Room extends BaseRoom {
 			config: {
 				selectableNumbers: config.choices ?? [...DEFAULT_CHOICES],
 				allowObserversToSnoop: false,
+				allowUnknown: true,
 			},
 			showResults: false,
 			adminDeviceId: adminDeviceId ?? null,

@@ -4,13 +4,12 @@
 	import { roomState } from '$lib/stores/roomStateStore';
 
 	export let deviceId: string;
-	export let allowUnknown: boolean;
 
 	$: numberSelected = $roomState.users[deviceId]?.choice;
 
 	$: participating = $roomState.users[deviceId]?.isParticipant ?? true;
 
-	$: choices = [...(allowUnknown ? ['?' as const] : []), ...$roomState.config.selectableNumbers];
+	$: choices = [...($roomState.config.allowUnknown ? ['?' as const] : []), ...$roomState.config.selectableNumbers];
 </script>
 
 <div class="flex w-full items-center space-x-2 my-4 justify-center">

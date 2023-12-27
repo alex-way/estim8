@@ -56,6 +56,10 @@ export class BaseRoom {
 			!this.state.config.allowObserversToSnoop;
 	}
 
+	invertAllowUnknown() {
+		this.state.config.allowUnknown = !this.state.config.allowUnknown;
+	}
+
 	clearSelectedNumbers() {
 		for (const [_, user] of Object.entries(this.state.users)) {
 			user.choice = null;

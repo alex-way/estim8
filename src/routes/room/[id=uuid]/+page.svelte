@@ -163,7 +163,7 @@
 		{#if deviceExistsInRoom}
 			<Progress value={percentOfPeopleVoted} class="my-4" />
 
-			<ChoicePicker deviceId={data.deviceId} allowUnknown={true} />
+			<ChoicePicker deviceId={data.deviceId} />
 
 			<form method="post" action="?/inverseDisplay" use:enhance class="inline-block">
 				<Button type="submit" disabled={disableRevealButton}>Reveal</Button>

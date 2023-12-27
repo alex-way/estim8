@@ -77,6 +77,12 @@ export const actions = {
 		room.invertShowResults();
 		await room.save();
 	},
+	inverseAllowUnknown: async ({ params }) => {
+		const room = await Room.getRoom(params.id);
+		if (room === null) return fail(404, { body: "That room doesn't exist" });
+		room.invertAllowUnknown();
+		await room.save();
+	},
 	inverseSnooping: async ({ params, locals }) => {
 		const room = await Room.getRoom(params.id);
 		if (room === null) return fail(404, { body: "That room doesn't exist" });

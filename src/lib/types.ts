@@ -17,6 +17,7 @@ export type RoomState = {
 	config: {
 		selectableNumbers: number[];
 		allowObserversToSnoop: boolean;
+		allowUnknown: boolean;
 	};
 	adminDeviceId: string | null;
 };

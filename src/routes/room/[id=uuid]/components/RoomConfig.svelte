@@ -42,6 +42,19 @@
 				</Tooltip.Content>
 			</Tooltip.Root>
 		</form>
+
+		<form method="post" action="?/inverseAllowUnknown" use:enhance>
+			<Tooltip.Root>
+				<Tooltip.Trigger type="button">
+					<Button type="submit" size="sm" class="inline-block" disabled={!userIsAdmin}
+						>{$roomState.config.allowUnknown ? 'Disallow Unknown' : 'Allow Unknown'}</Button
+					>
+				</Tooltip.Trigger>
+				<Tooltip.Content>
+					<p>Snooping allows observers to view results before they've been revealed.</p>
+				</Tooltip.Content>
+			</Tooltip.Root>
+		</form>
 	</div>
 
 	<div>
