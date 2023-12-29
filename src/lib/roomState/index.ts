@@ -83,11 +83,12 @@ export class Room extends BaseRoom {
 	) {
 		const kv = Room.getPersistentStorage();
 
-		const room = await kv.persistChosenNumberForDeviceId(
-			roomId,
-			deviceId,
-			choice,
-		);
+		const room = await kv
+			.persistChosenNumberForDeviceId(roomId, deviceId, choice)
+			.catch((err) => {
+				console.error(err);
+				throw err;
+			});
 		pusher.trigger(`presence-${roomId}`, "room-update", room);
 		return room;
 	}
