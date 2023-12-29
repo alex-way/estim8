@@ -1,11 +1,7 @@
 import { randomUUID } from "node:crypto";
-import { dev } from "$app/environment";
-
-import { MemoryStorage, TursoStorage } from "$lib/storage";
+import { persistentStorage, pusher } from "$hooks/server";
 import type { PersistentStorage } from "$lib/storage/base";
 import type { RoomState } from "$lib/types";
-
-import { pusher } from "$hooks/server";
 import { DEFAULT_CHOICES } from "../constants";
 import { BaseRoom } from "./base";
 
@@ -81,10 +77,7 @@ export class Room extends BaseRoom {
 	}
 
 	private static getPersistentStorage(): PersistentStorage {
-		if (dev) {
-			return new MemoryStorage();
-		}
-		return new TursoStorage();
+		return persistentStorage;
 	}
 
 	async save(): Promise<Room> {

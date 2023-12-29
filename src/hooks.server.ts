@@ -1,9 +1,12 @@
 import { randomUUID } from "node:crypto";
+import { dev } from "$app/environment";
 import { env as privateEnv } from "$env/dynamic/private";
 import { env as publicEnv } from "$env/dynamic/public";
 import { signJWT, verifyJWT } from "$lib/server/token";
+import { MemoryStorage, TursoStorage } from "$lib/storage";
 import type { Handle } from "@sveltejs/kit";
 import Pusher from "pusher";
+
 const ONE_YEAR = 1000 * 60 * 60 * 24 * 365;
 
 if (!privateEnv.PUSHER_APP_ID) {
@@ -23,6 +26,8 @@ export const pusher = new Pusher({
 	cluster: "eu",
 	useTLS: true,
 });
+
+export const persistentStorage = dev ? new MemoryStorage() : new TursoStorage();
 
 export const handle: Handle = async ({ event, resolve }) => {
 	event.locals.name = event.cookies.get("name");
