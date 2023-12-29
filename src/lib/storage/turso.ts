@@ -1,6 +1,6 @@
 import schema from "$db/schema";
 import { env } from "$env/dynamic/private";
-import type { RoomState } from "$lib/types";
+import type { Choice, RoomState } from "$lib/types";
 import { createClient as createTursoClient } from "@libsql/client";
 import { eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/libsql";
@@ -28,11 +28,7 @@ export class TursoStorage implements PersistentStorage {
 		return null;
 	}
 
-	async set(
-		key: string,
-		value: RoomState,
-		options?: { ex?: number | undefined } | undefined,
-	): Promise<void> {
+	async set(key: string, value: RoomState): Promise<RoomState> {
 		return db
 			.insert(schema.rooms)
 			.values({
@@ -43,6 +39,22 @@ export class TursoStorage implements PersistentStorage {
 				target: schema.rooms.id,
 				set: { state: value, updated_at: sql`CURRENT_TIMESTAMP` },
 			})
-			.then();
+			.returning({ state: schema.rooms.state })
+			.then((result) => result[0].state);
+	}
+
+	async persistChosenNumberForDeviceId(
+		roomId: string,
+		deviceId: string,
+		choice: Choice,
+	): Promise<RoomState> {
+		return db
+			.update(schema.rooms)
+			.set({
+				state: sql`jsonb_set(state, '{users, ${deviceId}, choice}', ${choice})`,
+			})
+			.where(eq(schema.rooms.id, roomId))
+			.returning({ state: schema.rooms.state })
+			.then((result) => result[0].state);
 	}
 }
