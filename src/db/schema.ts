@@ -1,9 +1,9 @@
-import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 import type { RoomState } from "$lib/types";
 import { sql } from "drizzle-orm";
+import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
 export const rooms = sqliteTable("rooms", {
-	id: text("id", { length: 128 }).primaryKey(),
+	id: text("id", { length: 36 }).primaryKey(),
 	state: text("state", { mode: "json" }).$type<RoomState>(),
 	created_at: integer("created_at", { mode: "timestamp" }).default(
 		sql`CURRENT_TIMESTAMP`,

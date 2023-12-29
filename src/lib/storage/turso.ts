@@ -33,7 +33,7 @@ export class TursoStorage implements PersistentStorage {
 		value: RoomState,
 		options?: { ex?: number | undefined } | undefined,
 	): Promise<void> {
-		await db
+		return db
 			.insert(schema.rooms)
 			.values({
 				id: key,
@@ -42,6 +42,7 @@ export class TursoStorage implements PersistentStorage {
 			.onConflictDoUpdate({
 				target: schema.rooms.id,
 				set: { state: value, updated_at: sql`CURRENT_TIMESTAMP` },
-			});
+			})
+			.then();
 	}
 }

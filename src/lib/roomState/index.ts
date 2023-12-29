@@ -10,7 +10,6 @@ const TEN_MINUTES = 60 * 10;
 export class Room extends BaseRoom {
 	id: string;
 	state: RoomState;
-	#lastSavedState: string;
 	#persistentStorage: PersistentStorage;
 
 	/**
@@ -32,7 +31,6 @@ export class Room extends BaseRoom {
 		super(state);
 		this.id = id;
 		this.state = state;
-		this.#lastSavedState = JSON.stringify(state);
 		this.#persistentStorage = Room.getPersistentStorage();
 	}
 
@@ -81,12 +79,13 @@ export class Room extends BaseRoom {
 	}
 
 	async save(): Promise<Room> {
-		await this.#persistentStorage.set(this.id, this.state, {
-			ex: TEN_MINUTES,
-		});
-		this.#lastSavedState = JSON.stringify(this.state);
+		await Promise.all([
+			this.#persistentStorage.set(this.id, this.state, {
+				ex: TEN_MINUTES,
+			}),
+			pusher.trigger(`presence-${this.id}`, "room-update", this.state),
+		]);
 
-		await pusher.trigger(`presence-${this.id}`, "room-update", this.state);
 		return this;
 	}
 }
