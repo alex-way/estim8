@@ -1,10 +1,10 @@
+import schema from "$db/schema";
+import { env } from "$env/dynamic/private";
 import type { RoomState } from "$lib/types";
-import type { PersistentStorage } from "./base";
 import { createClient as createTursoClient } from "@libsql/client";
 import { eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/libsql";
-import schema from "$db/schema";
-import { env } from "$env/dynamic/private";
+import type { PersistentStorage } from "./base";
 
 const client = createTursoClient({
 	url: env.TURSO_URL,
