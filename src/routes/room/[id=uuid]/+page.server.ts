@@ -70,10 +70,15 @@ export const actions = {
 			});
 		}
 
-		const room = await Room.getRoom(params.id);
-		if (room === null) return fail(404, { body: "That room doesn't exist" });
-		room.setChosenNumberForDeviceId(locals.deviceId, parsedNumber.data);
-		await room.save();
+		await Room.persistChosenNumberForDeviceId(
+			params.id,
+			locals.deviceId,
+			parsedNumber.data,
+		).catch(() => {
+			return fail(400, {
+				body: "Something went wrong. Please try again later.",
+			});
+		});
 	},
 	inverseDisplay: async ({ params }) => {
 		const room = await Room.getRoom(params.id);

@@ -1,11 +1,9 @@
 import { randomUUID } from "node:crypto";
 import { persistentStorage, pusher } from "$hooks/server";
 import type { PersistentStorage } from "$lib/storage/base";
-import type { RoomState } from "$lib/types";
+import type { Choice, RoomState } from "$lib/types";
 import { DEFAULT_CHOICES } from "../constants";
 import { BaseRoom } from "./base";
-
-const TEN_MINUTES = 60 * 10;
 
 export class Room extends BaseRoom {
 	id: string;
@@ -78,13 +76,28 @@ export class Room extends BaseRoom {
 		return persistentStorage;
 	}
 
+	static async persistChosenNumberForDeviceId(
+		roomId: string,
+		deviceId: string,
+		choice: Choice,
+	) {
+		const kv = Room.getPersistentStorage();
+
+		const room = await kv
+			.persistChosenNumberForDeviceId(roomId, deviceId, choice)
+			.catch((err) => {
+				console.error(err);
+				throw err;
+			});
+		pusher.trigger(`presence-${roomId}`, "room-update", room);
+		return room;
+	}
+
 	async save(): Promise<Room> {
 		// not awaiting this because we don't want to block
 		pusher.trigger(`presence-${this.id}`, "room-update", this.state);
 
-		await this.#persistentStorage.set(this.id, this.state, {
-			ex: TEN_MINUTES,
-		});
+		await this.#persistentStorage.set(this.id, this.state);
 
 		return this;
 	}

@@ -1,4 +1,4 @@
-import type { RoomState } from "$lib/types";
+import type { Choice, RoomState } from "$lib/types";
 import type { PersistentStorage } from "./base";
 
 const globalRoomState = new Map<string, RoomState>();
@@ -10,11 +10,20 @@ export class MemoryStorage implements PersistentStorage {
 		return value;
 	}
 
-	async set(
-		key: string,
-		value: RoomState,
-		options?: { ex?: number },
-	): Promise<void> {
+	async set(key: string, value: RoomState): Promise<RoomState> {
 		globalRoomState.set(key, value);
+		console.log(value);
+		return value;
+	}
+
+	async persistChosenNumberForDeviceId(
+		roomId: string,
+		deviceId: string,
+		choice: Choice,
+	): Promise<RoomState> {
+		const room = await this.get(roomId);
+		if (!room) throw new Error("room not found");
+		room.users[deviceId].choice = choice;
+		return this.set(roomId, room);
 	}
 }
