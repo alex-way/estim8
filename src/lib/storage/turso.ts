@@ -48,13 +48,16 @@ export class TursoStorage implements PersistentStorage {
 		deviceId: string,
 		choice: Choice,
 	): Promise<RoomState> {
+		const key = `$.users.${deviceId}.choice`;
 		return db
 			.update(schema.rooms)
 			.set({
-				state: sql`jsonb_set(state, '{users, ${deviceId}, choice}', ${choice})`,
+				state: sql`json_set(state, ${key}, ${choice})`,
 			})
 			.where(eq(schema.rooms.id, roomId))
 			.returning({ state: schema.rooms.state })
-			.then((result) => result[0].state);
+			.then((result) => {
+				return result[0].state;
+			});
 	}
 }
