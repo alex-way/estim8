@@ -1,8 +1,5 @@
 <script>
 	import '../app.css';
-	import { injectSpeedInsights } from '@vercel/speed-insights/sveltekit';
-	import { dev } from '$app/environment';
-	dev ?? injectSpeedInsights();
 </script>
 
 <div class="min-h-screen bg-background" id="page">
