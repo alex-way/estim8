@@ -12,12 +12,11 @@
 	$: choices = [...($roomState.config.allowUnknown ? ['?' as const] : []), ...$roomState.config.selectableNumbers];
 </script>
 
-<div class="flex w-full items-center space-x-2 my-4 justify-center">
+<div class="flex w-full items-center my-4 justify-center flex-wrap gap-2">
 	{#each choices as choice (choice)}
 		<form
 			method="post"
 			action="?/submitNumber"
-			class="inline-block"
 			use:enhance={() => {
 				$roomState.users[deviceId].choice = choice;
 				return async ({ update }) => {
