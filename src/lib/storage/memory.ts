@@ -12,7 +12,6 @@ export class MemoryStorage implements PersistentStorage {
 
 	async set(key: string, value: RoomState): Promise<RoomState> {
 		globalRoomState.set(key, value);
-		console.log(value);
 		return value;
 	}
 

@@ -54,7 +54,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 		event.locals.deviceId = sub;
 	} catch (error) {
-		console.log(error);
+		console.error(error);
 
 		event.cookies.delete("deviceId", {
 			secure: true,

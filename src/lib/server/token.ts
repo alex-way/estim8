@@ -22,7 +22,7 @@ export const verifyJWT = async (token: string): Promise<JWTPayload> => {
 		const { payload } = await jwtVerify<JWTPayload>(token, secret);
 		return payload;
 	} catch (error) {
-		console.log(error);
+		console.error(error);
 		throw new Error("Your token has expired.");
 	}
 };
