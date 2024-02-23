@@ -5,6 +5,7 @@
 	import { enhance } from '$app/forms';
 	import type { ActionData, PageData } from './$types';
 	import { navigating } from '$app/stores';
+	import { Plus } from 'lucide-svelte';
 
 	export let data: PageData;
 	export let form: ActionData;
@@ -40,7 +41,7 @@
 						autofocus
 						required
 					/>
-					<Button type="submit" size="lg">+</Button>
+					<Button type="submit" size="lg"><Plus /></Button>
 				</form>
 			</Card>
 		</div>
