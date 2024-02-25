@@ -22,6 +22,7 @@
 
 	$roomState = data.roomState;
 	$deviceId = data.deviceId;
+	$presenceInfo = { [data.deviceId]: [] };
 
 	const jsConfetti = browser ? new JSConfetti() : undefined;
 	let presenceChannel: PresenceChannel | undefined;
