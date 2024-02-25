@@ -4,12 +4,9 @@
 	import Button from '$lib/components/ui/button/button.svelte';
 	import * as Tooltip from '$lib/components/ui/tooltip';
 	import Context from './Context.svelte';
-	import { roomState, deviceId, presenceInfo } from '$lib/stores/roomStateStore';
+	import { roomState, deviceId, isParticipating, isRoomAdmin } from '$lib/stores/roomStateStore';
 
-	$: participants = Object.values($roomState.users).filter((user) => user.deviceId in $presenceInfo);
-
-	$: participating = $roomState.users[$deviceId]?.isParticipant ?? true;
-	$: userIsAdmin = $roomState.adminDeviceId === $deviceId;
+	let { participants } = roomState;
 </script>
 
 <div class="p-4 grid gap-2">
@@ -26,7 +23,9 @@
 			<input type="hidden" name="deviceId" value={$deviceId} />
 			<Tooltip.Root>
 				<Tooltip.Trigger type="button">
-					<Button type="submit" size="sm" class="inline-block">{participating ? 'Participating' : 'Observing'}</Button>
+					<Button type="submit" size="sm" class="inline-block"
+						>{$isParticipating ? 'Participating' : 'Observing'}</Button
+					>
 				</Tooltip.Trigger>
 				<Tooltip.Content>
 					<p>Changing this option allows you to sit out of the voting and observe the results.</p>
@@ -45,7 +44,7 @@
 		>
 			<Tooltip.Root>
 				<Tooltip.Trigger type="button">
-					<Button type="submit" size="sm" class="inline-block" disabled={!userIsAdmin}
+					<Button type="submit" size="sm" class="inline-block" disabled={!$isRoomAdmin}
 						>{$roomState.config.allowObserversToSnoop ? 'Disable Snooping' : 'Allow Snooping'}</Button
 					>
 				</Tooltip.Trigger>
@@ -66,7 +65,7 @@
 		>
 			<Tooltip.Root>
 				<Tooltip.Trigger type="button">
-					<Button type="submit" size="sm" class="inline-block" disabled={!userIsAdmin}
+					<Button type="submit" size="sm" class="inline-block" disabled={!$isRoomAdmin}
 						>{$roomState.config.allowUnknown ? 'Disallow Unknown' : 'Allow Unknown'}</Button
 					>
 				</Tooltip.Trigger>
@@ -81,7 +80,7 @@
 		<h1 class="text-xl">Participants</h1>
 
 		<div class="grid grid-cols-1 gap-2 my-4">
-			{#each Object.entries(participants) as [_, user] (user.deviceId)}
+			{#each Object.entries($participants) as [_, user] (user.deviceId)}
 				<Context {user}>
 					<p>
 						<span

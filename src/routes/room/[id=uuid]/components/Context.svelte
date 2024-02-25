@@ -2,7 +2,7 @@
 	import * as ContextMenu from '$lib/components/ui/context-menu';
 	import { enhance } from '$app/forms';
 	import type { RoomUser } from '$lib/types';
-	import { deviceId, roomState } from '$lib/stores/roomStateStore';
+	import { deviceId, roomState, isRoomAdmin } from '$lib/stores/roomStateStore';
 
 	let { user } = $props<{ user: RoomUser }>();
 
@@ -15,7 +15,7 @@
 	<ContextMenu.Trigger class="cursor-pointer">
 		<slot />
 	</ContextMenu.Trigger>
-	{#if adminDeviceId === $deviceId}
+	{#if $isRoomAdmin}
 		<ContextMenu.Content>
 			<ContextMenu.Item>
 				<form

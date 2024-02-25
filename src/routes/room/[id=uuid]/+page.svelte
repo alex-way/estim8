@@ -18,7 +18,7 @@
 	import { roomState, deviceId, presenceInfo } from '$lib/stores/roomStateStore';
 
 	let { data, form } = $props<{ data: PageData; form: ActionData }>();
-	let { name, copyText } = $state({ name: data.name, copyText: '' });
+	let { name, copyText } = $state({ name: data.name, copyText: 'Copy' });
 
 	$roomState = data.roomState;
 	$deviceId = data.deviceId;
@@ -90,14 +90,14 @@
 	let deviceExistsInRoom = $derived(!!name && $deviceId in $roomState.users);
 	let nameExistsInRoom = $derived(deviceExistsInRoom && $roomState.users[$deviceId].name === name);
 
-	let { participants, participantsNotVoted, percentOfParticipantsVoted, consensusAchieved } = roomState;
+	let { activeParticipants, participantsNotVoted, percentOfParticipantsVoted, consensusAchieved } = roomState;
 
 	let nameAlreadyExists = $derived(
 		Object.values($roomState.users).some((user) => user.name === name && $deviceId !== user.deviceId)
 	);
 
 	let disableRevealButton = $derived(
-		$participants.length === 0 ||
+		$activeParticipants.length === 0 ||
 			(!$roomState.showResults && $participantsNotVoted.length !== 0) ||
 			$roomState.showResults
 	);
@@ -119,10 +119,12 @@
 
 <div class="w-full grid grid-cols-1 lg:grid-cols-12 min-h-full">
 	<div class="w-full max-w-7xl lg:col-span-9 mx-auto p-4">
-		<h1 class="text-center text-2xl my-4">
-			Room ID: {$page.params.id}
+		<div class="flex justify-center items-center gap-4">
+			<h1 class="text-center text-2xl my-4">
+				Room ID: {$page.params.id}
+			</h1>
 			<Button variant="secondary" on:click={onClickCopy}>{copyText}</Button>
-		</h1>
+		</div>
 
 		<form
 			method="post"
@@ -178,7 +180,7 @@
 				<Button
 					type="submit"
 					variant="outline"
-					disabled={$participants.length === 0 || $percentOfParticipantsVoted === 0}>Clear</Button
+					disabled={$activeParticipants.length === 0 || $percentOfParticipantsVoted === 0}>Clear</Button
 				>
 			</form>
 

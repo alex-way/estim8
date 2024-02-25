@@ -1,20 +1,12 @@
 <script lang="ts">
-	import type { Choice, RoomUser } from '$lib/types';
+	import type { Choice } from '$lib/types';
 	import Progress from '$lib/components/ui/progress/progress.svelte';
 	import Context from './Context.svelte';
 	import Card from '$lib/components/Card.svelte';
-	import { roomState, deviceId, presenceInfo } from '$lib/stores/roomStateStore';
+	import { roomState, isObserving } from '$lib/stores/roomStateStore';
 	import { fade } from 'svelte/transition';
 
-	let participants = $derived<RoomUser[]>(
-		Object.values($roomState.users)
-			.filter((user) => user.isParticipant)
-			.filter((user) => user.deviceId in $presenceInfo)
-	);
-
-	let countOfParticipantsVoted = $derived<number>(participants.filter((user) => user.choice !== null).length);
-
-	let isObserving = $derived<boolean>($roomState.users[$deviceId].isParticipant === false);
+	const { activeParticipants, participantsVoted } = roomState;
 
 	type Result = {
 		choice: Choice;
@@ -45,20 +37,20 @@
 			}, [])
 			.map((result) => ({
 				...result,
-				percentage: Math.round((result.count / countOfParticipantsVoted) * 100)
+				percentage: Math.round((result.count / $participantsVoted.length) * 100)
 			}))
 			.sort((a, b) => b.count - a.count)
 	);
 </script>
 
 <div class="flex gap-4 justify-evenly my-16">
-	{#each participants as user (user.deviceId)}
+	{#each $activeParticipants as user (user.deviceId)}
 		<Context {user}>
 			<Card
 				title={user.name}
 				pending={user.choice === null}
 				reveal={$roomState.showResults ||
-					($roomState.config.allowObserversToSnoop && isObserving && user.choice !== null)}
+					($roomState.config.allowObserversToSnoop && $isObserving && user.choice !== null)}
 				revealText={user.choice || ''}
 			/>
 		</Context>

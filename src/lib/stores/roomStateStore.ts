@@ -27,26 +27,30 @@ function createRoomState(
 	const { subscribe, set, update } = roomState;
 
 	const participants = derived([presenceInfo, roomState], () =>
-		Object.values(get(roomState).users)
-			.filter((user) => user.isParticipant)
-			.filter((user) => user.deviceId in (get(presenceInfo) || {})),
+		Object.values(get(roomState).users).filter(
+			(user) => user.deviceId in get(presenceInfo),
+		),
+	);
+
+	const activeParticipants = derived([presenceInfo, roomState], () =>
+		get(participants).filter((user) => user.isParticipant),
 	);
 
 	const participantsVoted = derived([presenceInfo, roomState], () =>
-		get(participants).filter((user) => user.choice !== null),
+		get(activeParticipants).filter((user) => user.choice !== null),
 	);
 
 	const participantsNotVoted = derived([presenceInfo, roomState], () =>
-		get(participants).filter((user) => user.choice === null),
+		get(activeParticipants).filter((user) => user.choice === null),
 	);
 
 	const percentOfParticipantsVoted = derived(
 		[participantsVoted, participants],
 		($participantsVoted) => {
-			return get(participants).length
-				? Math.round(
-						($participantsVoted.length / get(participants).length) * 100,
-				  )
+			const totalParticipants = get(participants).length;
+
+			return totalParticipants
+				? Math.round(($participantsVoted.length / totalParticipants) * 100)
 				: 0;
 		},
 	);
@@ -60,32 +64,40 @@ function createRoomState(
 		);
 	});
 
+	const selectableChoices = derived(roomState, ($roomState) => [
+		...($roomState.config.allowUnknown ? ["?" as const] : []),
+		...$roomState.config.selectableNumbers,
+	]);
+
 	return {
 		subscribe,
 		set,
 		update,
+		selectableChoices,
 		participants,
+		activeParticipants,
 		participantsVoted,
 		participantsNotVoted,
 		percentOfParticipantsVoted,
 		consensusAchieved,
-		isObserving: (deviceId: string) =>
-			get({ subscribe }).users[deviceId]?.isParticipant === false,
 	};
 }
 
 export const roomState = createRoomState();
 
-export function createmyStore() {
-	const thing = writable(0);
+export const isObserving = derived(
+	[deviceId, roomState],
+	([$deviceId, $roomState]) =>
+		$roomState.users[$deviceId]?.isParticipant === false,
+);
 
-	const doubledStore = (n: number) => derived(thing, () => get(thing) * n);
+export const isParticipating = derived(
+	[deviceId, roomState],
+	([$deviceId, $roomState]) =>
+		$roomState.users[$deviceId]?.isParticipant === true,
+);
 
-	return {
-		subscribe: thing.subscribe,
-		set: thing.set,
-		doubled: doubledStore,
-	};
-}
-
-export const myStore = createmyStore();
+export const isRoomAdmin = derived(
+	[deviceId, roomState],
+	([$deviceId, $roomState]) => $roomState.adminDeviceId === $deviceId,
+);
