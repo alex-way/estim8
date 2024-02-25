@@ -90,35 +90,20 @@
 	let deviceExistsInRoom = $derived(!!name && $deviceId in $roomState.users);
 	let nameExistsInRoom = $derived(deviceExistsInRoom && $roomState.users[$deviceId].name === name);
 
-	let participants = $derived(
-		Object.values($roomState.users)
-			.filter((user) => user.deviceId in $presenceInfo)
-			.filter((user) => user.isParticipant)
-	);
-
-	let participantsWithNullSelection = $derived(participants.filter((user) => user.choice === null));
-	let percentOfPeopleVoted = $derived(
-		participants.length === 0
-			? 0
-			: Math.round(((participants.length - participantsWithNullSelection.length) / participants.length) * 100)
-	);
-
-	let consensus = $derived(
-		percentOfPeopleVoted == 100 && participants.every((user) => user.choice === participants.at(0)?.choice)
-	);
+	let { participants, participantsNotVoted, percentOfParticipantsVoted, consensusAchieved } = roomState;
 
 	let nameAlreadyExists = $derived(
 		Object.values($roomState.users).some((user) => user.name === name && $deviceId !== user.deviceId)
 	);
 
 	let disableRevealButton = $derived(
-		participants.length === 0 ||
-			(!$roomState.showResults && participantsWithNullSelection.length !== 0) ||
+		$participants.length === 0 ||
+			(!$roomState.showResults && $participantsNotVoted.length !== 0) ||
 			$roomState.showResults
 	);
 
 	$effect(() => {
-		if ($roomState.showResults && consensus && jsConfetti) {
+		if ($roomState.showResults && consensusAchieved && jsConfetti) {
 			jsConfetti.addConfetti();
 		}
 	});
@@ -163,7 +148,7 @@
 		</form>
 
 		{#if deviceExistsInRoom}
-			<Progress value={percentOfPeopleVoted} class="my-4" />
+			<Progress value={$percentOfParticipantsVoted} class="my-4" />
 
 			<ChoicePicker />
 
@@ -190,8 +175,10 @@
 				}}
 				class="inline-block"
 			>
-				<Button type="submit" variant="outline" disabled={participants.length === 0 || percentOfPeopleVoted === 0}
-					>Clear</Button
+				<Button
+					type="submit"
+					variant="outline"
+					disabled={$participants.length === 0 || $percentOfParticipantsVoted === 0}>Clear</Button
 				>
 			</form>
 
