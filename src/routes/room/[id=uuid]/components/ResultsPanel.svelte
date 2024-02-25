@@ -6,7 +6,7 @@
 	import { roomState, isObserving } from '$lib/stores/roomStateStore';
 	import { fade } from 'svelte/transition';
 
-	const { activeParticipants, participantsVoted } = roomState;
+	const { participants, participantsVoted } = roomState;
 
 	type Result = {
 		choice: Choice;
@@ -44,7 +44,7 @@
 </script>
 
 <div class="flex gap-4 justify-evenly my-16">
-	{#each $activeParticipants as user (user.deviceId)}
+	{#each $participants as user (user.deviceId)}
 		<Context {user}>
 			<Card
 				title={user.name}

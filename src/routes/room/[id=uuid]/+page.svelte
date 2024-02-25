@@ -90,16 +90,14 @@
 	let deviceExistsInRoom = $derived(!!name && $deviceId in $roomState.users);
 	let nameExistsInRoom = $derived(deviceExistsInRoom && $roomState.users[$deviceId].name === name);
 
-	let { activeParticipants, participantsNotVoted, percentOfParticipantsVoted, consensusAchieved } = roomState;
+	let { participants, participantsNotVoted, percentOfParticipantsVoted, consensusAchieved } = roomState;
 
 	let nameAlreadyExists = $derived(
 		Object.values($roomState.users).some((user) => user.name === name && $deviceId !== user.deviceId)
 	);
 
 	let disableRevealButton = $derived(
-		$activeParticipants.length === 0 ||
-			(!$roomState.showResults && $participantsNotVoted.length !== 0) ||
-			$roomState.showResults
+		$participants.length === 0 || $participantsNotVoted.length !== 0 || $roomState.showResults
 	);
 
 	$effect(() => {
@@ -180,7 +178,7 @@
 				<Button
 					type="submit"
 					variant="outline"
-					disabled={$activeParticipants.length === 0 || $percentOfParticipantsVoted === 0}>Clear</Button
+					disabled={$participants.length === 0 || $percentOfParticipantsVoted === 0}>Clear</Button
 				>
 			</form>
 

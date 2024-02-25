@@ -26,28 +26,32 @@ function createRoomState(
 	const roomState = writable<RoomState>(initialValue);
 	const { subscribe, set, update } = roomState;
 
-	const participants = derived([presenceInfo, roomState], () =>
-		Object.values(get(roomState).users).filter(
-			(user) => user.deviceId in get(presenceInfo),
-		),
+	const allPresentRoomMembers = derived(
+		[presenceInfo, roomState],
+		([$presenceInfo, $roomState]) =>
+			Object.values($roomState.users).filter(
+				(user) => user.deviceId in $presenceInfo,
+			),
 	);
 
-	const activeParticipants = derived([presenceInfo, roomState], () =>
-		get(participants).filter((user) => user.isParticipant),
+	const participants = derived(
+		allPresentRoomMembers,
+		($allPresentRoomMembers) =>
+			$allPresentRoomMembers.filter((user) => user.isParticipant),
 	);
 
-	const participantsVoted = derived([presenceInfo, roomState], () =>
-		get(activeParticipants).filter((user) => user.choice !== null),
+	const participantsVoted = derived(participants, ($participants) =>
+		$participants.filter((user) => user.choice !== null),
 	);
 
-	const participantsNotVoted = derived([presenceInfo, roomState], () =>
-		get(activeParticipants).filter((user) => user.choice === null),
+	const participantsNotVoted = derived(participants, ($participants) =>
+		$participants.filter((user) => user.choice === null),
 	);
 
 	const percentOfParticipantsVoted = derived(
 		[participantsVoted, participants],
-		($participantsVoted) => {
-			const totalParticipants = get(participants).length;
+		([$participantsVoted, $participants]) => {
+			const totalParticipants = $participants.length;
 
 			return totalParticipants
 				? Math.round(($participantsVoted.length / totalParticipants) * 100)
@@ -55,14 +59,14 @@ function createRoomState(
 		},
 	);
 
-	const consensusAchieved = derived([participantsVoted, roomState], () => {
-		return (
-			get(percentOfParticipantsVoted) === 100 &&
-			get(participants).every(
-				(user) => user.choice === get(participants).at(0)?.choice,
-			)
-		);
-	});
+	const consensusAchieved = derived(
+		[percentOfParticipantsVoted, participants],
+		([$percentOfParticipantsVoted, $participants]) =>
+			$percentOfParticipantsVoted === 100 &&
+			$participants.every(
+				(user) => user.choice === $participants.at(0)?.choice,
+			),
+	);
 
 	const selectableChoices = derived(roomState, ($roomState) => [
 		...($roomState.config.allowUnknown ? ["?" as const] : []),
@@ -74,8 +78,8 @@ function createRoomState(
 		set,
 		update,
 		selectableChoices,
+		allPresentRoomMembers,
 		participants,
-		activeParticipants,
 		participantsVoted,
 		participantsNotVoted,
 		percentOfParticipantsVoted,
