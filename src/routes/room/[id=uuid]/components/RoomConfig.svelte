@@ -23,6 +23,7 @@
 			<input type="hidden" name="deviceId" value={$deviceId} />
 			<Tooltip.Root>
 				<Tooltip.Trigger type="button">
+					<!-- todo: For some reason putting a button, and only a button here causes a hydration error? -->
 					<Button type="submit" size="sm" class="inline-block"
 						>{$isParticipating ? 'Participating' : 'Observing'}</Button
 					>
