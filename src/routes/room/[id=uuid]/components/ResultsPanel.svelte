@@ -1,21 +1,20 @@
 <script lang="ts">
-	import type { Choice } from '$lib/types';
+	import type { Choice, RoomUser } from '$lib/types';
 	import Progress from '$lib/components/ui/progress/progress.svelte';
 	import Context from './Context.svelte';
 	import Card from '$lib/components/Card.svelte';
-	import { roomState } from '$lib/stores/roomStateStore';
+	import { roomState, deviceId, presenceInfo } from '$lib/stores/roomStateStore';
 	import { fade } from 'svelte/transition';
 
-	export let deviceId: string;
-	export let presenceInfo: Record<string, any>;
+	let participants = $derived<RoomUser[]>(
+		Object.values($roomState.users)
+			.filter((user) => user.isParticipant)
+			.filter((user) => user.deviceId in $presenceInfo)
+	);
 
-	$: participants = Object.values($roomState.users)
-		.filter((user) => user.isParticipant)
-		.filter((user) => user.deviceId in (presenceInfo || {}));
+	let countOfParticipantsVoted = $derived<number>(participants.filter((user) => user.choice !== null).length);
 
-	$: countOfParticipantsVoted = participants.filter((user) => user.choice !== null).length;
-
-	$: isObserving = $roomState.users[deviceId].isParticipant === false;
+	let isObserving = $derived<boolean>($roomState.users[$deviceId].isParticipant === false);
 
 	type Result = {
 		choice: Choice;
@@ -23,37 +22,38 @@
 		percentage: number;
 	};
 
-	let results: Result[];
-	$: results = Object.values($roomState.users).reduce<Result[]>((acc, user) => {
-		if (user.choice === null) {
-			return acc;
-		}
+	let results = $derived<Result[]>(
+		Object.values($roomState.users)
+			.reduce<Result[]>((acc, user) => {
+				if (user.choice === null) {
+					return acc;
+				}
 
-		const existingResult = acc.find((result) => result.choice === user.choice);
+				const existingResult = acc.find((result) => result.choice === user.choice);
 
-		if (existingResult) {
-			existingResult.count++;
-		} else {
-			acc.push({
-				choice: user.choice,
-				count: 1,
-				percentage: 0
-			});
-		}
+				if (existingResult) {
+					existingResult.count++;
+				} else {
+					acc.push({
+						choice: user.choice,
+						count: 1,
+						percentage: 0
+					});
+				}
 
-		return acc;
-	}, []);
-	$: results = results
-		.map((result) => ({
-			...result,
-			percentage: Math.round((result.count / countOfParticipantsVoted) * 100)
-		}))
-		.sort((a, b) => b.count - a.count);
+				return acc;
+			}, [])
+			.map((result) => ({
+				...result,
+				percentage: Math.round((result.count / countOfParticipantsVoted) * 100)
+			}))
+			.sort((a, b) => b.count - a.count)
+	);
 </script>
 
 <div class="flex gap-4 justify-evenly my-16">
 	{#each participants as user (user.deviceId)}
-		<Context currentUserDeviceId={deviceId} adminDeviceId={$roomState.adminDeviceId || ''} {user}>
+		<Context {user}>
 			<Card
 				title={user.name}
 				pending={user.choice === null}

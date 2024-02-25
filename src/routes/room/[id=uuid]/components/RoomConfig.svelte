@@ -1,19 +1,15 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import type { RoomState } from '$lib/types';
 	import Badge from '$lib/components/ui/badge/badge.svelte';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import * as Tooltip from '$lib/components/ui/tooltip';
 	import Context from './Context.svelte';
-	import { roomState } from '$lib/stores/roomStateStore';
+	import { roomState, deviceId, presenceInfo } from '$lib/stores/roomStateStore';
 
-	export let deviceId: string;
-	export let presenceInfo: Record<string, any>;
+	$: participants = Object.values($roomState.users).filter((user) => user.deviceId in $presenceInfo);
 
-	$: participants = Object.values($roomState.users).filter((user) => user.deviceId in (presenceInfo || {}));
-
-	$: participating = $roomState.users[deviceId]?.isParticipant ?? true;
-	$: userIsAdmin = $roomState.adminDeviceId === deviceId;
+	$: participating = $roomState.users[$deviceId]?.isParticipant ?? true;
+	$: userIsAdmin = $roomState.adminDeviceId === $deviceId;
 </script>
 
 <div class="p-4 grid gap-2">
@@ -27,7 +23,7 @@
 				};
 			}}
 		>
-			<input type="hidden" name="deviceId" value={deviceId} />
+			<input type="hidden" name="deviceId" value={$deviceId} />
 			<Tooltip.Root>
 				<Tooltip.Trigger type="button">
 					<Button type="submit" size="sm" class="inline-block">{participating ? 'Participating' : 'Observing'}</Button>
@@ -86,7 +82,7 @@
 
 		<div class="grid grid-cols-1 gap-2 my-4">
 			{#each Object.entries(participants) as [_, user] (user.deviceId)}
-				<Context currentUserDeviceId={deviceId} adminDeviceId={$roomState.adminDeviceId || ''} {user}>
+				<Context {user}>
 					<p>
 						<span
 							class={`animate-pulse ${

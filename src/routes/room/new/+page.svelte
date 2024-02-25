@@ -7,12 +7,9 @@
 	import { navigating } from '$app/stores';
 	import { Plus } from 'lucide-svelte';
 
-	export let data: PageData;
-	export let form: ActionData;
+	let { data, form } = $props<{ data: PageData; form: ActionData }>();
 
-	$: choices = form?.choices ?? data.choices;
-
-	let newNumber = '';
+	let choices = $derived(form?.choices ?? data.choices);
 </script>
 
 <div class="flex justify-center">
@@ -34,7 +31,6 @@
 					<Input
 						type="number"
 						name="choices"
-						bind:value={newNumber}
 						class="text-center py-6 text-3xl bg-slate-700"
 						min={0}
 						max={999}

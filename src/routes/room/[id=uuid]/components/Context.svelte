@@ -2,21 +2,20 @@
 	import * as ContextMenu from '$lib/components/ui/context-menu';
 	import { enhance } from '$app/forms';
 	import type { RoomUser } from '$lib/types';
+	import { deviceId, roomState } from '$lib/stores/roomStateStore';
 
-	export let currentUserDeviceId: string;
-	export let adminDeviceId: string;
-	export let user: RoomUser;
+	let { user } = $props<{ user: RoomUser }>();
 
-	$: currentUserIsAdmin = adminDeviceId === currentUserDeviceId;
-	$: isSelf = user.deviceId === currentUserDeviceId;
-	$: isAlreadyAdmin = adminDeviceId === user.deviceId;
+	let adminDeviceId = $derived($roomState.adminDeviceId || '');
+	let isSelf = $derived(user.deviceId === $deviceId);
+	let isAlreadyAdmin = $derived(adminDeviceId === user.deviceId);
 </script>
 
 <ContextMenu.Root>
 	<ContextMenu.Trigger class="cursor-pointer">
 		<slot />
 	</ContextMenu.Trigger>
-	{#if currentUserIsAdmin}
+	{#if adminDeviceId === $deviceId}
 		<ContextMenu.Content>
 			<ContextMenu.Item>
 				<form

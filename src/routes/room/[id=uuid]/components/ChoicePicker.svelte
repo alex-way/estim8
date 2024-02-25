@@ -1,24 +1,25 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { Button } from '$lib/components/ui/button';
-	import { roomState } from '$lib/stores/roomStateStore';
+	import { roomState, deviceId } from '$lib/stores/roomStateStore';
 
-	export let deviceId: string;
+	let selectedNumber = $derived($roomState.users[$deviceId]?.choice);
 
-	$: numberSelected = $roomState.users[deviceId]?.choice;
+	let participating = $derived($roomState.users[$deviceId]?.isParticipant ?? true);
 
-	$: participating = $roomState.users[deviceId]?.isParticipant ?? true;
-
-	$: choices = [...($roomState.config.allowUnknown ? ['?' as const] : []), ...$roomState.config.selectableNumbers];
+	let selectableChoices = $derived([
+		...($roomState.config.allowUnknown ? ['?' as const] : []),
+		...$roomState.config.selectableNumbers
+	]);
 </script>
 
 <div class="flex w-full items-center my-4 justify-center flex-wrap gap-2">
-	{#each choices as choice (choice)}
+	{#each selectableChoices as choice (choice)}
 		<form
 			method="post"
 			action="?/submitNumber"
 			use:enhance={() => {
-				$roomState.users[deviceId].choice = choice;
+				$roomState.users[$deviceId].choice = choice;
 				return async ({ update }) => {
 					update({ reset: false, invalidateAll: false });
 				};
@@ -29,7 +30,7 @@
 				name="chosenNumber"
 				value={choice}
 				class="text-2xl p-6"
-				disabled={!participating || $roomState.showResults || numberSelected === choice}>{choice}</Button
+				disabled={!participating || $roomState.showResults || selectedNumber === choice}>{choice}</Button
 			>
 		</form>
 	{/each}
