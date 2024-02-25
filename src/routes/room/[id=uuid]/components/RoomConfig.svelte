@@ -6,7 +6,7 @@
 	import Context from './Context.svelte';
 	import { roomState, deviceId, isParticipating, isRoomAdmin } from '$lib/stores/roomStateStore';
 
-	let { participants } = roomState;
+	let { allPresentRoomMembers } = roomState;
 </script>
 
 <div class="p-4 grid gap-2">
@@ -81,7 +81,7 @@
 		<h1 class="text-xl">Participants</h1>
 
 		<div class="grid grid-cols-1 gap-2 my-4">
-			{#each Object.entries($participants) as [_, user] (user.deviceId)}
+			{#each Object.entries($allPresentRoomMembers) as [_, user] (user.deviceId)}
 				<Context {user}>
 					<p>
 						<span
