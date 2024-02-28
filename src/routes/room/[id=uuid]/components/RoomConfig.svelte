@@ -21,7 +21,7 @@
 			}}
 		>
 			<input type="hidden" name="deviceId" value={$deviceId} />
-			<Tooltip.Root>
+			<Tooltip.Root openDelay={200}>
 				<Tooltip.Trigger asChild let:builder>
 					<Button builders={[builder]} type="submit" size="sm" class="inline-block"
 						>{$isParticipating ? 'Participating' : 'Observing'}</Button
@@ -42,7 +42,7 @@
 				};
 			}}
 		>
-			<Tooltip.Root>
+			<Tooltip.Root openDelay={200}>
 				<Tooltip.Trigger asChild let:builder>
 					<Button builders={[builder]} type="submit" size="sm" class="inline-block" disabled={!$isRoomAdmin}
 						>{$roomState.config.allowObserversToSnoop ? 'Disable Snooping' : 'Allow Snooping'}</Button
@@ -63,7 +63,7 @@
 				};
 			}}
 		>
-			<Tooltip.Root>
+			<Tooltip.Root openDelay={200}>
 				<Tooltip.Trigger asChild let:builder>
 					<Button builders={[builder]} type="submit" size="sm" class="inline-block" disabled={!$isRoomAdmin}
 						>{$roomState.config.allowUnknown ? 'Disallow Unknown' : 'Allow Unknown'}</Button
