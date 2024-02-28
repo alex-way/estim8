@@ -89,13 +89,13 @@ export class Room extends BaseRoom {
 				console.error(err);
 				throw err;
 			});
-		pusher.trigger(`presence-${roomId}`, "room-update", room);
+		pusher.trigger(`presence-cache-${roomId}`, "room-update", room);
 		return room;
 	}
 
 	async save(): Promise<Room> {
 		// not awaiting this because we don't want to block
-		pusher.trigger(`presence-${this.id}`, "room-update", this.state);
+		pusher.trigger(`presence-cache-${this.id}`, "room-update", this.state);
 
 		await this.#persistentStorage.set(this.id, this.state);
 

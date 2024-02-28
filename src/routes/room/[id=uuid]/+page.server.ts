@@ -2,12 +2,12 @@ import { pusher } from "$hooks/server";
 import { Room } from "$lib/roomState";
 import { error, fail } from "@sveltejs/kit";
 import z from "zod";
-import type { Actions } from "./$types";
+import type { Actions, PageServerLoad } from "./$types";
 
 const ONE_YEAR = 1000 * 60 * 60 * 24 * 365;
 
 async function getUsersInRoom(roomId: string): Promise<string[]> {
-	const channelName = `presence-${roomId}`;
+	const channelName = `presence-cache-${roomId}`;
 	const usersResponse = await pusher.get({
 		path: `/channels/${channelName}/users`,
 	});
@@ -204,12 +204,13 @@ export const actions = {
 	},
 } satisfies Actions;
 
-export const load = async ({ params, locals, isDataRequest, isSubRequest }) => {
+export const load: PageServerLoad = async ({ params, locals }) => {
 	const room = await Room.getRoom(params.id);
-	if (room === null)
+	if (room === null) {
 		return error(404, {
 			message: "That room doesn't exist",
 		});
+	}
 
 	if (locals.name && room.getDeviceIdFromName(locals.name) === null) {
 		room.setNameForDeviceId(locals.deviceId, locals.name);

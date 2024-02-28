@@ -27,7 +27,7 @@
 	const jsConfetti = browser ? new JSConfetti() : undefined;
 	let presenceChannel: PresenceChannel | undefined;
 
-	let channelName = $derived<string>(`presence-${$page.params.id}`);
+	let channelName = $derived<string>(`presence-cache-${$page.params.id}`);
 
 	type Member = {
 		id: string;
@@ -56,10 +56,16 @@
 
 		presenceChannel = pusher.subscribe(channelName) as PresenceChannel;
 
-		presenceChannel.bind('room-update', function (newRoomState: RoomState) {
+		presenceChannel.bind('room-update', (newRoomState: RoomState) => {
 			console.log('room-update', newRoomState);
 			$roomState = newRoomState;
 		});
+
+		// todo: Split out room-update into individual actions:
+		// - user:update-choice
+		// - user:clear-choice
+		// - user:reveal
+		// - user:inverse-participation
 
 		presenceChannel.bind('pusher:subscription_succeeded', (members: PresenceSubscriptionData) => {
 			console.log('subscription_succeeded', members);
