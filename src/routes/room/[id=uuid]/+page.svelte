@@ -107,7 +107,7 @@
 	);
 
 	$effect(() => {
-		if ($roomState.showResults && consensusAchieved && jsConfetti) {
+		if ($roomState.showResults && $consensusAchieved && jsConfetti) {
 			jsConfetti.addConfetti();
 		}
 	});
