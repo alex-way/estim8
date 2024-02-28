@@ -16,8 +16,23 @@ async function getUsersInRoom(roomId: string): Promise<string[]> {
 	return usersJson.users.map((user) => user.id);
 }
 
+function isAdmin(room: Room, locals: { deviceId: string }) {
+	return room.state.adminDeviceId === locals.deviceId;
+}
+
+async function getRoomOr404(roomId: string): Promise<Room> {
+	const room = await Room.getRoom(roomId);
+	if (room === null)
+		return error(404, {
+			message: "That room doesn't exist",
+		});
+	return room;
+}
+
 export const actions = {
 	setName: async ({ request, locals, params, cookies }) => {
+		const room = await getRoomOr404(params.id);
+
 		const formData = await request.formData();
 
 		const schema = z.string();
@@ -30,9 +45,6 @@ export const actions = {
 				},
 			});
 		}
-
-		const room = await Room.getRoom(params.id);
-		if (room === null) return fail(404, { body: "That room doesn't exist" });
 
 		const nameAlreadyPresent =
 			room.getDeviceIdFromName(parsedName.data) !== null;
@@ -81,136 +93,167 @@ export const actions = {
 		});
 	},
 	inverseDisplay: async ({ params }) => {
-		const room = await Room.getRoom(params.id);
-		if (room === null) return fail(404, { body: "That room doesn't exist" });
+		const room = await getRoomOr404(params.id);
+
 		room.invertShowResults();
 		await room.save();
 	},
 	inverseAllowUnknown: async ({ params }) => {
-		const room = await Room.getRoom(params.id);
-		if (room === null) return fail(404, { body: "That room doesn't exist" });
+		const room = await getRoomOr404(params.id);
+
 		room.invertAllowUnknown();
 		await room.save();
 	},
 	inverseSnooping: async ({ params, locals }) => {
-		const room = await Room.getRoom(params.id);
-		if (room === null) return fail(404, { body: "That room doesn't exist" });
-		const isAdmin = room.state.adminDeviceId === locals.deviceId;
+		const room = await getRoomOr404(params.id);
 
-		if (!isAdmin) {
+		if (!isAdmin(room, locals))
 			return fail(403, {
 				body: "Only the admin can do this",
 			});
-		}
 
 		room.invertSnooping();
 		await room.save();
 	},
 	inverseParticipation: async ({ request, params, locals }) => {
-		const room = await Room.getRoom(params.id);
-		if (room === null) return fail(404, { body: "That room doesn't exist" });
+		const room = await getRoomOr404(params.id);
 
 		const formData = await request.formData();
 		const schema = z.string();
 
 		const formDeviceId = formData.get("deviceId");
 
-		const isAdmin = room.state.adminDeviceId === locals.deviceId;
 		const isOwnDevice = locals.deviceId === formDeviceId;
-		if (!isAdmin && !isOwnDevice) {
+		if (!isAdmin(room, locals) && !isOwnDevice)
 			return fail(403, {
 				body: "Only the admin can do this",
 			});
-		}
+
 		const parsedDeviceId = schema.safeParse(formDeviceId);
-		if (!parsedDeviceId.success) {
+		if (!parsedDeviceId.success)
 			return fail(400, {
 				body: parsedDeviceId.error.toString(),
 			});
-		}
 
 		room.inverseUserParticipation(parsedDeviceId.data);
 		await room.save();
 	},
 	removeUserFromRoom: async ({ request, params, locals }) => {
-		const room = await Room.getRoom(params.id);
-		if (room === null) return fail(404, { body: "That room doesn't exist" });
+		const room = await getRoomOr404(params.id);
 
 		const formData = await request.formData();
 		const schema = z.string();
 
 		const formDeviceId = formData.get("deviceId");
 
-		const isAdmin = room.state.adminDeviceId === locals.deviceId;
-
-		if (!isAdmin) {
+		if (!isAdmin(room, locals))
 			return fail(403, {
 				body: "Only the admin can do this",
 			});
-		}
 
 		const parsedDeviceId = schema.safeParse(formDeviceId);
-		if (!parsedDeviceId.success) {
+		if (!parsedDeviceId.success)
 			return fail(400, {
 				body: parsedDeviceId.error.toString(),
 			});
-		}
 
 		const isAdminBeingRemoved = room.state.adminDeviceId === formDeviceId;
 
-		if (isAdminBeingRemoved) {
+		if (isAdminBeingRemoved)
 			return fail(403, {
 				body: "The admin cannot be removed",
 			});
-		}
 
 		room.removeUser(parsedDeviceId.data);
 
 		await room.save();
 	},
 	setAdmin: async ({ request, params, locals }) => {
-		const room = await Room.getRoom(params.id);
-		if (room === null) return fail(404, { body: "That room doesn't exist" });
+		const room = await getRoomOr404(params.id);
 
 		const formData = await request.formData();
 		const schema = z.string();
 
 		const formDeviceId = formData.get("deviceId");
 
-		const isAdmin = room.state.adminDeviceId === locals.deviceId;
-
-		if (!isAdmin) {
+		if (!isAdmin(room, locals))
 			return fail(403, {
 				body: "Only the admin can do this",
 			});
-		}
 
 		const parsedDeviceId = schema.safeParse(formDeviceId);
-		if (!parsedDeviceId.success) {
+		if (!parsedDeviceId.success)
 			return fail(400, {
 				body: parsedDeviceId.error.toString(),
 			});
-		}
 
 		room.setAdmin(parsedDeviceId.data);
 
 		await room.save();
 	},
 	clear: async ({ params }) => {
-		const room = await Room.getRoom(params.id);
-		if (room === null) return fail(404, { body: "That room doesn't exist" });
+		const room = await getRoomOr404(params.id);
+
 		room.clearSelectedNumbers();
+		await room.save();
+	},
+	addChoice: async ({ request, params, locals }) => {
+		const room = await getRoomOr404(params.id);
+
+		if (!isAdmin(room, locals))
+			return fail(403, {
+				body: "Only the admin can do this",
+			});
+
+		const formData = await request.formData();
+		const schema = z.coerce.number();
+
+		const parsedChoice = schema.safeParse(formData.get("choice"));
+		if (!parsedChoice.success) {
+			return fail(400, {
+				body: parsedChoice.error.toString(),
+			});
+		}
+
+		room.updateSelectableNumbers([
+			...room.state.config.selectableNumbers,
+			parsedChoice.data,
+		]);
+		await room.save();
+	},
+	removeChoice: async ({ request, params, locals }) => {
+		const room = await getRoomOr404(params.id);
+
+		if (!isAdmin(room, locals))
+			return fail(403, {
+				body: "Only the admin can do this",
+			});
+
+		const formData = await request.formData();
+		const schema = z.coerce.number();
+
+		const parsedChoice = schema.safeParse(formData.get("choice"));
+		if (!parsedChoice.success) {
+			return fail(400, {
+				body: parsedChoice.error.toString(),
+			});
+		}
+
+		room.updateSelectableNumbers(
+			room.state.config.selectableNumbers.filter(
+				(choice) => choice !== parsedChoice.data,
+			),
+		);
 		await room.save();
 	},
 } satisfies Actions;
 
 export const load: PageServerLoad = async ({ params, locals }) => {
 	const room = await Room.getRoom(params.id);
-	if (room === null) {
+	if (room === null)
 		return error(404, {
 			message: "That room doesn't exist",
 		});
-	}
 
 	if (locals.name && room.getDeviceIdFromName(locals.name) === null) {
 		room.setNameForDeviceId(locals.deviceId, locals.name);

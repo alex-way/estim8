@@ -75,7 +75,9 @@ export class BaseRoom {
 	}
 
 	updateSelectableNumbers(selectableNumbers: number[]) {
-		this.state.config.selectableNumbers = selectableNumbers;
+		this.state.config.selectableNumbers = selectableNumbers.sort(
+			(a, b) => a - b,
+		);
 		this.clearSelectedNumbers();
 	}
 
