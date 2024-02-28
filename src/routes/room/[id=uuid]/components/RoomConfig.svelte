@@ -5,6 +5,9 @@
 	import * as Tooltip from '$lib/components/ui/tooltip';
 	import Context from './Context.svelte';
 	import { roomState, deviceId, isParticipating, isRoomAdmin } from '$lib/stores/roomStateStore';
+	import Input from '$lib/components/ui/input/input.svelte';
+	import { Plus } from 'lucide-svelte';
+	import Label from '$lib/components/ui/label/label.svelte';
 
 	let { allPresentRoomMembers } = roomState;
 </script>
@@ -75,6 +78,23 @@
 			</Tooltip.Root>
 		</form>
 	</div>
+	{#if $isRoomAdmin}
+		<form action="?/addChoice" method="post" use:enhance>
+			<Label for="choice">Add a choice</Label>
+			<div class="flex w-1/2">
+				<Input
+					type="number"
+					name="choice"
+					class="text-center text-xl bg-slate-700 rounded-r-none w-12"
+					min={0}
+					max={999}
+					autofocus
+					required
+				/>
+				<Button type="submit" class="rounded-l-none p-1 w-12"><Plus size={16} /></Button>
+			</div>
+		</form>
+	{/if}
 
 	<div>
 		<h1 class="text-xl">Participants</h1>
