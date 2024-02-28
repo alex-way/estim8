@@ -99,7 +99,8 @@
 	let deviceExistsInRoom = $derived(!!name && $deviceId in $roomState.users);
 	let nameExistsInRoom = $derived(deviceExistsInRoom && $roomState.users[$deviceId].name === name);
 
-	let { participants, participantsNotVoted, percentOfParticipantsVoted, consensusAchieved } = roomState;
+	let { participants, participantsVoted, participantsNotVoted, percentOfParticipantsVoted, consensusAchieved } =
+		roomState;
 
 	let nameAlreadyExists = $derived(
 		Object.values($roomState.users).some((user) => user.name === name && $deviceId !== user.deviceId)
@@ -178,11 +179,7 @@
 				}}
 				class="inline-block"
 			>
-				<Button
-					type="submit"
-					variant="outline"
-					disabled={$participants.length === 0 || $percentOfParticipantsVoted === 0}>Clear</Button
-				>
+				<Button type="submit" variant="outline" disabled={$participantsVoted.length === 0}>Clear</Button>
 			</form>
 
 			<ResultsPanel />
