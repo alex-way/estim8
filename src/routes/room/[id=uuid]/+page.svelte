@@ -15,20 +15,19 @@
 	import RoomConfig from './components/RoomConfig.svelte';
 	import * as Alert from '$lib/components/ui/alert';
 	import { browser } from '$app/environment';
-	import { roomState } from '$lib/stores/roomStateStore';
+	import { roomState, deviceId, presenceInfo } from '$lib/stores/roomStateStore';
 
-	export let data: PageData;
-	export let form: ActionData;
+	let { data, form } = $props<{ data: PageData; form: ActionData }>();
+	let { name, copyText } = $state({ name: data.name, copyText: 'Copy' });
 
 	$roomState = data.roomState;
+	$deviceId = data.deviceId;
+	$presenceInfo = { [data.deviceId]: [] };
 
-	let name = data.name;
 	const jsConfetti = browser ? new JSConfetti() : undefined;
 	let presenceChannel: PresenceChannel | undefined;
 
-	$: channelName = `presence-${$page.params.id}`;
-
-	let presenceInfo = {} as Record<string, Member['info']>;
+	let channelName = $derived<string>(`presence-${$page.params.id}`);
 
 	type Member = {
 		id: string;
@@ -64,7 +63,7 @@
 
 		presenceChannel.bind('pusher:subscription_succeeded', (members: PresenceSubscriptionData) => {
 			console.log('subscription_succeeded', members);
-			presenceInfo = members.members;
+			$presenceInfo = members.members;
 		});
 
 		presenceChannel.bind('pusher:subscription_error', (error: any) => {
@@ -73,13 +72,12 @@
 
 		presenceChannel.bind('pusher:member_added', (member: Member) => {
 			console.log('member_added', member);
-			presenceInfo[member.id] = member.info;
+			$presenceInfo = { ...$presenceInfo, [member.id]: member.info };
 		});
 
 		presenceChannel.bind('pusher:member_removed', (member: Member) => {
 			console.log('member_removed', member);
-			delete presenceInfo[member.id];
-			presenceInfo = presenceInfo;
+			delete $presenceInfo[member.id];
 			$roomState.users = Object.fromEntries(Object.entries($roomState.users).filter(([key]) => key !== member.id));
 		});
 
@@ -89,37 +87,24 @@
 		};
 	});
 
-	let deviceExistsInRoom: boolean;
-	$: deviceExistsInRoom = !!name && data.deviceId in $roomState.users;
-	$: nameExistsInRoom = deviceExistsInRoom && $roomState.users[data.deviceId].name === name;
+	let deviceExistsInRoom = $derived(!!name && $deviceId in $roomState.users);
+	let nameExistsInRoom = $derived(deviceExistsInRoom && $roomState.users[$deviceId].name === name);
 
-	$: participants = Object.values($roomState.users)
-		.filter((user) => user.deviceId in (presenceInfo || {}))
-		.filter((user) => user.isParticipant);
+	let { participants, participantsNotVoted, percentOfParticipantsVoted, consensusAchieved } = roomState;
 
-	$: participantsWithNullSelection = participants.filter((user) => user.choice === null);
-	$: percentOfPeopleVoted =
-		participants.length === 0
-			? 0
-			: Math.round(((participants.length - participantsWithNullSelection.length) / participants.length) * 100);
-
-	$: consensus =
-		percentOfPeopleVoted == 100 && participants.every((user) => user.choice === participants.at(0)?.choice);
-
-	$: nameAlreadyExists = Object.values($roomState.users).some(
-		(user) => user.name === name && data.deviceId !== user.deviceId
+	let nameAlreadyExists = $derived(
+		Object.values($roomState.users).some((user) => user.name === name && $deviceId !== user.deviceId)
 	);
 
-	$: if ($roomState.showResults && consensus && jsConfetti) {
-		jsConfetti.addConfetti();
-	}
+	let disableRevealButton = $derived(
+		$participants.length === 0 || $participantsNotVoted.length !== 0 || $roomState.showResults
+	);
 
-	$: disableRevealButton =
-		participants.length === 0 ||
-		(!$roomState.showResults && participantsWithNullSelection.length !== 0) ||
-		$roomState.showResults;
-
-	let copyText = 'Copy';
+	$effect(() => {
+		if ($roomState.showResults && consensusAchieved && jsConfetti) {
+			jsConfetti.addConfetti();
+		}
+	});
 
 	function onClickCopy() {
 		navigator.clipboard.writeText($page.url.toString());
@@ -132,10 +117,12 @@
 
 <div class="w-full grid grid-cols-1 lg:grid-cols-12 min-h-full">
 	<div class="w-full max-w-7xl lg:col-span-9 mx-auto p-4">
-		<h1 class="text-center text-2xl my-4">
-			Room ID: {$page.params.id}
+		<div class="flex justify-center items-center gap-4">
+			<h1 class="text-center text-2xl my-4">
+				Room ID: {$page.params.id}
+			</h1>
 			<Button variant="secondary" on:click={onClickCopy}>{copyText}</Button>
-		</h1>
+		</div>
 
 		<form
 			method="post"
@@ -161,9 +148,9 @@
 		</form>
 
 		{#if deviceExistsInRoom}
-			<Progress value={percentOfPeopleVoted} class="my-4" />
+			<Progress value={$percentOfParticipantsVoted} class="my-4" />
 
-			<ChoicePicker deviceId={data.deviceId} />
+			<ChoicePicker />
 
 			<form
 				method="post"
@@ -188,12 +175,14 @@
 				}}
 				class="inline-block"
 			>
-				<Button type="submit" variant="outline" disabled={participants.length === 0 || percentOfPeopleVoted === 0}
-					>Clear</Button
+				<Button
+					type="submit"
+					variant="outline"
+					disabled={$participants.length === 0 || $percentOfParticipantsVoted === 0}>Clear</Button
 				>
 			</form>
 
-			<ResultsPanel deviceId={data.deviceId} presenceInfo={presenceInfo || {}} />
+			<ResultsPanel />
 		{:else}
 			<p class="text-center" />
 			<Alert.Root class="my-4 max-w-lg mx-auto">
@@ -202,6 +191,6 @@
 		{/if}
 	</div>
 	<div class="col-span-3 xl:col-span-2 border-white border-opacity-20 border-t-2 lg:border-t-0 lg:border-l-2">
-		<RoomConfig deviceId={data.deviceId} presenceInfo={presenceInfo || {}} />
+		<RoomConfig />
 	</div>
 </div>
