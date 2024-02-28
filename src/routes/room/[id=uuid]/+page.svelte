@@ -14,7 +14,7 @@
 	import ChoicePicker from './components/ChoicePicker.svelte';
 	import RoomConfig from './components/RoomConfig.svelte';
 	import * as Alert from '$lib/components/ui/alert';
-	import { browser } from '$app/environment';
+	import { browser, dev } from '$app/environment';
 	import { roomState, deviceId, presenceInfo } from '$lib/stores/roomStateStore';
 
 	let { data, form } = $props<{ data: PageData; form: ActionData }>();
@@ -57,7 +57,7 @@
 		presenceChannel = pusher.subscribe(channelName) as PresenceChannel;
 
 		presenceChannel.bind('room-update', (newRoomState: RoomState) => {
-			console.log('room-update', newRoomState);
+			dev && console.log('room-update', newRoomState);
 			$roomState = newRoomState;
 		});
 
@@ -68,21 +68,21 @@
 		// - user:inverse-participation
 
 		presenceChannel.bind('pusher:subscription_succeeded', (members: PresenceSubscriptionData) => {
-			console.log('subscription_succeeded', members);
+			dev && console.log('subscription_succeeded', members);
 			$presenceInfo = members.members;
 		});
 
 		presenceChannel.bind('pusher:subscription_error', (error: any) => {
-			console.log('subscription_error', error);
+			dev && console.log('subscription_error', error);
 		});
 
 		presenceChannel.bind('pusher:member_added', (member: Member) => {
-			console.log('member_added', member);
+			dev && console.log('member_added', member);
 			$presenceInfo = { ...$presenceInfo, [member.id]: member.info };
 		});
 
 		presenceChannel.bind('pusher:member_removed', (member: Member) => {
-			console.log('member_removed', member);
+			dev && console.log('member_removed', member);
 			delete $presenceInfo[member.id];
 			$roomState.users = Object.fromEntries(Object.entries($roomState.users).filter(([key]) => key !== member.id));
 		});
