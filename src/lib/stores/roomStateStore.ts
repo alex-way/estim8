@@ -1,5 +1,5 @@
 import type { RoomState } from "$lib/types";
-import { derived, get, writable } from "svelte/store";
+import { derived, writable } from "svelte/store";
 
 type Member = {
 	id: string;

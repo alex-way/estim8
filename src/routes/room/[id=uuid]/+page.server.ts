@@ -246,6 +246,29 @@ export const actions = {
 		);
 		await room.save();
 	},
+	setCardBack: async ({ request, params, locals }) => {
+		const room = await getRoomOr404(params.id);
+
+		const formData = await request.formData();
+		const schema = z.union([
+			z.literal("default"),
+			z.literal("red"),
+			z.literal("blue"),
+			z.literal("green"),
+			z.literal("yellow"),
+			z.literal("magic"),
+		]);
+
+		const parsedCardBack = schema.safeParse(formData.get("cardBack"));
+		if (!parsedCardBack.success) {
+			return fail(400, {
+				body: parsedCardBack.error.toString(),
+			});
+		}
+
+		room.setCardBackForDeviceId(locals.deviceId, parsedCardBack.data);
+		await room.save();
+	},
 } satisfies Actions;
 
 export const load: PageServerLoad = async ({ params, locals }) => {

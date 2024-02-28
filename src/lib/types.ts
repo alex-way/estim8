@@ -1,12 +1,22 @@
 export type Choice = number | "?";
 
+export const cardBacks = [
+	"default",
+	"red",
+	"blue",
+	"green",
+	"yellow",
+	"magic",
+] as const;
+export type CardBack = (typeof cardBacks)[number];
+
 export type RoomUser = {
 	deviceId: string;
 	name: string;
 	choice: Choice | null;
 	isParticipant: boolean;
 	config?: {
-		cardBackground?: "green" | "red" | "blue" | "yellow" | "white";
+		cardBack?: CardBack;
 	};
 };
 

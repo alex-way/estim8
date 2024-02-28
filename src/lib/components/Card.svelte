@@ -3,7 +3,7 @@
 	import { Skeleton } from '$lib/components/ui/skeleton';
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { cn } from '$lib/utils';
-	import { fade } from 'svelte/transition';
+	import type { CardBack } from '$lib/types';
 
 	type Props = {
 		/**The text to show at the top of the card. Usually the name of the participant.*/
@@ -14,12 +14,29 @@
 		pending?: boolean;
 		revealText?: string | number;
 		class?: HTMLAttributes<HTMLDivElement>['class'];
+		cardBack?: CardBack;
 	};
 
-	let { title = '', reveal = false, pending = true, revealText = '', class: className } = $props<Props>();
+	const cardBackClasses: Record<CardBack, string> = {
+		default: 'bg-secondary',
+		red: 'bg-red-900',
+		blue: 'bg-blue-900',
+		green: 'bg-green-900',
+		yellow: 'bg-yellow-900',
+		magic: 'bg-gradient-to-b from-indigo-500'
+	};
+
+	let {
+		title = '',
+		reveal = false,
+		pending = true,
+		revealText = '',
+		class: className,
+		cardBack = 'default'
+	} = $props<Props>();
 </script>
 
-<Card.Root class={cn('bg-secondary w-32 h-48 inline-block', className)} on:click>
+<Card.Root class={cn('w-32 h-48 inline-block', className, cardBackClasses[cardBack])} on:click>
 	<Card.Header>
 		<Card.Title class="text-xl text-center">{title}</Card.Title>
 	</Card.Header>

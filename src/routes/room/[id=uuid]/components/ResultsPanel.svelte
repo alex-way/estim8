@@ -52,6 +52,7 @@
 				reveal={$roomState.showResults ||
 					($roomState.config.allowObserversToSnoop && $isObserving && user.choice !== null)}
 				revealText={user.choice || ''}
+				cardBack={user.config?.cardBack}
 			/>
 		</Context>
 	{/each}

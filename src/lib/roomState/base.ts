@@ -1,4 +1,4 @@
-import type { Choice, RoomState, RoomUser } from "$lib/types";
+import type { CardBack, Choice, RoomState, RoomUser } from "$lib/types";
 
 export class BaseRoom {
 	state: RoomState;
@@ -79,6 +79,11 @@ export class BaseRoom {
 			(a, b) => a - b,
 		);
 		this.clearSelectedNumbers();
+	}
+
+	setCardBackForDeviceId(deviceId: string, cardBack: CardBack) {
+		const user = this.getUserOrDefault(deviceId);
+		user.config = { ...user.config, cardBack };
 	}
 
 	getUserOrDefault(deviceId: string): RoomUser {
