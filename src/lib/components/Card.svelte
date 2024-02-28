@@ -23,7 +23,7 @@
 		blue: 'bg-blue-900',
 		green: 'bg-green-900',
 		yellow: 'bg-yellow-900',
-		magic: 'bg-gradient-to-b from-indigo-500'
+		magic: 'bg-gradient-to-r from-pink-800 via-red-800 to-yellow-800 background-animate'
 	};
 
 	let {
