@@ -60,11 +60,11 @@ function createRoomState(
 	);
 
 	const consensusAchieved = derived(
-		[percentOfParticipantsVoted, participants],
-		([$percentOfParticipantsVoted, $participants]) =>
+		[percentOfParticipantsVoted, participantsVoted],
+		([$percentOfParticipantsVoted, $participantsVoted]) =>
 			$percentOfParticipantsVoted === 100 &&
-			$participants.every(
-				(user) => user.choice === $participants.at(0)?.choice,
+			$participantsVoted.every(
+				(user) => user.choice === $participantsVoted.at(0)?.choice,
 			),
 	);
 

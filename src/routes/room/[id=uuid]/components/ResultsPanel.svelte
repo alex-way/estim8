@@ -15,7 +15,7 @@
 	};
 
 	let results = $derived<Result[]>(
-		Object.values($roomState.users)
+		$participantsVoted
 			.reduce<Result[]>((acc, user) => {
 				if (user.choice === null) {
 					return acc;

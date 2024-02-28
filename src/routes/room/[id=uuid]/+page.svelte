@@ -83,8 +83,11 @@
 
 		presenceChannel.bind('pusher:member_removed', (member: Member) => {
 			dev && console.log('member_removed', member);
-			delete $presenceInfo[member.id];
-			$roomState.users = Object.fromEntries(Object.entries($roomState.users).filter(([key]) => key !== member.id));
+			$presenceInfo = Object.fromEntries(Object.entries($presenceInfo).filter(([key]) => key !== member.id));
+		});
+
+		presenceChannel.bind('show-confetti', () => {
+			if (jsConfetti) jsConfetti.addConfetti();
 		});
 
 		return () => {
@@ -105,12 +108,6 @@
 	let disableRevealButton = $derived(
 		$participants.length === 0 || $participantsNotVoted.length !== 0 || $roomState.showResults
 	);
-
-	$effect(() => {
-		if ($roomState.showResults && $consensusAchieved && jsConfetti) {
-			jsConfetti.addConfetti();
-		}
-	});
 
 	function onClickCopy() {
 		navigator.clipboard.writeText($page.url.toString());

@@ -96,6 +96,20 @@ export const actions = {
 		const room = await getRoomOr404(params.id);
 
 		room.invertShowResults();
+
+		const usersInRoom = await getUsersInRoom(room.id);
+
+		const activeUsers = Object.values(room.state.users).filter(
+			(user) => user.isParticipant && usersInRoom.includes(user.deviceId),
+		);
+
+		const consensusAchieved = activeUsers.every(
+			(user) => user.choice === activeUsers[0]?.choice,
+		);
+
+		if (room.state.showResults && consensusAchieved) {
+			pusher.trigger(`presence-cache-${room.id}`, "show-confetti", {});
+		}
 		await room.save();
 	},
 	inverseAllowUnknown: async ({ params }) => {
