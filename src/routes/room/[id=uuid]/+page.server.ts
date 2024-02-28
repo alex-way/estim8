@@ -216,7 +216,13 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		room.setNameForDeviceId(locals.deviceId, locals.name);
 	}
 
-	if (room.state.adminDeviceId === null) {
+	const usersInRoom = await getUsersInRoom(room.id);
+
+	const isOnlyUserInRoom =
+		usersInRoom.length === 0 ||
+		(usersInRoom.length === 1 && usersInRoom[0] === locals.deviceId);
+
+	if (room.state.adminDeviceId === null || isOnlyUserInRoom) {
 		room.setAdmin(locals.deviceId);
 	}
 
