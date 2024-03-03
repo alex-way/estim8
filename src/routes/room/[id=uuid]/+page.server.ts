@@ -1,4 +1,5 @@
 import { pusher } from "$hooks/server";
+import { getChannelName } from "$lib/constants";
 import { Room } from "$lib/roomState";
 import { error, fail } from "@sveltejs/kit";
 import z from "zod";
@@ -6,14 +7,27 @@ import type { Actions, PageServerLoad } from "./$types";
 
 const ONE_YEAR = 1000 * 60 * 60 * 24 * 365;
 
+/**
+ * Gets a list of user IDs from the presence channel
+ */
 async function getUsersInRoom(roomId: string): Promise<string[]> {
-	const channelName = `presence-cache-${roomId}`;
+	const channelName = getChannelName(roomId);
 	const usersResponse = await pusher.get({
 		path: `/channels/${channelName}/users`,
 	});
 	const usersJson: { users: { id: string }[] } = await usersResponse.json();
 
 	return usersJson.users.map((user) => user.id);
+}
+
+async function trigger(
+	roomId: string,
+	eventName: string,
+	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+	data: Record<string, any>,
+) {
+	const channelName = getChannelName(roomId);
+	return pusher.trigger(channelName, eventName, data);
 }
 
 function isAdmin(room: Room, locals: { deviceId: string }) {
@@ -82,6 +96,11 @@ export const actions = {
 			});
 		}
 
+		trigger(params.id, "user:update-choice", {
+			id: locals.deviceId,
+			choice: parsedNumber.data,
+		});
+
 		await Room.persistChosenNumberForDeviceId(
 			params.id,
 			locals.deviceId,
@@ -91,13 +110,11 @@ export const actions = {
 				body: "Something went wrong. Please try again later.",
 			});
 		});
-		pusher.trigger(`presence-cache-${params.id}`, "user:update-choice", {
-			id: locals.deviceId,
-			choice: parsedNumber.data,
-		});
 	},
-	inverseDisplay: async ({ params }) => {
+	reveal: async ({ params }) => {
 		const room = await getRoomOr404(params.id);
+
+		if (room.state.showResults) return;
 
 		room.invertShowResults();
 
@@ -111,10 +128,12 @@ export const actions = {
 			(user) => user.choice === activeUsers[0]?.choice,
 		);
 
-		if (room.state.showResults && consensusAchieved) {
-			pusher.trigger(`presence-cache-${room.id}`, "show-confetti", {});
+		trigger(params.id, "room:reveal", {});
+
+		if (consensusAchieved) {
+			trigger(params.id, "show-confetti", {});
 		}
-		await room.save();
+		await room.save(false);
 	},
 	inverseAllowUnknown: async ({ params }) => {
 		const room = await getRoomOr404(params.id);
@@ -214,7 +233,7 @@ export const actions = {
 
 		room.clearSelectedNumbers();
 		await room.save();
-		pusher.trigger(`presence-cache-${params.id}`, "room:clear", null);
+		trigger(params.id, "room:clear", {});
 	},
 	addChoice: async ({ request, params, locals }) => {
 		const room = await getRoomOr404(params.id);
@@ -286,7 +305,11 @@ export const actions = {
 		}
 
 		room.setCardBackForDeviceId(locals.deviceId, parsedCardBack.data);
-		await room.save();
+		trigger(params.id, "user:update-card-back", {
+			id: locals.deviceId,
+			cardBack: parsedCardBack.data,
+		});
+		await room.save(false);
 	},
 } satisfies Actions;
 

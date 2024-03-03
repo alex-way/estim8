@@ -4,7 +4,7 @@
 	import { PUBLIC_PUSHER_APP_KEY } from '$env/static/public';
 	import Pusher, { type PresenceChannel } from 'pusher-js';
 	import { onMount } from 'svelte';
-	import type { Choice, RoomState } from '$lib/types';
+	import type { CardBack, Choice, RoomState } from '$lib/types';
 	import type { ActionData, PageData } from './$types';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
@@ -16,6 +16,7 @@
 	import * as Alert from '$lib/components/ui/alert';
 	import { browser, dev } from '$app/environment';
 	import { roomState, deviceId, presenceInfo } from '$lib/stores/roomStateStore';
+	import { getChannelName } from '$lib/constants';
 
 	let { data, form } = $props<{ data: PageData; form: ActionData }>();
 	let { name, copyText } = $state({ name: data.name, copyText: 'Copy' });
@@ -29,7 +30,7 @@
 	const jsConfetti = browser ? new JSConfetti() : undefined;
 	let presenceChannel: PresenceChannel | undefined;
 
-	let channelName = $derived<string>(`presence-cache-${$page.params.id}`);
+	const channelName = getChannelName($page.params.id);
 
 	type Member = {
 		id: string;
@@ -93,8 +94,17 @@
 			$presenceInfo = Object.fromEntries(Object.entries($presenceInfo).filter(([key]) => key !== member.id));
 		});
 
+		presenceChannel.bind('user:update-card-back', (update: { id: string; cardBack: CardBack }) => {
+			dev && console.log('user:update-card-back', update);
+			$roomState.users[update.id].config = { ...$roomState.users[update.id].config, cardBack: update.cardBack };
+		});
+
 		presenceChannel.bind('show-confetti', () => {
 			if (jsConfetti) jsConfetti.addConfetti();
+		});
+
+		presenceChannel.bind('room:reveal', () => {
+			$roomState.showResults = true;
 		});
 
 		return () => {
@@ -164,7 +174,7 @@
 
 			<form
 				method="post"
-				action="?/inverseDisplay"
+				action="?/reveal"
 				use:enhance={() => {
 					return async ({ update }) => {
 						update({ invalidateAll: false });

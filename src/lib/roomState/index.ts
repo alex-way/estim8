@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { persistentStorage, pusher } from "$hooks/server";
 import type { PersistentStorage } from "$lib/storage/base";
 import type { Choice, RoomState } from "$lib/types";
-import { DEFAULT_CHOICES } from "../constants";
+import { DEFAULT_CHOICES, getChannelName } from "../constants";
 import { BaseRoom } from "./base";
 
 export class Room extends BaseRoom {
@@ -94,8 +94,9 @@ export class Room extends BaseRoom {
 
 	async save(notify = true): Promise<Room> {
 		if (notify) {
+			const channelName = getChannelName(this.id);
 			// not awaiting this because we don't want to block
-			pusher.trigger(`presence-cache-${this.id}`, "room-update", this.state);
+			pusher.trigger(channelName, "room-update", this.state);
 		}
 		await this.#persistentStorage.set(this.id, this.state);
 
