@@ -45,14 +45,15 @@
 
 <div class="flex gap-4 justify-evenly my-16">
 	{#each $participants as user (user.deviceId)}
-		<Context {user}>
+		<!-- todo: replace $roomState.users with user. Workaround for https://github.com/sveltejs/svelte/issues/10685 -->
+		<Context user={$roomState.users[user.deviceId]}>
 			<Card
-				title={user.name}
-				pending={user.choice === null}
+				title={$roomState.users[user.deviceId].name}
+				pending={$roomState.users[user.deviceId].choice === null}
 				reveal={$roomState.showResults ||
-					($roomState.config.allowObserversToSnoop && $isObserving && user.choice !== null)}
-				revealText={user.choice || ''}
-				cardBack={user.config?.cardBack}
+					($roomState.config.allowObserversToSnoop && $isObserving && $roomState.users[user.deviceId].choice !== null)}
+				revealText={$roomState.users[user.deviceId].choice || ''}
+				cardBack={$roomState.users[user.deviceId].config?.cardBack}
 			/>
 		</Context>
 	{/each}

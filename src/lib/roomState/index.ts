@@ -83,20 +83,20 @@ export class Room extends BaseRoom {
 	) {
 		const kv = Room.getPersistentStorage();
 
-		const room = await kv
+		const room = kv
 			.persistChosenNumberForDeviceId(roomId, deviceId, choice)
 			.catch((err) => {
 				console.error(err);
 				throw err;
 			});
-		pusher.trigger(`presence-cache-${roomId}`, "room-update", room);
 		return room;
 	}
 
-	async save(): Promise<Room> {
-		// not awaiting this because we don't want to block
-		pusher.trigger(`presence-cache-${this.id}`, "room-update", this.state);
-
+	async save(notify = true): Promise<Room> {
+		if (notify) {
+			// not awaiting this because we don't want to block
+			pusher.trigger(`presence-cache-${this.id}`, "room-update", this.state);
+		}
 		await this.#persistentStorage.set(this.id, this.state);
 
 		return this;

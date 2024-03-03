@@ -91,6 +91,10 @@ export const actions = {
 				body: "Something went wrong. Please try again later.",
 			});
 		});
+		pusher.trigger(`presence-cache-${params.id}`, "user:update-choice", {
+			id: locals.deviceId,
+			choice: parsedNumber.data,
+		});
 	},
 	inverseDisplay: async ({ params }) => {
 		const room = await getRoomOr404(params.id);
@@ -210,6 +214,7 @@ export const actions = {
 
 		room.clearSelectedNumbers();
 		await room.save();
+		pusher.trigger(`presence-cache-${params.id}`, "room:clear", null);
 	},
 	addChoice: async ({ request, params, locals }) => {
 		const room = await getRoomOr404(params.id);
