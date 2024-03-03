@@ -152,13 +152,15 @@ export const actions = {
 		room.invertSnooping();
 		await room.save();
 	},
-	inverseParticipation: async ({ request, params, locals }) => {
+	setParticipation: async ({ request, params, locals }) => {
 		const room = await getRoomOr404(params.id);
 
 		const formData = await request.formData();
-		const schema = z.string();
+		const deviceIdSchema = z.string();
+		const participatingSchema = z.coerce.boolean();
 
 		const formDeviceId = formData.get("deviceId");
+		const participating = formData.get("participating");
 
 		const isOwnDevice = locals.deviceId === formDeviceId;
 		if (!isAdmin(room, locals) && !isOwnDevice)
@@ -166,14 +168,24 @@ export const actions = {
 				body: "Only the admin can do this",
 			});
 
-		const parsedDeviceId = schema.safeParse(formDeviceId);
+		const parsedDeviceId = deviceIdSchema.safeParse(formDeviceId);
 		if (!parsedDeviceId.success)
 			return fail(400, {
 				body: parsedDeviceId.error.toString(),
 			});
 
-		room.inverseUserParticipation(parsedDeviceId.data);
-		await room.save();
+		const parsedParticipating = participatingSchema.safeParse(participating);
+		if (!parsedParticipating.success)
+			return fail(400, {
+				body: parsedParticipating.error.toString(),
+			});
+
+		trigger(params.id, "user:update-participation", {
+			id: locals.deviceId,
+			participating: parsedParticipating.data,
+		});
+		room.setUserParticipation(parsedDeviceId.data, parsedParticipating.data);
+		await room.save(false);
 	},
 	removeUserFromRoom: async ({ request, params, locals }) => {
 		const room = await getRoomOr404(params.id);

@@ -20,13 +20,16 @@
 			<ContextMenu.Item>
 				<form
 					method="post"
-					action="?/inverseParticipation"
+					action="?/setParticipation"
 					use:enhance={() => {
 						return async ({ update }) => {
 							update({ reset: false, invalidateAll: false });
 						};
 					}}
 				>
+					{#if !user.isParticipant}
+						<input type="hidden" name="participating" value={1} />
+					{/if}
 					<input type="hidden" name="deviceId" value={user.deviceId} />
 					<button type="submit">Make {user.isParticipant ? 'observer' : 'participant'}</button>
 				</form>

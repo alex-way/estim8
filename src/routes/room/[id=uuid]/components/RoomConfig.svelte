@@ -20,7 +20,7 @@
 	<div class="flex gap-2">
 		<form
 			method="post"
-			action="?/inverseParticipation"
+			action="?/setParticipation"
 			use:enhance={() => {
 				return async ({ update }) => {
 					update({ reset: false, invalidateAll: false });
@@ -28,6 +28,9 @@
 			}}
 		>
 			<input type="hidden" name="deviceId" value={$deviceId} />
+			{#if !$isParticipating}
+				<input type="hidden" name="participating" value={1} />
+			{/if}
 			<Tooltip.Root openDelay={200}>
 				<Tooltip.Trigger asChild let:builder>
 					<Button builders={[builder]} type="submit" size="sm" class="inline-block"

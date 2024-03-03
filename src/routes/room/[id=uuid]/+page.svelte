@@ -99,6 +99,11 @@
 			$roomState.users[update.id].config = { ...$roomState.users[update.id].config, cardBack: update.cardBack };
 		});
 
+		presenceChannel.bind('user:update-participation', (update: { id: string; participating: boolean }) => {
+			dev && console.log('user:update-participation', update);
+			$roomState.users[update.id].isParticipant = update.participating;
+		});
+
 		presenceChannel.bind('show-confetti', () => {
 			if (jsConfetti) jsConfetti.addConfetti();
 		});

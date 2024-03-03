@@ -115,6 +115,11 @@ export class BaseRoom {
 		user.isParticipant = !user.isParticipant;
 	}
 
+	setUserParticipation(deviceId: string, isParticipant: boolean) {
+		const user = this.getUserOrDefault(deviceId);
+		user.isParticipant = isParticipant;
+	}
+
 	removeUsersNotInRoom(usersInRoom: string[]) {
 		const usersNotInRoom = Object.keys(this.state.users).filter(
 			(user) => !usersInRoom.includes(user),
