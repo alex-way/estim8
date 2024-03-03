@@ -121,23 +121,8 @@ export const actions = {
 
 		if (room.state.showResults) return;
 
-		room.invertShowResults();
-
-		const usersInRoom = await getUsersInRoom(room.id);
-
-		const activeUsers = Object.values(room.state.users).filter(
-			(user) => user.isParticipant && usersInRoom.includes(user.deviceId),
-		);
-
-		const consensusAchieved = activeUsers.every(
-			(user) => user.choice === activeUsers[0]?.choice,
-		);
-
 		trigger(params.id, "room:reveal", {});
-
-		if (consensusAchieved) {
-			trigger(params.id, "show-confetti", {});
-		}
+		room.invertShowResults();
 		await room.save();
 	},
 	setAllowUnknown: async ({ request, params, locals }) => {
@@ -285,7 +270,7 @@ export const actions = {
 
 		trigger(params.id, "room:clear", {});
 		room.clearSelectedNumbers();
-		await room.save(true);
+		await room.save();
 	},
 	addChoice: async ({ request, params, locals }) => {
 		const room = await getRoomOr404(params.id);
@@ -414,6 +399,12 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 	if (room.state.adminDeviceId === null || isOnlyUserInRoom) {
 		room.setAdmin(locals.deviceId);
+	}
+
+	const inRoomAlready = room.state.users[locals.deviceId] !== undefined;
+	if (!inRoomAlready) {
+		const user = room.getUserOrDefault(locals.deviceId);
+		trigger(params.id, "user:add", user);
 	}
 
 	if (room.isModified()) {

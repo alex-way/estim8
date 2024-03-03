@@ -27,19 +27,16 @@ export class BaseRoom {
 		return null;
 	}
 
-	getUserFromName(name: string): RoomUser | null {
+	getUserFromName(name: string): RoomUser | undefined {
 		for (const [_, user] of Object.entries(this.state.users)) {
 			if (user.name === name) {
 				return user;
 			}
 		}
-		return null;
 	}
 
-	getUserFromDeviceId(deviceId: string): RoomUser | null {
-		const user = this.state.users[deviceId];
-		if (user) return user;
-		return null;
+	getUserFromDeviceId(deviceId: string): RoomUser | undefined {
+		return this.state.users[deviceId];
 	}
 
 	setChosenNumberForDeviceId(deviceId: string, choice: Choice) {

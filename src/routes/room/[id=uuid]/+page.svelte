@@ -4,7 +4,7 @@
 	import { PUBLIC_PUSHER_APP_KEY } from '$env/static/public';
 	import Pusher, { type PresenceChannel } from 'pusher-js';
 	import { onMount } from 'svelte';
-	import type { CardBack, Choice, RoomState } from '$lib/types';
+	import type { CardBack, Choice, RoomState, RoomUser } from '$lib/types';
 	import type { ActionData, PageData } from './$types';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
@@ -124,12 +124,22 @@
 			$roomState.users[update.id].name = update.name;
 		});
 
-		presenceChannel.bind('show-confetti', () => {
-			if (jsConfetti) jsConfetti.addConfetti();
+		presenceChannel.bind('user:add', (update: RoomUser) => {
+			dev && console.log('user:add', update);
+			$roomState.users[update.deviceId] = update;
+		});
+
+		presenceChannel.bind('room:clear', () => {
+			dev && console.log('room:clear');
+			$roomState.showResults = false;
+			Object.keys($roomState.users).forEach((deviceId) => {
+				$roomState.users[deviceId].choice = null;
+			});
 		});
 
 		presenceChannel.bind('room:reveal', () => {
 			$roomState.showResults = true;
+			if (jsConfetti && $consensusAchieved) jsConfetti.addConfetti();
 		});
 
 		return () => {
@@ -138,10 +148,11 @@
 		};
 	});
 
-	let deviceExistsInRoom = $derived(!!name && $deviceId in $roomState.users);
+	let deviceExistsInRoom = $derived(!!name && $deviceId in $roomState.users && $roomState.users[$deviceId].name);
 	let nameExistsInRoom = $derived(deviceExistsInRoom && $roomState.users[$deviceId].name === name);
 
-	let { participants, participantsVoted, participantsNotVoted, percentOfParticipantsVoted } = roomState;
+	let { participants, participantsVoted, participantsNotVoted, percentOfParticipantsVoted, consensusAchieved } =
+		roomState;
 
 	let nameAlreadyExists = $derived(
 		Object.values($roomState.users).some((user) => user.name === name && $deviceId !== user.deviceId)

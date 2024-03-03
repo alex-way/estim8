@@ -30,7 +30,7 @@ function createRoomState(
 		[presenceInfo, roomState],
 		([$presenceInfo, $roomState]) =>
 			Object.values($roomState.users).filter(
-				(user) => user.deviceId in $presenceInfo,
+				(user) => user.deviceId in $presenceInfo && user.name,
 			),
 	);
 
