@@ -109,6 +109,11 @@
 			$roomState.config.allowUnknown = update.allowUnknown;
 		});
 
+		presenceChannel.bind('room:update-selectable-numbers', (update: { selectableNumbers: number[] }) => {
+			dev && console.log('room:update-selectable-numbers', update);
+			$roomState.config.selectableNumbers = update.selectableNumbers.sort((a, b) => a - b);
+		});
+
 		presenceChannel.bind('room:update-allow-snooping', (update: { allowSnooping: boolean }) => {
 			dev && console.log('room:update-allow-snooping', update);
 			$roomState.config.allowObserversToSnoop = update.allowSnooping;

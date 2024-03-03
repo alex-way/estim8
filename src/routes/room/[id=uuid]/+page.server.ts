@@ -80,7 +80,7 @@ export const actions = {
 		room.removeUsersNotInRoom(usersInRoom);
 
 		room.setNameForDeviceId(locals.deviceId, parsedName.data);
-		await room.save(false);
+		await room.save();
 
 		cookies.set("name", parsedName.data, {
 			secure: true,
@@ -138,7 +138,7 @@ export const actions = {
 		if (consensusAchieved) {
 			trigger(params.id, "show-confetti", {});
 		}
-		await room.save(false);
+		await room.save();
 	},
 	setAllowUnknown: async ({ request, params, locals }) => {
 		const room = await getRoomOr404(params.id);
@@ -162,7 +162,7 @@ export const actions = {
 			allowUnknown: parsedAllowUnknown.data,
 		});
 		room.state.config.allowUnknown = parsedAllowUnknown.data;
-		await room.save(false);
+		await room.save();
 	},
 	setAllowSnooping: async ({ request, params, locals }) => {
 		const room = await getRoomOr404(params.id);
@@ -187,7 +187,7 @@ export const actions = {
 		});
 
 		room.state.config.allowObserversToSnoop = parsedAllowSnooping.data;
-		await room.save(false);
+		await room.save();
 	},
 	setParticipation: async ({ request, params, locals }) => {
 		const room = await getRoomOr404(params.id);
@@ -222,7 +222,7 @@ export const actions = {
 			participating: parsedParticipating.data,
 		});
 		room.setUserParticipation(parsedDeviceId.data, parsedParticipating.data);
-		await room.save(false);
+		await room.save();
 	},
 	removeUserFromRoom: async ({ request, params, locals }) => {
 		const room = await getRoomOr404(params.id);
@@ -255,7 +255,7 @@ export const actions = {
 		});
 
 		room.removeUser(parsedDeviceId.data);
-		await room.save(false);
+		await room.save();
 	},
 	setAdmin: async ({ request, params, locals }) => {
 		const room = await getRoomOr404(params.id);
@@ -278,14 +278,14 @@ export const actions = {
 
 		room.setAdmin(parsedDeviceId.data);
 
-		await room.save();
+		await room.save(true);
 	},
 	clear: async ({ params }) => {
 		const room = await getRoomOr404(params.id);
 
 		trigger(params.id, "room:clear", {});
 		room.clearSelectedNumbers();
-		await room.save();
+		await room.save(true);
 	},
 	addChoice: async ({ request, params, locals }) => {
 		const room = await getRoomOr404(params.id);
@@ -304,6 +304,22 @@ export const actions = {
 				body: parsedChoice.error.toString(),
 			});
 		}
+
+		const existingChoice = room.state.config.selectableNumbers.includes(
+			parsedChoice.data,
+		);
+
+		if (existingChoice)
+			return fail(400, {
+				body: "This choice is already in the list",
+			});
+
+		trigger(params.id, "room:update-selectable-numbers", {
+			selectableNumbers: [
+				...room.state.config.selectableNumbers,
+				parsedChoice.data,
+			],
+		});
 
 		room.updateSelectableNumbers([
 			...room.state.config.selectableNumbers,
@@ -328,6 +344,20 @@ export const actions = {
 				body: parsedChoice.error.toString(),
 			});
 		}
+		const existingChoice = room.state.config.selectableNumbers.includes(
+			parsedChoice.data,
+		);
+
+		if (!existingChoice)
+			return fail(400, {
+				body: "This choice is not in the list",
+			});
+
+		trigger(params.id, "room:update-selectable-numbers", {
+			selectableNumbers: room.state.config.selectableNumbers.filter(
+				(choice) => choice !== parsedChoice.data,
+			),
+		});
 
 		room.updateSelectableNumbers(
 			room.state.config.selectableNumbers.filter(
@@ -361,7 +391,7 @@ export const actions = {
 			id: locals.deviceId,
 			cardBack: parsedCardBack.data,
 		});
-		await room.save(false);
+		await room.save();
 	},
 } satisfies Actions;
 
@@ -387,7 +417,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	}
 
 	if (room.isModified()) {
-		await room.save();
+		await room.save(true);
 	}
 
 	return {

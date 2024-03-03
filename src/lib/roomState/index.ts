@@ -92,7 +92,7 @@ export class Room extends BaseRoom {
 		return room;
 	}
 
-	async save(notify = true): Promise<Room> {
+	async save(notify = false): Promise<Room> {
 		if (notify) {
 			const channelName = getChannelName(this.id);
 			// not awaiting this because we don't want to block
