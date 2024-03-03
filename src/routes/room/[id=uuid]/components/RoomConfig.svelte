@@ -66,13 +66,16 @@
 
 		<form
 			method="post"
-			action="?/inverseAllowUnknown"
+			action="?/setAllowUnknown"
 			use:enhance={() => {
 				return async ({ update }) => {
 					update({ reset: false, invalidateAll: false });
 				};
 			}}
 		>
+			{#if !$roomState.config.allowUnknown}
+				<input type="hidden" name="allowUnknown" value={1} />
+			{/if}
 			<Tooltip.Root openDelay={200}>
 				<Tooltip.Trigger asChild let:builder>
 					<Button builders={[builder]} type="submit" size="sm" class="inline-block" disabled={!$isRoomAdmin}

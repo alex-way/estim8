@@ -135,11 +135,24 @@ export const actions = {
 		}
 		await room.save(false);
 	},
-	inverseAllowUnknown: async ({ params }) => {
+	setAllowUnknown: async ({ request, params }) => {
 		const room = await getRoomOr404(params.id);
 
-		room.invertAllowUnknown();
-		await room.save();
+		const formData = await request.formData();
+		const schema = z.coerce.boolean();
+
+		const parsedAllowUnknown = schema.safeParse(formData.get("allowUnknown"));
+		if (!parsedAllowUnknown.success) {
+			return fail(400, {
+				body: parsedAllowUnknown.error.toString(),
+			});
+		}
+
+		trigger(params.id, "room:update-allow-unknown", {
+			allowUnknown: parsedAllowUnknown.data,
+		});
+		room.state.config.allowUnknown = parsedAllowUnknown.data;
+		await room.save(false);
 	},
 	inverseSnooping: async ({ params, locals }) => {
 		const room = await getRoomOr404(params.id);
@@ -213,9 +226,12 @@ export const actions = {
 				body: "The admin cannot be removed",
 			});
 
-		room.removeUser(parsedDeviceId.data);
+		trigger(params.id, "user:remove", {
+			id: parsedDeviceId.data,
+		});
 
-		await room.save();
+		room.removeUser(parsedDeviceId.data);
+		await room.save(false);
 	},
 	setAdmin: async ({ request, params, locals }) => {
 		const room = await getRoomOr404(params.id);
@@ -243,9 +259,9 @@ export const actions = {
 	clear: async ({ params }) => {
 		const room = await getRoomOr404(params.id);
 
+		trigger(params.id, "room:clear", {});
 		room.clearSelectedNumbers();
 		await room.save();
-		trigger(params.id, "room:clear", {});
 	},
 	addChoice: async ({ request, params, locals }) => {
 		const room = await getRoomOr404(params.id);

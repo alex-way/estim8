@@ -104,6 +104,11 @@
 			$roomState.users[update.id].isParticipant = update.participating;
 		});
 
+		presenceChannel.bind('room:update-allow-unknown', (update: { allowUnknown: boolean }) => {
+			dev && console.log('room:update-allow-unknown', update);
+			$roomState.config.allowUnknown = update.allowUnknown;
+		});
+
 		presenceChannel.bind('show-confetti', () => {
 			if (jsConfetti) jsConfetti.addConfetti();
 		});
