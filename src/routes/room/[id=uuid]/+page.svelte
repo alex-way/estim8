@@ -109,6 +109,11 @@
 			$roomState.config.allowUnknown = update.allowUnknown;
 		});
 
+		presenceChannel.bind('room:update-allow-snooping', (update: { allowSnooping: boolean }) => {
+			dev && console.log('room:update-allow-snooping', update);
+			$roomState.config.allowObserversToSnoop = update.allowSnooping;
+		});
+
 		presenceChannel.bind('user:set-name', (update: { id: string; name: string }) => {
 			dev && console.log('user:set-name', update);
 			$roomState.users[update.id].name = update.name;

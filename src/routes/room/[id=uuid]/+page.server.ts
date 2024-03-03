@@ -140,8 +140,13 @@ export const actions = {
 		}
 		await room.save(false);
 	},
-	setAllowUnknown: async ({ request, params }) => {
+	setAllowUnknown: async ({ request, params, locals }) => {
 		const room = await getRoomOr404(params.id);
+
+		if (!isAdmin(room, locals))
+			return fail(403, {
+				body: "Only the admin can do this",
+			});
 
 		const formData = await request.formData();
 		const schema = z.coerce.boolean();
@@ -159,7 +164,7 @@ export const actions = {
 		room.state.config.allowUnknown = parsedAllowUnknown.data;
 		await room.save(false);
 	},
-	inverseSnooping: async ({ params, locals }) => {
+	setAllowSnooping: async ({ request, params, locals }) => {
 		const room = await getRoomOr404(params.id);
 
 		if (!isAdmin(room, locals))
@@ -167,8 +172,22 @@ export const actions = {
 				body: "Only the admin can do this",
 			});
 
-		room.invertSnooping();
-		await room.save();
+		const formData = await request.formData();
+		const schema = z.coerce.boolean();
+
+		const parsedAllowSnooping = schema.safeParse(formData.get("allowSnooping"));
+		if (!parsedAllowSnooping.success) {
+			return fail(400, {
+				body: parsedAllowSnooping.error.toString(),
+			});
+		}
+
+		trigger(params.id, "room:update-allow-snooping", {
+			allowSnooping: parsedAllowSnooping.data,
+		});
+
+		room.state.config.allowObserversToSnoop = parsedAllowSnooping.data;
+		await room.save(false);
 	},
 	setParticipation: async ({ request, params, locals }) => {
 		const room = await getRoomOr404(params.id);

@@ -45,13 +45,16 @@
 
 		<form
 			method="post"
-			action="?/inverseSnooping"
+			action="?/setAllowSnooping"
 			use:enhance={() => {
 				return async ({ update }) => {
 					update({ reset: false, invalidateAll: false });
 				};
 			}}
 		>
+			{#if !$roomState.config.allowObserversToSnoop}
+				<input type="hidden" name="allowSnooping" value={1} />
+			{/if}
 			<Tooltip.Root openDelay={200}>
 				<Tooltip.Trigger asChild let:builder>
 					<Button builders={[builder]} type="submit" size="sm" class="inline-block" disabled={!$isRoomAdmin}
