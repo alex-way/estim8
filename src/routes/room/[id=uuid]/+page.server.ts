@@ -70,12 +70,17 @@ export const actions = {
 			});
 		}
 
+		trigger(params.id, "user:set-name", {
+			id: locals.deviceId,
+			name: parsedName.data,
+		});
+
 		// Remove all users from the room that aren't in the room anymore
 		const usersInRoom = await getUsersInRoom(room.id);
 		room.removeUsersNotInRoom(usersInRoom);
 
 		room.setNameForDeviceId(locals.deviceId, parsedName.data);
-		await room.save();
+		await room.save(false);
 
 		cookies.set("name", parsedName.data, {
 			secure: true,

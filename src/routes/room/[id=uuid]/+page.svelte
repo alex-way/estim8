@@ -109,6 +109,11 @@
 			$roomState.config.allowUnknown = update.allowUnknown;
 		});
 
+		presenceChannel.bind('user:set-name', (update: { id: string; name: string }) => {
+			dev && console.log('user:set-name', update);
+			$roomState.users[update.id].name = update.name;
+		});
+
 		presenceChannel.bind('show-confetti', () => {
 			if (jsConfetti) jsConfetti.addConfetti();
 		});
