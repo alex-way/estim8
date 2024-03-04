@@ -18,7 +18,7 @@
 	},
 	"dependencies": {
 		"@libsql/client": "0.5.2",
-		"bits-ui": "^0.18.6",
+		"bits-ui": "^0.19.3",
 		"clsx": "^2.1.0",
 		"confetti-js": "^0.0.18",
 		"drizzle-orm": "^0.29.4",
