@@ -3,6 +3,9 @@ import type { PersistentStorage } from "./base";
 
 const globalRoomState = new Map<string, RoomState>();
 
+/**
+ * @deprecated
+ */
 export class MemoryStorage implements PersistentStorage {
 	async get(key: string): Promise<RoomState | null> {
 		const value = globalRoomState.get(key);

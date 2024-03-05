@@ -3,8 +3,9 @@ import { dev } from "$app/environment";
 import { env as privateEnv } from "$env/dynamic/private";
 import { env as publicEnv } from "$env/dynamic/public";
 import { signJWT, verifyJWT } from "$lib/server/token";
-import { MemoryStorage, TursoStorage } from "$lib/storage";
+import { TursoStorage } from "$lib/storage";
 import type { Handle } from "@sveltejs/kit";
+import { sequence } from "@sveltejs/kit/hooks";
 import Pusher from "pusher";
 
 const ONE_YEAR = 1000 * 60 * 60 * 24 * 365;
@@ -27,9 +28,9 @@ export const pusher = new Pusher({
 	useTLS: true,
 });
 
-export const persistentStorage = dev ? new MemoryStorage() : new TursoStorage();
+export const persistentStorage = new TursoStorage();
 
-export const handle: Handle = async ({ event, resolve }) => {
+export const handleCookies: Handle = async ({ event, resolve }) => {
 	event.locals.name = event.cookies.get("name");
 
 	let jwt = event.cookies.get("deviceId");
@@ -65,3 +66,12 @@ export const handle: Handle = async ({ event, resolve }) => {
 	}
 	return resolve(event);
 };
+
+const handleInternalRoutes: Handle = async ({ event, resolve }) => {
+	if (dev && event.request.url.includes("/_internal/")) {
+		return new Response("Not found", { status: 404 });
+	}
+	return resolve(event);
+};
+
+export const handle = sequence(handleInternalRoutes, handleCookies);

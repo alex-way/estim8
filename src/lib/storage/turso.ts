@@ -1,19 +1,8 @@
+import { db } from "$db";
 import schema from "$db/schema";
-import { env } from "$env/dynamic/private";
 import type { Choice, RoomState } from "$lib/types";
-import { createClient as createTursoClient } from "@libsql/client";
 import { eq, sql } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/libsql";
 import type { PersistentStorage } from "./base";
-
-const client = createTursoClient({
-	url: env.TURSO_URL,
-	authToken: env.TURSO_AUTH_TOKEN,
-});
-
-const db = drizzle(client, {
-	schema,
-});
 
 export class TursoStorage implements PersistentStorage {
 	async get(key: string): Promise<RoomState | null> {

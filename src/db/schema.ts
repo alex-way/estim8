@@ -13,8 +13,6 @@ export const rooms = sqliteTable("rooms", {
 	),
 });
 
-export const schema = {
-	rooms,
-};
+export const schema = { rooms };
 
 export default schema;
