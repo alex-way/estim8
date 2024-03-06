@@ -6,6 +6,8 @@ export const cardBacks = [
 	"blue",
 	"green",
 	"yellow",
+	"pink",
+	"purple",
 	"magic",
 ] as const;
 export type CardBack = (typeof cardBacks)[number];
