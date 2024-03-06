@@ -123,6 +123,11 @@
 			$roomState.users[update.deviceId] = update;
 		});
 
+		presenceChannel.bind('room:set-admin', (update: { adminDeviceId: string }) => {
+			dev && console.log('room:set-admin', update);
+			$roomState.adminDeviceId = update.adminDeviceId;
+		});
+
 		presenceChannel.bind('room:clear', () => {
 			dev && console.log('room:clear');
 			$roomState.showResults = false;

@@ -14,6 +14,9 @@
 	let { allPresentRoomMembers } = roomState;
 
 	let currentCardBack = $derived($roomState.users[$deviceId]?.config?.cardBack || 'default');
+	let isAdminOnline = $derived(
+		!!$roomState.adminDeviceId && $allPresentRoomMembers.some((user) => user.deviceId === $roomState.adminDeviceId)
+	);
 </script>
 
 <div class="p-4 grid gap-2">
@@ -129,6 +132,13 @@
 				/>
 				<Button type="submit" class="rounded-l-none p-1 w-12"><Plus size={16} /></Button>
 			</div>
+		</form>
+	{/if}
+
+	{#if !isAdminOnline}
+		<form action="?/claimAdmin" method="post" use:enhance>
+			<Label for="choice">Claim Admin</Label>
+			<Button type="submit" size="sm" class="inline-block">Claim Admin</Button>
 		</form>
 	{/if}
 

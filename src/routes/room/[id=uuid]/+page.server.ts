@@ -43,6 +43,13 @@ async function getRoomOr404(roomId: string): Promise<Room> {
 	return room;
 }
 
+async function isAdminInRoom(room: Room): Promise<boolean> {
+	const usersInRoom = await getUsersInRoom(room.id);
+	return (
+		!!room.state.adminDeviceId && usersInRoom.includes(room.state.adminDeviceId)
+	);
+}
+
 export const actions = {
 	setName: async ({ request, locals, params, cookies }) => {
 		const room = await getRoomOr404(params.id);
@@ -378,6 +385,20 @@ export const actions = {
 			id: locals.deviceId,
 			cardBack: parsedCardBack.data,
 		});
+		await room.save();
+	},
+	claimAdmin: async ({ params, locals }) => {
+		const room = await getRoomOr404(params.id);
+
+		const shouldSetAdmin =
+			room.state.adminDeviceId === null || !(await isAdminInRoom(room));
+
+		if (!shouldSetAdmin) return;
+
+		trigger(params.id, "room:set-admin", {
+			adminDeviceId: locals.deviceId,
+		});
+		room.setAdmin(locals.deviceId);
 		await room.save();
 	},
 } satisfies Actions;
