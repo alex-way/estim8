@@ -64,12 +64,6 @@
 			$roomState = newRoomState;
 		});
 
-		// todo: Split out room-update into individual actions:
-		// - user:update-choice
-		// - user:clear-choice
-		// - user:reveal
-		// - user:inverse-participation
-
 		presenceChannel.bind('pusher:subscription_succeeded', (members: PresenceSubscriptionData) => {
 			dev && console.log('subscription_succeeded', members);
 			$presenceInfo = members.members;
