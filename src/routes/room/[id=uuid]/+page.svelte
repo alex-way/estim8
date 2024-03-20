@@ -1,24 +1,23 @@
 <script lang="ts">
+	import { browser, dev } from '$app/environment';
 	import { enhance } from '$app/forms';
 	import { page } from '$app/stores';
 	import { PUBLIC_PUSHER_APP_KEY } from '$env/static/public';
-	import Pusher, { type PresenceChannel } from 'pusher-js';
-	import { onMount } from 'svelte';
-	import type { CardBack, Choice, RoomState, RoomUser } from '$lib/types';
-	import type { ActionData, PageData } from './$types';
+	import * as Alert from '$lib/components/ui/alert';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Progress } from '$lib/components/ui/progress';
-	import JSConfetti from 'js-confetti';
-	import ResultsPanel from './components/ResultsPanel.svelte';
-	import ChoicePicker from './components/ChoicePicker.svelte';
-	import RoomConfig from './components/RoomConfig.svelte';
-	import * as Alert from '$lib/components/ui/alert';
-	import { browser, dev } from '$app/environment';
-	import { roomState, deviceId, presenceInfo } from '$lib/stores/roomStateStore';
 	import { getChannelName } from '$lib/constants';
+	import { deviceId, presenceInfo, roomState } from '$lib/stores/roomStateStore';
+	import type { CardBack, Choice, RoomState, RoomUser } from '$lib/types';
+	import JSConfetti from 'js-confetti';
+	import Pusher, { type PresenceChannel } from 'pusher-js';
+	import { onMount } from 'svelte';
+	import ChoicePicker from './components/ChoicePicker.svelte';
+	import ResultsPanel from './components/ResultsPanel.svelte';
+	import RoomConfig from './components/RoomConfig.svelte';
 
-	let { data, form } = $props<{ data: PageData; form: ActionData }>();
+	const { data, form } = $props();
 	let { name, copyText } = $state({ name: data.name, copyText: 'Copy' });
 
 	$roomState = data.roomState;
@@ -34,7 +33,7 @@
 
 	type Member = {
 		id: string;
-		info: {};
+		info: Record<string, never>;
 	};
 
 	type PresenceSubscriptionData = {
@@ -69,7 +68,7 @@
 			$presenceInfo = members.members;
 		});
 
-		presenceChannel.bind('pusher:subscription_error', (error: any) => {
+		presenceChannel.bind('pusher:subscription_error', (error: unknown) => {
 			dev && console.log('subscription_error', error);
 		});
 
@@ -147,17 +146,17 @@
 		};
 	});
 
-	let deviceExistsInRoom = $derived(!!name && $deviceId in $roomState.users && $roomState.users[$deviceId].name);
-	let nameExistsInRoom = $derived(deviceExistsInRoom && $roomState.users[$deviceId].name === name);
+	const deviceExistsInRoom = $derived(!!name && $deviceId in $roomState.users && $roomState.users[$deviceId].name);
+	const nameExistsInRoom = $derived(deviceExistsInRoom && $roomState.users[$deviceId].name === name);
 
-	let { participants, participantsVoted, participantsNotVoted, percentOfParticipantsVoted, consensusAchieved } =
+	const { participants, participantsVoted, participantsNotVoted, percentOfParticipantsVoted, consensusAchieved } =
 		roomState;
 
-	let nameAlreadyExists = $derived(
+	const nameAlreadyExists = $derived(
 		Object.values($roomState.users).some((user) => user.name === name && $deviceId !== user.deviceId)
 	);
 
-	let disableRevealButton = $derived(
+	const disableRevealButton = $derived(
 		$participants.length === 0 || $participantsNotVoted.length !== 0 || $roomState.showResults
 	);
 

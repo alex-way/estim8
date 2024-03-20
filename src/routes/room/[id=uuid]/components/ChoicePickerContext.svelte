@@ -1,9 +1,9 @@
 <script lang="ts">
-	import * as ContextMenu from '$lib/components/ui/context-menu';
 	import { enhance } from '$app/forms';
-	import { deviceId, isRoomAdmin } from '$lib/stores/roomStateStore';
+	import * as ContextMenu from '$lib/components/ui/context-menu';
+	import { isRoomAdmin } from '$lib/stores/roomStateStore';
 
-	let { choice } = $props<{ choice: number | '?' }>();
+	const { choice }: { choice: number | '?' } = $props();
 </script>
 
 <ContextMenu.Root>

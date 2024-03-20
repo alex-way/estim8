@@ -10,4 +10,16 @@ export default defineConfig({
 	server: {
 		host: "estim8.127.0.0.1.nip.io",
 	},
+	optimizeDeps: {
+		// Including to prevent constant re-building when developing
+		include: [
+			"pusher-js",
+			"js-confetti",
+			"lucide-svelte",
+			"bits-ui",
+			"clsx",
+			"tailwind-merge",
+			"tailwind-variants",
+		],
+	},
 });

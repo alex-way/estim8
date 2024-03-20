@@ -1,9 +1,9 @@
 <script lang="ts">
 	import * as Card from '$lib/components/ui/card';
 	import { Skeleton } from '$lib/components/ui/skeleton';
-	import type { HTMLAttributes } from 'svelte/elements';
-	import { cn } from '$lib/utils';
 	import type { CardBack } from '$lib/types';
+	import { cn } from '$lib/utils';
+	import type { HTMLAttributes } from 'svelte/elements';
 
 	type Props = {
 		/**The text to show at the top of the card. Usually the name of the participant.*/
@@ -28,14 +28,14 @@
 		magic: 'bg-gradient-to-r from-pink-800 via-red-800 to-yellow-800 background-animate'
 	};
 
-	let {
+	const {
 		title = '',
 		reveal = false,
 		pending = true,
 		revealText = '',
 		class: className,
 		cardBack = 'default'
-	} = $props<Props>();
+	}: Props = $props();
 </script>
 
 <Card.Root class={cn('w-32 h-48 inline-block', className, cardBackClasses[cardBack])} on:click>

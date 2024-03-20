@@ -1,15 +1,14 @@
 <script lang="ts">
-	import Button from '$lib/components/ui/button/button.svelte';
-	import Card from '$lib/components/Card.svelte';
-	import Input from '$lib/components/ui/input/input.svelte';
 	import { enhance } from '$app/forms';
-	import type { ActionData, PageData } from './$types';
 	import { navigating } from '$app/stores';
+	import Card from '$lib/components/Card.svelte';
+	import Button from '$lib/components/ui/button/button.svelte';
+	import Input from '$lib/components/ui/input/input.svelte';
 	import { Plus } from 'lucide-svelte';
 
-	let { data, form } = $props<{ data: PageData; form: ActionData }>();
+	const { data, form } = $props();
 
-	let choices = $derived(form?.choices ?? data.choices);
+	const choices = $derived(form?.choices ?? data.choices);
 </script>
 
 <div class="flex justify-center">

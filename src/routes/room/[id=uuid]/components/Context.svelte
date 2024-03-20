@@ -1,14 +1,14 @@
 <script lang="ts">
-	import * as ContextMenu from '$lib/components/ui/context-menu';
 	import { enhance } from '$app/forms';
+	import * as ContextMenu from '$lib/components/ui/context-menu';
+	import { deviceId, isRoomAdmin, roomState } from '$lib/stores/roomStateStore';
 	import type { RoomUser } from '$lib/types';
-	import { deviceId, roomState, isRoomAdmin } from '$lib/stores/roomStateStore';
 
-	let { user } = $props<{ user: RoomUser }>();
+	const { user }: { user: RoomUser } = $props();
 
-	let adminDeviceId = $derived($roomState.adminDeviceId || '');
-	let isSelf = $derived(user.deviceId === $deviceId);
-	let isAlreadyAdmin = $derived(adminDeviceId === user.deviceId);
+	const adminDeviceId = $derived($roomState.adminDeviceId || '');
+	const isSelf = $derived(user.deviceId === $deviceId);
+	const isAlreadyAdmin = $derived(adminDeviceId === user.deviceId);
 </script>
 
 <ContextMenu.Root>
