@@ -49,16 +49,13 @@ export class BaseRoom {
 	}
 
 	invertSnooping() {
-		this.state.config.allowObserversToSnoop =
-			!this.state.config.allowObserversToSnoop;
+		this.state.config.allowObserversToSnoop = !this.state.config.allowObserversToSnoop;
 	}
 
 	invertAllowUnknown() {
 		this.state.config.allowUnknown = !this.state.config.allowUnknown;
 		if (!this.state.config.allowUnknown) {
-			for (const [_, user] of Object.entries(this.state.users).filter(
-				([_, user]) => user.choice === "?",
-			)) {
+			for (const [_, user] of Object.entries(this.state.users).filter(([_, user]) => user.choice === "?")) {
 				user.choice = null;
 			}
 		}
@@ -72,9 +69,7 @@ export class BaseRoom {
 	}
 
 	updateSelectableNumbers(selectableNumbers: number[]) {
-		this.state.config.selectableNumbers = selectableNumbers.sort(
-			(a, b) => a - b,
-		);
+		this.state.config.selectableNumbers = selectableNumbers.sort((a, b) => a - b);
 		this.clearSelectedNumbers();
 	}
 
@@ -118,9 +113,7 @@ export class BaseRoom {
 	}
 
 	removeUsersNotInRoom(usersInRoom: string[]) {
-		const usersNotInRoom = Object.keys(this.state.users).filter(
-			(user) => !usersInRoom.includes(user),
-		);
+		const usersNotInRoom = Object.keys(this.state.users).filter((user) => !usersInRoom.includes(user));
 
 		for (const user of usersNotInRoom) {
 			this.removeUser(user);

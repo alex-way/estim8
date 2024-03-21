@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { ContextMenu as ContextMenuPrimitive } from 'bits-ui';
 	import { cn } from '$lib/utils';
+	import { ContextMenu as ContextMenuPrimitive } from 'bits-ui';
 	import { Circle } from 'lucide-svelte';
 
 	type $$Props = ContextMenuPrimitive.RadioItemProps;

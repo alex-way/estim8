@@ -45,9 +45,7 @@ async function getRoomOr404(roomId: string): Promise<Room> {
 
 async function isAdminInRoom(room: Room): Promise<boolean> {
 	const usersInRoom = await getUsersInRoom(room.id);
-	return (
-		!!room.state.adminDeviceId && usersInRoom.includes(room.state.adminDeviceId)
-	);
+	return !!room.state.adminDeviceId && usersInRoom.includes(room.state.adminDeviceId);
 }
 
 export const actions = {
@@ -67,8 +65,7 @@ export const actions = {
 			});
 		}
 
-		const nameAlreadyPresent =
-			room.getDeviceIdFromName(parsedName.data) !== null;
+		const nameAlreadyPresent = room.getDeviceIdFromName(parsedName.data) !== null;
 		if (nameAlreadyPresent) {
 			return fail(400, {
 				errors: {
@@ -113,11 +110,7 @@ export const actions = {
 			choice: parsedNumber.data,
 		});
 
-		await Room.persistChosenNumberForDeviceId(
-			params.id,
-			locals.deviceId,
-			parsedNumber.data,
-		).catch(() => {
+		await Room.persistChosenNumberForDeviceId(params.id, locals.deviceId, parsedNumber.data).catch(() => {
 			return fail(400, {
 				body: "Something went wrong. Please try again later.",
 			});
@@ -297,9 +290,7 @@ export const actions = {
 			});
 		}
 
-		const existingChoice = room.state.config.selectableNumbers.includes(
-			parsedChoice.data,
-		);
+		const existingChoice = room.state.config.selectableNumbers.includes(parsedChoice.data);
 
 		if (existingChoice)
 			return fail(400, {
@@ -307,16 +298,10 @@ export const actions = {
 			});
 
 		trigger(params.id, "room:update-selectable-numbers", {
-			selectableNumbers: [
-				...room.state.config.selectableNumbers,
-				parsedChoice.data,
-			],
+			selectableNumbers: [...room.state.config.selectableNumbers, parsedChoice.data],
 		});
 
-		room.updateSelectableNumbers([
-			...room.state.config.selectableNumbers,
-			parsedChoice.data,
-		]);
+		room.updateSelectableNumbers([...room.state.config.selectableNumbers, parsedChoice.data]);
 		await room.save();
 	},
 	removeChoice: async ({ request, params, locals }) => {
@@ -336,9 +321,7 @@ export const actions = {
 				body: parsedChoice.error.toString(),
 			});
 		}
-		const existingChoice = room.state.config.selectableNumbers.includes(
-			parsedChoice.data,
-		);
+		const existingChoice = room.state.config.selectableNumbers.includes(parsedChoice.data);
 
 		if (!existingChoice)
 			return fail(400, {
@@ -346,16 +329,10 @@ export const actions = {
 			});
 
 		trigger(params.id, "room:update-selectable-numbers", {
-			selectableNumbers: room.state.config.selectableNumbers.filter(
-				(choice) => choice !== parsedChoice.data,
-			),
+			selectableNumbers: room.state.config.selectableNumbers.filter((choice) => choice !== parsedChoice.data),
 		});
 
-		room.updateSelectableNumbers(
-			room.state.config.selectableNumbers.filter(
-				(choice) => choice !== parsedChoice.data,
-			),
-		);
+		room.updateSelectableNumbers(room.state.config.selectableNumbers.filter((choice) => choice !== parsedChoice.data));
 		await room.save();
 	},
 	setCardBack: async ({ request, params, locals }) => {
@@ -390,8 +367,7 @@ export const actions = {
 	claimAdmin: async ({ params, locals }) => {
 		const room = await getRoomOr404(params.id);
 
-		const shouldSetAdmin =
-			room.state.adminDeviceId === null || !(await isAdminInRoom(room));
+		const shouldSetAdmin = room.state.adminDeviceId === null || !(await isAdminInRoom(room));
 
 		if (!shouldSetAdmin) return;
 
@@ -416,9 +392,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 	const usersInRoom = await getUsersInRoom(room.id);
 
-	const isOnlyUserInRoom =
-		usersInRoom.length === 0 ||
-		(usersInRoom.length === 1 && usersInRoom[0] === locals.deviceId);
+	const isOnlyUserInRoom = usersInRoom.length === 0 || (usersInRoom.length === 1 && usersInRoom[0] === locals.deviceId);
 
 	if (room.state.adminDeviceId === null || isOnlyUserInRoom) {
 		room.setAdmin(locals.deviceId);

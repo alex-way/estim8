@@ -18,11 +18,7 @@ export class MemoryStorage implements PersistentStorage {
 		return value;
 	}
 
-	async persistChosenNumberForDeviceId(
-		roomId: string,
-		deviceId: string,
-		choice: Choice,
-	): Promise<RoomState> {
+	async persistChosenNumberForDeviceId(roomId: string, deviceId: string, choice: Choice): Promise<RoomState> {
 		const room = await this.get(roomId);
 		if (!room) throw new Error("room not found");
 		room.users[deviceId].choice = choice;

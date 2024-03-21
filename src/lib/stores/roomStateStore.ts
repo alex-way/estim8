@@ -26,18 +26,12 @@ function createRoomState(
 	const roomState = writable<RoomState>(initialValue);
 	const { subscribe, set, update } = roomState;
 
-	const allPresentRoomMembers = derived(
-		[presenceInfo, roomState],
-		([$presenceInfo, $roomState]) =>
-			Object.values($roomState.users).filter(
-				(user) => user.deviceId in $presenceInfo && user.name,
-			),
+	const allPresentRoomMembers = derived([presenceInfo, roomState], ([$presenceInfo, $roomState]) =>
+		Object.values($roomState.users).filter((user) => user.deviceId in $presenceInfo && user.name),
 	);
 
-	const participants = derived(
-		allPresentRoomMembers,
-		($allPresentRoomMembers) =>
-			$allPresentRoomMembers.filter((user) => user.isParticipant),
+	const participants = derived(allPresentRoomMembers, ($allPresentRoomMembers) =>
+		$allPresentRoomMembers.filter((user) => user.isParticipant),
 	);
 
 	const participantsVoted = derived(participants, ($participants) =>
@@ -53,9 +47,7 @@ function createRoomState(
 		([$participantsVoted, $participants]) => {
 			const totalParticipants = $participants.length;
 
-			return totalParticipants
-				? Math.round(($participantsVoted.length / totalParticipants) * 100)
-				: 0;
+			return totalParticipants ? Math.round(($participantsVoted.length / totalParticipants) * 100) : 0;
 		},
 	);
 
@@ -63,9 +55,7 @@ function createRoomState(
 		[percentOfParticipantsVoted, participantsVoted],
 		([$percentOfParticipantsVoted, $participantsVoted]) =>
 			$percentOfParticipantsVoted === 100 &&
-			$participantsVoted.every(
-				(user) => user.choice === $participantsVoted.at(0)?.choice,
-			),
+			$participantsVoted.every((user) => user.choice === $participantsVoted.at(0)?.choice),
 	);
 
 	const selectableChoices = derived(roomState, ($roomState) => [
@@ -91,14 +81,12 @@ export const roomState = createRoomState();
 
 export const isObserving = derived(
 	[deviceId, roomState],
-	([$deviceId, $roomState]) =>
-		$roomState.users[$deviceId]?.isParticipant === false,
+	([$deviceId, $roomState]) => $roomState.users[$deviceId]?.isParticipant === false,
 );
 
 export const isParticipating = derived(
 	[deviceId, roomState],
-	([$deviceId, $roomState]) =>
-		$roomState.users[$deviceId]?.isParticipant === true,
+	([$deviceId, $roomState]) => $roomState.users[$deviceId]?.isParticipant === true,
 );
 
 export const isRoomAdmin = derived(

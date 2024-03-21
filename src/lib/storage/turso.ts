@@ -6,11 +6,7 @@ import type { PersistentStorage } from "./base";
 
 export class TursoStorage implements PersistentStorage {
 	async get(key: string): Promise<RoomState | null> {
-		const result = await db
-			.select()
-			.from(schema.rooms)
-			.where(eq(schema.rooms.id, key))
-			.limit(1);
+		const result = await db.select().from(schema.rooms).where(eq(schema.rooms.id, key)).limit(1);
 		if (result.length > 0) {
 			return result[0].state;
 		}
@@ -32,11 +28,7 @@ export class TursoStorage implements PersistentStorage {
 			.then((result) => result[0].state);
 	}
 
-	async persistChosenNumberForDeviceId(
-		roomId: string,
-		deviceId: string,
-		choice: Choice,
-	): Promise<RoomState> {
+	async persistChosenNumberForDeviceId(roomId: string, deviceId: string, choice: Choice): Promise<RoomState> {
 		const key = `$.users.${deviceId}.choice`;
 		return db
 			.update(schema.rooms)

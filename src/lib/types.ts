@@ -1,15 +1,6 @@
 export type Choice = number | "?";
 
-export const cardBacks = [
-	"default",
-	"red",
-	"blue",
-	"green",
-	"yellow",
-	"pink",
-	"purple",
-	"magic",
-] as const;
+export const cardBacks = ["default", "red", "blue", "green", "yellow", "pink", "purple", "magic"] as const;
 export type CardBack = (typeof cardBacks)[number];
 
 export type RoomUser = {

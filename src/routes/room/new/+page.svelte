@@ -1,14 +1,14 @@
 <script lang="ts">
-	import { enhance } from '$app/forms';
-	import { navigating } from '$app/stores';
-	import Card from '$lib/components/Card.svelte';
-	import Button from '$lib/components/ui/button/button.svelte';
-	import Input from '$lib/components/ui/input/input.svelte';
-	import { Plus } from 'lucide-svelte';
+import { enhance } from "$app/forms";
+import { navigating } from "$app/stores";
+import Card from "$lib/components/Card.svelte";
+import Button from "$lib/components/ui/button/button.svelte";
+import Input from "$lib/components/ui/input/input.svelte";
+import { Plus } from "lucide-svelte";
 
-	const { data, form } = $props();
+const { data, form } = $props();
 
-	const choices = $derived(form?.choices ?? data.choices);
+const choices = $derived(form?.choices ?? data.choices);
 </script>
 
 <div class="flex justify-center">

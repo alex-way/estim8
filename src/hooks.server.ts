@@ -37,10 +37,7 @@ export const handleCookies: Handle = async ({ event, resolve }) => {
 
 	if (!jwt) {
 		const deviceId = randomUUID();
-		jwt = await signJWT(
-			{ sub: deviceId },
-			{ exp: new Date(Date.now() + ONE_YEAR) },
-		);
+		jwt = await signJWT({ sub: deviceId }, { exp: new Date(Date.now() + ONE_YEAR) });
 		event.cookies.set("deviceId", jwt, {
 			secure: true,
 			path: "/",

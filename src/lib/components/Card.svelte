@@ -1,41 +1,41 @@
 <script lang="ts">
-	import * as Card from '$lib/components/ui/card';
-	import { Skeleton } from '$lib/components/ui/skeleton';
-	import type { CardBack } from '$lib/types';
-	import { cn } from '$lib/utils';
-	import type { HTMLAttributes } from 'svelte/elements';
+import * as Card from "$lib/components/ui/card";
+import { Skeleton } from "$lib/components/ui/skeleton";
+import type { CardBack } from "$lib/types";
+import { cn } from "$lib/utils";
+import type { HTMLAttributes } from "svelte/elements";
 
-	type Props = {
-		/**The text to show at the top of the card. Usually the name of the participant.*/
-		title?: string;
-		/**Whether to reveal the text beneath the card. */
-		reveal?: boolean;
-		/**Whether we're still waiting for the user to select a number. */
-		pending?: boolean;
-		revealText?: string | number;
-		class?: HTMLAttributes<HTMLDivElement>['class'];
-		cardBack?: CardBack;
-	};
+type Props = {
+	/**The text to show at the top of the card. Usually the name of the participant.*/
+	title?: string;
+	/**Whether to reveal the text beneath the card. */
+	reveal?: boolean;
+	/**Whether we're still waiting for the user to select a number. */
+	pending?: boolean;
+	revealText?: string | number;
+	class?: HTMLAttributes<HTMLDivElement>["class"];
+	cardBack?: CardBack;
+};
 
-	const cardBackClasses: Record<CardBack, string> = {
-		default: 'bg-secondary',
-		red: 'bg-red-900',
-		blue: 'bg-blue-900',
-		green: 'bg-green-900',
-		yellow: 'bg-yellow-700',
-		pink: 'bg-pink-800',
-		purple: 'bg-purple-950',
-		magic: 'bg-gradient-to-r from-pink-800 via-red-800 to-yellow-800 background-animate'
-	};
+const cardBackClasses: Record<CardBack, string> = {
+	default: "bg-secondary",
+	red: "bg-red-900",
+	blue: "bg-blue-900",
+	green: "bg-green-900",
+	yellow: "bg-yellow-700",
+	pink: "bg-pink-800",
+	purple: "bg-purple-950",
+	magic: "bg-gradient-to-r from-pink-800 via-red-800 to-yellow-800 background-animate",
+};
 
-	const {
-		title = '',
-		reveal = false,
-		pending = true,
-		revealText = '',
-		class: className,
-		cardBack = 'default'
-	}: Props = $props();
+const {
+	title = "",
+	reveal = false,
+	pending = true,
+	revealText = "",
+	class: className,
+	cardBack = "default",
+}: Props = $props();
 </script>
 
 <Card.Root class={cn('w-32 h-48 inline-block', className, cardBackClasses[cardBack])} on:click>

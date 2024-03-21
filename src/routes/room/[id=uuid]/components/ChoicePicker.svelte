@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { enhance } from '$app/forms';
-	import { Button } from '$lib/components/ui/button';
-	import { roomState, deviceId, isParticipating } from '$lib/stores/roomStateStore';
-	import ChoicePickerContext from './ChoicePickerContext.svelte';
+import { enhance } from "$app/forms";
+import { Button } from "$lib/components/ui/button";
+import { roomState, deviceId, isParticipating } from "$lib/stores/roomStateStore";
+import ChoicePickerContext from "./ChoicePickerContext.svelte";
 
-	let selectedNumber = $derived($roomState.users[$deviceId]?.choice);
+let selectedNumber = $derived($roomState.users[$deviceId]?.choice);
 
-	let { selectableChoices } = roomState;
+let { selectableChoices } = roomState;
 </script>
 
 <div class="flex w-full items-center my-4 justify-center flex-wrap gap-2">

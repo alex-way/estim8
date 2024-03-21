@@ -14,7 +14,7 @@ export const actions = {
 		const parsedChoices = (
 			choicesParam
 				.map((choice) => {
-					const parsed = parseInt(choice.toString());
+					const parsed = Number.parseInt(choice.toString());
 					if (Number.isNaN(parsed)) return null;
 					return parsed;
 				})
@@ -37,7 +37,7 @@ export const actions = {
 		const parsedChoices = (
 			choicesParam
 				.map((choice) => {
-					const parsed = parseInt(choice.toString());
+					const parsed = Number.parseInt(choice.toString());
 					if (Number.isNaN(parsed)) return null;
 					return parsed;
 				})
@@ -48,7 +48,7 @@ export const actions = {
 
 		if (!toRemove) return choices;
 
-		const parsedToRemove = parseInt(toRemove.toString());
+		const parsedToRemove = Number.parseInt(toRemove.toString());
 		if (Number.isNaN(parsedToRemove)) return choices;
 
 		choices.delete(parsedToRemove);
@@ -79,15 +79,13 @@ export const load: PageServerLoad = async ({ cookies }) => {
 	const parsedChoices = userSpecifiedChoices
 		.split(",")
 		.map((choice) => {
-			const parsed = parseInt(choice);
+			const parsed = Number.parseInt(choice);
 			if (Number.isNaN(parsed)) return null;
 			return parsed;
 		})
 		.filter((choice) => choice !== null) as number[];
 
-	const choices = parsedChoices.length
-		? new Set(parsedChoices)
-		: DEFAULT_CHOICES;
+	const choices = parsedChoices.length ? new Set(parsedChoices) : DEFAULT_CHOICES;
 
 	return {
 		choices,

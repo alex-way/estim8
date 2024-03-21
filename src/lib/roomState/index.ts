@@ -32,10 +32,7 @@ export class Room extends BaseRoom {
 		this.#persistentStorage = Room.getPersistentStorage();
 	}
 
-	static async createRoom(
-		config: { id?: string; choices?: number[] },
-		adminDeviceId?: string,
-	) {
+	static async createRoom(config: { id?: string; choices?: number[] }, adminDeviceId?: string) {
 		const roomId = config.id ?? randomUUID();
 
 		const state = {
@@ -76,19 +73,13 @@ export class Room extends BaseRoom {
 		return persistentStorage;
 	}
 
-	static async persistChosenNumberForDeviceId(
-		roomId: string,
-		deviceId: string,
-		choice: Choice,
-	) {
+	static async persistChosenNumberForDeviceId(roomId: string, deviceId: string, choice: Choice) {
 		const kv = Room.getPersistentStorage();
 
-		const room = kv
-			.persistChosenNumberForDeviceId(roomId, deviceId, choice)
-			.catch((err) => {
-				console.error(err);
-				throw err;
-			});
+		const room = kv.persistChosenNumberForDeviceId(roomId, deviceId, choice).catch((err) => {
+			console.error(err);
+			throw err;
+		});
 		return room;
 	}
 

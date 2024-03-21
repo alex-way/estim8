@@ -9,10 +9,21 @@
 		"rules": {
 			"complexity": {
 				"noBannedTypes": {
-					"level": "off",
-					"options": null
+					"level": "off"
 				}
 			}
 		}
-	}
+	},
+	"overrides": [
+		{
+		  "include": ["*.svelte"],
+		  "linter": {
+			"rules": {
+			  "style": {
+				"useConst": "off"
+			  }
+			}
+		  }
+		}
+	  ]
 }

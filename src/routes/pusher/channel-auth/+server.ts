@@ -33,10 +33,6 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		user_info: {},
 	};
 
-	const auth = pusher.authorizeChannel(
-		socket_id.toString(),
-		channel_name.toString(),
-		presenceData,
-	);
+	const auth = pusher.authorizeChannel(socket_id.toString(), channel_name.toString(), presenceData);
 	return json(auth, { status: 200 });
 };

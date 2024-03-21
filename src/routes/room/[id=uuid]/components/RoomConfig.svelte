@@ -1,22 +1,22 @@
 <script lang="ts">
-	import { enhance } from '$app/forms';
-	import Badge from '$lib/components/ui/badge/badge.svelte';
-	import Button from '$lib/components/ui/button/button.svelte';
-	import * as Tooltip from '$lib/components/ui/tooltip';
-	import * as Select from '$lib/components/ui/select';
-	import Context from './Context.svelte';
-	import { roomState, deviceId, isParticipating, isRoomAdmin } from '$lib/stores/roomStateStore';
-	import Input from '$lib/components/ui/input/input.svelte';
-	import { Plus } from 'lucide-svelte';
-	import Label from '$lib/components/ui/label/label.svelte';
-	import { cardBacks } from '$lib/types';
+import { enhance } from "$app/forms";
+import Badge from "$lib/components/ui/badge/badge.svelte";
+import Button from "$lib/components/ui/button/button.svelte";
+import * as Tooltip from "$lib/components/ui/tooltip";
+import * as Select from "$lib/components/ui/select";
+import Context from "./Context.svelte";
+import { roomState, deviceId, isParticipating, isRoomAdmin } from "$lib/stores/roomStateStore";
+import Input from "$lib/components/ui/input/input.svelte";
+import { Plus } from "lucide-svelte";
+import Label from "$lib/components/ui/label/label.svelte";
+import { cardBacks } from "$lib/types";
 
-	let { allPresentRoomMembers } = roomState;
+let { allPresentRoomMembers } = roomState;
 
-	let currentCardBack = $derived($roomState.users[$deviceId]?.config?.cardBack || 'default');
-	let isAdminOnline = $derived(
-		!!$roomState.adminDeviceId && $allPresentRoomMembers.some((user) => user.deviceId === $roomState.adminDeviceId)
-	);
+let currentCardBack = $derived($roomState.users[$deviceId]?.config?.cardBack || "default");
+let isAdminOnline = $derived(
+	!!$roomState.adminDeviceId && $allPresentRoomMembers.some((user) => user.deviceId === $roomState.adminDeviceId),
+);
 </script>
 
 <div class="p-4 grid gap-2">
