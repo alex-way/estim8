@@ -20,6 +20,7 @@ export default defineConfig({
 			"clsx",
 			"tailwind-merge",
 			"tailwind-variants",
+			"svelte/internal/client",
 		],
 	},
 });
