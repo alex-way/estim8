@@ -3,7 +3,6 @@ import { dev } from "$app/environment";
 import { env as privateEnv } from "$env/dynamic/private";
 import { env as publicEnv } from "$env/dynamic/public";
 import { signJWT, verifyJWT } from "$lib/server/token";
-import { TursoStorage } from "$lib/storage";
 import type { Handle } from "@sveltejs/kit";
 import { sequence } from "@sveltejs/kit/hooks";
 import Pusher from "pusher";
@@ -27,8 +26,6 @@ export const pusher = new Pusher({
 	cluster: "eu",
 	useTLS: true,
 });
-
-export const persistentStorage = new TursoStorage();
 
 export const handleCookies: Handle = async ({ event, resolve }) => {
 	event.locals.name = event.cookies.get("name");

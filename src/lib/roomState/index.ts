@@ -1,14 +1,15 @@
 import { randomUUID } from "node:crypto";
-import { persistentStorage, pusher } from "$hooks/server";
-import type { PersistentStorage } from "$lib/storage/base";
+import { db } from "$db";
+import schema from "$db/schema";
+import { pusher } from "$hooks/server";
 import type { Choice, RoomState } from "$lib/types";
+import { eq, sql } from "drizzle-orm";
 import { DEFAULT_CHOICES, getChannelName } from "../constants";
 import { BaseRoom } from "./base";
 
 export class Room extends BaseRoom {
 	id: string;
 	state: RoomState;
-	#persistentStorage: PersistentStorage;
 
 	/**
 	 * NOTE: The constructor is now `private`.
@@ -29,7 +30,6 @@ export class Room extends BaseRoom {
 		super(state);
 		this.id = id;
 		this.state = state;
-		this.#persistentStorage = Room.getPersistentStorage();
 	}
 
 	static async createRoom(config: { id?: string; choices?: number[] }, adminDeviceId?: string) {
@@ -61,26 +61,26 @@ export class Room extends BaseRoom {
 	 * in the "ready" data to the `constructor`.
 	 */
 	static async getRoom(id: string): Promise<Room | null> {
-		const kv = Room.getPersistentStorage();
-		const existingRoomState = await kv.get(id);
+		const result = await db.select().from(schema.rooms).where(eq(schema.rooms.id, id)).limit(1);
+		if (result.length === 0) {
+			return null;
+		}
 
-		if (!existingRoomState) return null;
-
-		return new Room(id, existingRoomState);
-	}
-
-	private static getPersistentStorage(): PersistentStorage {
-		return persistentStorage;
+		return new Room(id, result[0].state);
 	}
 
 	static async persistChosenNumberForDeviceId(roomId: string, deviceId: string, choice: Choice) {
-		const kv = Room.getPersistentStorage();
-
-		const room = kv.persistChosenNumberForDeviceId(roomId, deviceId, choice).catch((err) => {
-			console.error(err);
-			throw err;
-		});
-		return room;
+		const key = `$.users.${deviceId}.choice`;
+		return db
+			.update(schema.rooms)
+			.set({
+				state: sql`json_set(state, ${key}, ${choice})`,
+			})
+			.where(eq(schema.rooms.id, roomId))
+			.returning({ state: schema.rooms.state })
+			.then((result) => {
+				return result[0].state;
+			});
 	}
 
 	async save(notify = false): Promise<Room> {
@@ -89,8 +89,18 @@ export class Room extends BaseRoom {
 			// not awaiting this because we don't want to block
 			pusher.trigger(channelName, "room-update", this.state);
 		}
-		await this.#persistentStorage.set(this.id, this.state);
 
-		return this;
+		return db
+			.insert(schema.rooms)
+			.values({
+				id: this.id,
+				state: this.state,
+			})
+			.onConflictDoUpdate({
+				target: schema.rooms.id,
+				set: { state: this.state, updated_at: sql`CURRENT_TIMESTAMP` },
+			})
+			.returning({ state: schema.rooms.state })
+			.then((result) => new Room(this.id, result[0].state));
 	}
 }
