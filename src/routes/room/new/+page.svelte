@@ -1,14 +1,15 @@
 <script lang="ts">
-import { enhance } from "$app/forms";
-import { navigating } from "$app/stores";
-import Card from "$lib/components/Card.svelte";
-import Button from "$lib/components/ui/button/button.svelte";
-import Input from "$lib/components/ui/input/input.svelte";
-import { Plus } from "lucide-svelte";
+	import { enhance } from '$app/forms';
+	import Card from '$lib/components/Card.svelte';
+	import Button from '$lib/components/ui/button/button.svelte';
+	import Input from '$lib/components/ui/input/input.svelte';
+	import { Plus } from 'lucide-svelte';
 
-const { data, form } = $props();
+	const { data, form } = $props();
 
-const choices = $derived(form?.choices ?? data.choices);
+	const choices = $derived(form?.choices ?? data.choices);
+
+	let loading = $state(false);
 </script>
 
 <div class="flex justify-center">
@@ -44,6 +45,7 @@ const choices = $derived(form?.choices ?? data.choices);
 			action="?/createRoom"
 			method="post"
 			use:enhance={() => {
+				loading = true;
 				return async ({ update }) => {
 					update({ reset: false, invalidateAll: false });
 				};
@@ -52,8 +54,8 @@ const choices = $derived(form?.choices ?? data.choices);
 			{#each choices as choice}
 				<input type="hidden" name="choices" value={choice} />
 			{/each}
-			<Button type="submit" size="lg" class="w-full" disabled={!!$navigating}
-				>{!!$navigating ? 'Loading...' : 'Start a new room'}</Button
+			<Button type="submit" size="lg" class="w-full" disabled={loading}
+				>{loading ? 'Loading...' : 'Start a new room'}</Button
 			>
 		</form>
 	</div>

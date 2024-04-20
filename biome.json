@@ -1,14 +1,17 @@
 {
 	"$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
-    "formatter": {
-        "indentStyle": "tab",
-        "lineWidth": 120
-    },
+	"formatter": {
+		"indentStyle": "tab",
+		"lineWidth": 120
+	},
 	"linter": {
 		"enabled": true,
 		"rules": {
 			"complexity": {
 				"noBannedTypes": {
+					"level": "off"
+				},
+				"noForEach": {
 					"level": "off"
 				}
 			}
@@ -16,14 +19,14 @@
 	},
 	"overrides": [
 		{
-		  "include": ["*.svelte"],
-		  "linter": {
-			"rules": {
-			  "style": {
-				"useConst": "off"
-			  }
+			"include": ["*.svelte"],
+			"linter": {
+				"rules": {
+					"style": {
+						"useConst": "off"
+					}
+				}
 			}
-		  }
 		}
-	  ]
+	]
 }
