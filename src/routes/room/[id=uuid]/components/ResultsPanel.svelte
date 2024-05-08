@@ -1,46 +1,46 @@
 <script lang="ts">
-import type { Choice } from "$lib/types";
-import Progress from "$lib/components/ui/progress/progress.svelte";
-import Context from "./Context.svelte";
-import Card from "$lib/components/Card.svelte";
-import { roomState, isObserving } from "$lib/stores/roomStateStore";
-import { fade } from "svelte/transition";
+	import Card from '$lib/components/Card.svelte';
+	import Progress from '$lib/components/ui/progress/progress.svelte';
+	import { isObserving, roomState } from '$lib/stores/roomStateStore';
+	import type { Choice } from '$lib/types';
+	import { fade } from 'svelte/transition';
+	import Context from './Context.svelte';
 
-const { participants, participantsVoted } = roomState;
+	const { participants, participantsVoted } = roomState;
 
-type Result = {
-	choice: Choice;
-	count: number;
-	percentage: number;
-};
+	type Result = {
+		choice: Choice;
+		count: number;
+		percentage: number;
+	};
 
-let results = $derived<Result[]>(
-	$participantsVoted
-		.reduce<Result[]>((acc, user) => {
-			if (user.choice === null) {
+	let results = $derived<Result[]>(
+		$participantsVoted
+			.reduce<Result[]>((acc, user) => {
+				if (user.choice === null) {
+					return acc;
+				}
+
+				const existingResult = acc.find((result) => result.choice === user.choice);
+
+				if (existingResult) {
+					existingResult.count++;
+				} else {
+					acc.push({
+						choice: user.choice,
+						count: 1,
+						percentage: 0
+					});
+				}
+
 				return acc;
-			}
-
-			const existingResult = acc.find((result) => result.choice === user.choice);
-
-			if (existingResult) {
-				existingResult.count++;
-			} else {
-				acc.push({
-					choice: user.choice,
-					count: 1,
-					percentage: 0,
-				});
-			}
-
-			return acc;
-		}, [])
-		.map((result) => ({
-			...result,
-			percentage: Math.round((result.count / $participantsVoted.length) * 100),
-		}))
-		.sort((a, b) => b.count - a.count),
-);
+			}, [])
+			.map((result) => ({
+				...result,
+				percentage: Math.round((result.count / $participantsVoted.length) * 100)
+			}))
+			.sort((a, b) => b.count - a.count)
+	);
 </script>
 
 <div class="flex gap-4 justify-evenly my-16">
@@ -51,7 +51,7 @@ let results = $derived<Result[]>(
 				pending={user.choice === null}
 				reveal={$roomState.showResults ||
 					($roomState.config.allowObserversToSnoop && $isObserving && user.choice !== null)}
-				revealText={user.choice || ''}
+				revealText={user.choice || '-'}
 				cardBack={user.config?.cardBack}
 			/>
 		</Context>

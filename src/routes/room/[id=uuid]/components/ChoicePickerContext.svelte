@@ -2,13 +2,14 @@
 	import { enhance } from '$app/forms';
 	import * as ContextMenu from '$lib/components/ui/context-menu';
 	import { isRoomAdmin } from '$lib/stores/roomStateStore';
+	import type { Snippet } from 'svelte';
 
-	const { choice }: { choice: number | '?' } = $props();
+	const { choice, children }: { choice: number | '?'; children: Snippet } = $props();
 </script>
 
 <ContextMenu.Root>
 	<ContextMenu.Trigger class="cursor-pointer">
-		<slot />
+		{@render children()}
 	</ContextMenu.Trigger>
 	{#if $isRoomAdmin}
 		<ContextMenu.Content>

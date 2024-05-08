@@ -4,12 +4,17 @@
 	import { page } from '$app/stores';
 	import { PUBLIC_PUSHER_APP_KEY } from '$env/static/public';
 	import * as Alert from '$lib/components/ui/alert';
+	import * as AlertDialog from '$lib/components/ui/alert-dialog';
 	import { Button } from '$lib/components/ui/button';
+	import * as Dialog from '$lib/components/ui/dialog';
 	import { Input } from '$lib/components/ui/input';
+	import Label from '$lib/components/ui/label/label.svelte';
 	import { Progress } from '$lib/components/ui/progress';
+	import * as Select from '$lib/components/ui/select';
 	import { getChannelName } from '$lib/constants';
 	import { deviceId, presenceInfo, roomState } from '$lib/stores/roomStateStore';
 	import type { CardBack, Choice, RoomState, RoomUser } from '$lib/types';
+	import { cardBacks } from '$lib/types';
 	import JSConfetti from 'js-confetti';
 	import Pusher, { type PresenceChannel } from 'pusher-js';
 	import { onMount } from 'svelte';
@@ -148,6 +153,7 @@
 
 	const deviceExistsInRoom = $derived(!!name && $deviceId in $roomState.users && $roomState.users[$deviceId].name);
 	const nameExistsInRoom = $derived(deviceExistsInRoom && $roomState.users[$deviceId].name === name);
+	const setName = $derived($roomState.users[$deviceId]?.name);
 
 	const { participants, participantsVoted, participantsNotVoted, percentOfParticipantsVoted, consensusAchieved } =
 		roomState;
@@ -159,6 +165,8 @@
 	const disableRevealButton = $derived(
 		$participants.length === 0 || $participantsNotVoted.length !== 0 || $roomState.showResults
 	);
+
+	let currentCardBack = $derived($roomState.users[$deviceId]?.config?.cardBack || 'default');
 
 	function onClickCopy() {
 		navigator.clipboard.writeText($page.url.toString());
@@ -178,65 +186,124 @@
 			<Button variant="secondary" on:click={onClickCopy}>{copyText}</Button>
 		</div>
 
+		<div class="grid w-full max-w-sm items-center gap-1.5">
+			<div class="flex">
+				<Dialog.Root>
+					<Dialog.Trigger><Button type="button" size="sm">Edit profile</Button></Dialog.Trigger>
+					<Dialog.Content>
+						<Dialog.Header>
+							<Dialog.Title>Edit profile</Dialog.Title>
+							<Dialog.Description class="grid gap-2 grid-cols-1">
+								<form
+									method="post"
+									action="?/setName"
+									class="w-full max-w-sm items-center space-x-2 mx-auto flex gap-2 align-middle"
+									use:enhance={() => {
+										localStorage.setItem('name', name || '');
+										return async ({ update }) => {
+											update({ reset: false, invalidateAll: false });
+										};
+									}}
+								>
+									<Label for="name">Name</Label>
+									<Input type="text" name="name" placeholder="Name" maxlength={32} bind:value={name} />
+									<Button type="submit" disabled={nameAlreadyExists} class={`${nameExistsInRoom ? 'hidden' : ''}`}
+										>Set</Button
+									>
+								</form>
+								<form
+									method="post"
+									action="?/setCardBack"
+									class="w-full max-w-sm items-center space-x-2 mx-auto flex gap-2 align-middle"
+									use:enhance={() => {
+										return async ({ update }) => {
+											update({ reset: false, invalidateAll: false });
+										};
+									}}
+								>
+									<Label for="cardback">Card back</Label>
+									<Select.Root name="cardback" selected={{ value: currentCardBack }}>
+										<Select.Trigger class="w-[180px]">
+											<Select.Value placeholder="Card Back" />
+										</Select.Trigger>
+										<Select.Content>
+											{#each cardBacks as background}
+												<Select.Item value={background}
+													>{background.charAt(0).toUpperCase() + background.slice(1)}</Select.Item
+												>
+											{/each}
+										</Select.Content>
+										<Select.Input name="cardBack" />
+									</Select.Root>
+									<Button type="submit">Update</Button>
+								</form>
+							</Dialog.Description>
+						</Dialog.Header>
+					</Dialog.Content>
+				</Dialog.Root>
+			</div>
+
+			<p class="text-sm text-muted-foreground" class:hidden={!nameAlreadyExists}>This name is already taken.</p>
+			{#if form?.errors?.name}
+				<p class="text-sm text-muted-foreground">{form.errors.name}</p>
+			{/if}
+		</div>
+
+		<Progress value={$percentOfParticipantsVoted} class="my-4" />
+
+		<ChoicePicker />
+
 		<form
 			method="post"
-			action="?/setName"
-			class="w-full max-w-sm items-center space-x-2 mx-auto"
+			action="?/reveal"
 			use:enhance={() => {
-				localStorage.setItem('name', name || '');
 				return async ({ update }) => {
-					update({ reset: false, invalidateAll: false });
+					update({ invalidateAll: false });
 				};
 			}}
+			class="inline-block"
 		>
-			<div class="grid w-full max-w-sm items-center gap-1.5">
-				<div class="flex">
-					<Input type="text" name="name" placeholder="Name" maxlength={8} bind:value={name} />
-					<Button type="submit" disabled={nameAlreadyExists} class={`${nameExistsInRoom ? 'hidden' : ''}`}>Set</Button>
-				</div>
-				<p class="text-sm text-muted-foreground" class:hidden={!nameAlreadyExists}>This name is already taken.</p>
-				{#if form?.errors?.name}
-					<p class="text-sm text-muted-foreground">{form.errors.name}</p>
-				{/if}
-			</div>
+			<Button type="submit" disabled={disableRevealButton}>Reveal</Button>
 		</form>
 
-		{#if deviceExistsInRoom}
-			<Progress value={$percentOfParticipantsVoted} class="my-4" />
+		<form
+			method="post"
+			action="?/clear"
+			use:enhance={() => {
+				return async ({ update }) => {
+					update({ invalidateAll: false });
+				};
+			}}
+			class="inline-block"
+		>
+			<Button type="submit" variant="outline" disabled={$participantsVoted.length === 0}>Clear</Button>
+		</form>
 
-			<ChoicePicker />
+		<ResultsPanel />
 
-			<form
-				method="post"
-				action="?/reveal"
-				use:enhance={() => {
-					return async ({ update }) => {
-						update({ invalidateAll: false });
-					};
-				}}
-				class="inline-block"
-			>
-				<Button type="submit" disabled={disableRevealButton}>Reveal</Button>
-			</form>
-
-			<form
-				method="post"
-				action="?/clear"
-				use:enhance={() => {
-					return async ({ update }) => {
-						update({ invalidateAll: false });
-					};
-				}}
-				class="inline-block"
-			>
-				<Button type="submit" variant="outline" disabled={$participantsVoted.length === 0}>Clear</Button>
-			</form>
-
-			<ResultsPanel />
-		{:else}
-			<Alert.Root class="my-4 max-w-lg mx-auto">
-				<Alert.Title>Please enter your name to continue.</Alert.Title>
-			</Alert.Root>
+		{#if setName === ''}
+			<AlertDialog.Root open={true}>
+				<AlertDialog.Content>
+					<AlertDialog.Header>
+						<AlertDialog.Title class="text-center">Please enter your name to continue.</AlertDialog.Title>
+					</AlertDialog.Header>
+					<form
+						method="post"
+						action="?/setName"
+						class="w-full max-w-sm items-center mx-auto flex gap-2 align-middle"
+						use:enhance={() => {
+							localStorage.setItem('name', name || '');
+							return async ({ update }) => {
+								update({ reset: false, invalidateAll: false });
+							};
+						}}
+					>
+						<Input type="text" name="name" placeholder="Name" maxlength={32} bind:value={name} />
+						<Button type="submit" disabled={nameAlreadyExists} class={`${nameExistsInRoom ? 'hidden' : ''}`}>Set</Button
+						>
+					</form>
+				</AlertDialog.Content>
+			</AlertDialog.Root>
 		{/if}
 	</div>
 	<div class="col-span-3 xl:col-span-2 border-white border-opacity-20 border-t-2 lg:border-t-0 lg:border-l-2">
