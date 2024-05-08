@@ -138,7 +138,7 @@
 
 		presenceChannel.bind('room:reveal', () => {
 			$roomState.showResults = true;
-			if (jsConfetti && $consensusAchieved) jsConfetti.addConfetti();
+			if (jsConfetti && $consensusAchieved && $participantsVoted[0].choice !== '?') jsConfetti.addConfetti();
 		});
 
 		return () => {
