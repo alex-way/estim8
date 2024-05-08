@@ -52,8 +52,8 @@
 		{#if reveal}
 			{#if revealText}
 				<p class="text-6xl text-center mt-2">{revealText}</p>
-			{:else if children}
-				{@render children()}
+			{:else}
+				{@render children?.()}
 			{/if}
 		{:else}
 			<Skeleton class={`w-16 h-20 rounded-lg mx-auto bg-primary/20 ${pending ? '' : 'bg-emerald-300'}`} />

@@ -7,7 +7,10 @@
 	import * as Tooltip from '$lib/components/ui/tooltip';
 	import { deviceId, isParticipating, isRoomAdmin, roomState } from '$lib/stores/roomStateStore';
 	import { Plus } from 'lucide-svelte';
+	import type { Snippet } from 'svelte';
 	import Context from './Context.svelte';
+
+	const { additionalButtons }: { additionalButtons?: Snippet } = $props();
 
 	let { allPresentRoomMembers } = roomState;
 
@@ -90,6 +93,7 @@
 				</Tooltip.Content>
 			</Tooltip.Root>
 		</form>
+		{@render additionalButtons?.()}
 	</div>
 
 	{#if $isRoomAdmin}
