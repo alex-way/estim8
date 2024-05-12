@@ -25,12 +25,14 @@
 	);
 
 	let currentCardBack = $derived($roomState.users[$deviceId]?.config?.cardBack || 'default');
+	let dialogOpen = $state(false);
 </script>
 
 <div class="grid w-full max-w-sm items-center gap-1.5">
 	<div class="flex">
-		<Dialog.Root>
-			<Dialog.Trigger><Button type="button" size="sm">Edit profile</Button></Dialog.Trigger>
+		<Button type="button" size="sm" on:click={() => (dialogOpen = true)}>Edit profile</Button>
+		<Dialog.Root bind:open={dialogOpen}>
+			<Dialog.Trigger></Dialog.Trigger>
 			<Dialog.Content>
 				<Dialog.Header>
 					<Dialog.Title>Edit profile</Dialog.Title>
