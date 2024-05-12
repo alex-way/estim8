@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { page } from '$app/stores';
 	import { Button } from '$lib/components/ui/button';
 	import * as Dialog from '$lib/components/ui/dialog';
 	import { Input } from '$lib/components/ui/input';
@@ -10,8 +9,7 @@
 	import { cardBacks } from '$lib/types';
 	import type { ActionData, PageData } from '../$types';
 
-	const { data, form }: { data: PageData; form: ActionData } = $props();
-	let { name } = $state({ name: $page.data.name });
+	let { data, form, name = $bindable() }: { data: PageData; form: ActionData; name: string | undefined } = $props();
 
 	$roomState = data.roomState;
 	$deviceId = data.deviceId;

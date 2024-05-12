@@ -239,7 +239,7 @@
 	</div>
 	<div class="col-span-3 xl:col-span-2 border-white border-opacity-20 border-t-2 lg:border-t-0 lg:border-l-2">
 		{#snippet additionalButtons()}
-			<ProfileButton {data} {form} />
+			<ProfileButton {data} {form} bind:name />
 		{/snippet}
 		<RoomConfig {additionalButtons} />
 	</div>
