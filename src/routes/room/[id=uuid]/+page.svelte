@@ -169,6 +169,7 @@
 			copyText = 'Copy';
 		}, 2000);
 	}
+	const disableClearButton = $derived($participantsVoted.length === 0);
 </script>
 
 <div class="w-full grid grid-cols-1 lg:grid-cols-12 min-h-full">
@@ -207,7 +208,7 @@
 			}}
 			class="inline-block"
 		>
-			<Button type="submit" variant="outline" disabled={$participantsVoted.length === 0}>Clear</Button>
+			<Button type="submit" variant="outline" disabled={disableClearButton}>Clear</Button>
 		</form>
 
 		<ResultsPanel />

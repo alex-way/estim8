@@ -51,6 +51,7 @@
 						class="text-center py-6 text-3xl bg-slate-700"
 						min={0}
 						max={999}
+						step={0.5}
 						autofocus
 						required
 					/>

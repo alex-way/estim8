@@ -4,7 +4,8 @@ import { error, redirect } from "@sveltejs/kit";
 import z from "zod";
 import type { Actions, PageServerLoad } from "./$types";
 
-const schema = z.array(z.coerce.number().int().positive()).min(2);
+const singleChoiceSchema = z.coerce.number().positive();
+const schema = z.array(singleChoiceSchema).min(2);
 
 export const actions = {
 	addChoice: async ({ request, cookies }) => {
@@ -14,11 +15,10 @@ export const actions = {
 		const parsedChoices = (
 			choicesParam
 				.map((choice) => {
-					const parsed = Number.parseInt(choice.toString());
-					if (Number.isNaN(parsed)) return null;
-					return parsed;
+					const parsed = singleChoiceSchema.safeParse(choice.toString());
+					return parsed.data;
 				})
-				.filter((choice) => choice !== null) as number[]
+				.filter((choice) => choice !== undefined) as number[]
 		).sort((a, b) => a - b);
 
 		const choices = new Set(parsedChoices);
