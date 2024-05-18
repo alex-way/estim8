@@ -10,8 +10,8 @@
 		"test": "npm run test:integration && npm run test:unit",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-		"lint": "biome lint src &&prettier --plugin-search-dir . --check . && eslint .",
-		"format": "biome format src &&prettier --plugin-search-dir . --write .",
+		"lint": "biome lint src && prettier --plugin-search-dir . --check . && eslint .",
+		"format": "biome format src && prettier --plugin-search-dir . --write .",
 		"test:integration": "playwright test",
 		"test:unit": "vitest",
 		"drizzle-kit": "drizzle-kit"
@@ -38,19 +38,19 @@
 		"@biomejs/biome": "^1.7.3",
 		"@playwright/test": "^1.44.0",
 		"@sveltejs/adapter-vercel": "^5.3.0",
-		"@sveltejs/kit": "^2.5.8",
+		"@sveltejs/kit": "^2.5.9",
 		"@typescript-eslint/eslint-plugin": "^7.9.0",
 		"@typescript-eslint/parser": "^7.9.0",
 		"@vitejs/plugin-basic-ssl": "^1.1.0",
 		"autoprefixer": "^10.4.19",
 		"drizzle-kit": "^0.21.2",
-		"eslint": "^9.2.0",
+		"eslint": "^9.3.0",
 		"eslint-config-prettier": "^9.1.0",
 		"eslint-plugin-svelte": "2.39.0",
 		"postcss": "^8.4.38",
 		"prettier": "^3.2.5",
 		"prettier-plugin-svelte": "^3.2.3",
-		"svelte": "5.0.0-next.134",
+		"svelte": "5.0.0-next.136",
 		"svelte-check": "^3.7.1",
 		"svelte-preprocess": "^5.1.4",
 		"tailwindcss": "3.4.3",
@@ -59,6 +59,5 @@
 		"vite": "^5.2.11",
 		"vitest": "^1.6.0",
 		"zod": "^3.23.8"
-	},
-	"packageManager": "pnpm@9.1.0+sha256.22e36fba7f4880ecf749a5ca128b8435da085ecd49575e7fb9e64d6bf4fad394"
+	}
 }
