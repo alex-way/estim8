@@ -62,13 +62,17 @@ export const actions = {
 	createRoom: async ({ request, locals }) => {
 		const formData = await request.formData();
 		const choices = formData.getAll("choices");
+		const roomId = formData.get("roomId");
 
 		const parsedChoices = schema.safeParse(choices);
 		if (parsedChoices.success === false) {
 			return error(400, parsedChoices.error.message);
 		}
 
-		const room = await Room.createRoom({ choices: parsedChoices.data }, locals.deviceId);
+		const room = await Room.createRoom(
+			{ choices: parsedChoices.data, id: roomId === null ? undefined : roomId.toString() },
+			locals.deviceId,
+		);
 
 		return redirect(303, `/room/${room.id}`);
 	},
