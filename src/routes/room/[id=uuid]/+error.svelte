@@ -1,10 +1,45 @@
 <script lang="ts">
 	import Button from '$/lib/components/ui/button/button.svelte';
 	import { enhance } from '$app/forms';
+	import { goto, invalidateAll } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { DEFAULT_CHOICES } from '$lib/constants';
+	import { PUBLIC_PUSHER_APP_KEY } from '$env/static/public';
+	import { DEFAULT_CHOICES, getChannelName } from '$lib/constants';
+	import Pusher, { type PresenceChannel } from 'pusher-js';
+	import { onMount } from 'svelte';
 
 	let loading = $state(false);
+
+	let presenceChannel: PresenceChannel | undefined;
+
+	const channelName = getChannelName($page.params.id);
+
+	onMount(() => {
+		const pusher = new Pusher(PUBLIC_PUSHER_APP_KEY, {
+			cluster: 'eu',
+			userAuthentication: {
+				endpoint: '/pusher/user-auth',
+				transport: 'ajax'
+			},
+			channelAuthorization: {
+				endpoint: '/pusher/channel-auth',
+				transport: 'ajax'
+			}
+		});
+
+		presenceChannel = pusher.subscribe(channelName) as PresenceChannel;
+
+		presenceChannel.bind('room:reload', async () => {
+			pusher.unsubscribe(channelName);
+			pusher.disconnect();
+			await goto(`/room/${$page.params.id}`, { replaceState: true, invalidateAll: true });
+		});
+
+		return () => {
+			pusher.unsubscribe(channelName);
+			pusher.disconnect();
+		};
+	});
 </script>
 
 <div class="h-full text-white flex flex-col justify-center items-center py-40">

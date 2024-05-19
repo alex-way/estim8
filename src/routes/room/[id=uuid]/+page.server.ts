@@ -368,6 +368,8 @@ export const actions = {
 export const load: PageServerLoad = async ({ params, locals }) => {
 	let room = await getRoomOr404(params.id);
 
+	trigger(params.id, "room:reload", {});
+
 	const usersInRoom = await getUsersInRoom(room.id);
 
 	const isOnlyUserInRoom = usersInRoom.length === 0 || (usersInRoom.length === 1 && usersInRoom[0] === locals.deviceId);

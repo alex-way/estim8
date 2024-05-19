@@ -18,10 +18,6 @@
 	const deviceExistsInRoom = $derived(!!name && $deviceId in $roomState.users && $roomState.users[$deviceId].name);
 	const nameExistsInRoom = $derived(deviceExistsInRoom && $roomState.users[$deviceId].name === name);
 
-	const nameAlreadyExists = $derived(
-		Object.values($roomState.users).some((user) => user.name === name && $deviceId !== user.deviceId)
-	);
-
 	let currentCardBack = $derived($roomState.users[$deviceId]?.config?.cardBack || 'default');
 	let dialogOpen = $state(false);
 </script>
@@ -48,9 +44,7 @@
 						>
 							<Label for="name">Name</Label>
 							<Input type="text" name="name" placeholder="Name" maxlength={32} bind:value={name} />
-							<Button type="submit" disabled={nameAlreadyExists} class={`${nameExistsInRoom ? 'hidden' : ''}`}
-								>Set</Button
-							>
+							<Button type="submit" class={`${nameExistsInRoom ? 'hidden' : ''}`}>Set</Button>
 						</form>
 						<form
 							method="post"

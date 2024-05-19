@@ -9,7 +9,7 @@
 	import { Progress } from '$lib/components/ui/progress';
 	import { getChannelName } from '$lib/constants';
 	import { deviceId, presenceInfo, roomState } from '$lib/stores/roomStateStore';
-	import type { CardBack, Choice, RoomState, RoomUser } from '$lib/types';
+	import type { CardBack, Choice, RoomUser } from '$lib/types';
 	import JSConfetti from 'js-confetti';
 	import Pusher, { type PresenceChannel } from 'pusher-js';
 	import { onMount } from 'svelte';
@@ -148,10 +148,6 @@
 	const { participants, participantsVoted, participantsNotVoted, percentOfParticipantsVoted, consensusAchieved } =
 		roomState;
 
-	const nameAlreadyExists = $derived(
-		Object.values($roomState.users).some((user) => user.name === name && $deviceId !== user.deviceId)
-	);
-
 	const disableRevealButton = $derived(
 		$participants.length === 0 || $participantsNotVoted.length !== 0 || $roomState.showResults
 	);
@@ -225,8 +221,7 @@
 						}}
 					>
 						<Input type="text" name="name" placeholder="Name" maxlength={32} bind:value={name} />
-						<Button type="submit" disabled={nameAlreadyExists} class={`${nameExistsInRoom ? 'hidden' : ''}`}>Set</Button
-						>
+						<Button type="submit" class={`${nameExistsInRoom ? 'hidden' : ''}`}>Set</Button>
 					</form>
 				</AlertDialog.Content>
 			</AlertDialog.Root>
