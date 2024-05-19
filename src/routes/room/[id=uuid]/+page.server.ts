@@ -1,6 +1,7 @@
+import type { RoomState } from "$/lib/types";
 import { pusher } from "$hooks/server";
 import { getChannelName } from "$lib/constants";
-import { Room } from "$lib/roomState";
+import { DBUser, Room } from "$lib/roomState";
 import { error, fail } from "@sveltejs/kit";
 import z from "zod";
 import type { Actions, PageServerLoad } from "./$types";
@@ -30,12 +31,12 @@ async function trigger(
 	return pusher.trigger(channelName, eventName, data);
 }
 
-function isAdmin(room: Room, locals: { deviceId: string }) {
-	return room.state.adminDeviceId === locals.deviceId;
+function isRoomAdmin(room: RoomState, locals: { deviceId: string }) {
+	return room.adminDeviceId === locals.deviceId;
 }
 
-async function getRoomOr404(roomId: string): Promise<Room> {
-	const room = await Room.getRoom(roomId);
+async function getRoomOr404(roomId: string): Promise<RoomState> {
+	const room = await new Room(roomId).getRoom();
 	if (room === null)
 		return error(404, {
 			message: "That room doesn't exist",
@@ -43,20 +44,16 @@ async function getRoomOr404(roomId: string): Promise<Room> {
 	return room;
 }
 
-async function isAdminInRoom(room: Room): Promise<boolean> {
+async function isAdminInRoom(room: RoomState): Promise<boolean> {
 	const usersInRoom = await getUsersInRoom(room.id);
-	return !!room.state.adminDeviceId && usersInRoom.includes(room.state.adminDeviceId);
+	return !!room.adminDeviceId && usersInRoom.includes(room.adminDeviceId);
 }
 
 export const actions = {
 	setName: async ({ request, locals, params, cookies }) => {
-		const room = await getRoomOr404(params.id);
-
 		const formData = await request.formData();
 
-		const schema = z.string();
-
-		const parsedName = schema.safeParse(formData.get("name"));
+		const parsedName = z.string().safeParse(formData.get("name"));
 		if (!parsedName.success) {
 			return fail(400, {
 				errors: {
@@ -64,23 +61,8 @@ export const actions = {
 				},
 			});
 		}
-
-		const nameAlreadyPresent = room.getDeviceIdFromName(parsedName.data) !== null;
-		if (nameAlreadyPresent) {
-			return fail(400, {
-				errors: {
-					name: "Name already taken.",
-				},
-			});
-		}
-
-		// Remove all users from the room that aren't in the room anymore
-		const usersInRoom = await getUsersInRoom(room.id);
-		room.removeUsersNotInRoom(usersInRoom);
-
-		room.setNameForDeviceId(locals.deviceId, parsedName.data);
 		await Promise.all([
-			room.save(),
+			new DBUser(locals.deviceId).setName(parsedName.data),
 			trigger(params.id, "user:set-name", {
 				id: locals.deviceId,
 				name: parsedName.data,
@@ -97,9 +79,8 @@ export const actions = {
 	},
 	submitNumber: async ({ request, params, locals }) => {
 		const formData = await request.formData();
-		const schema = z.union([z.literal("?"), z.coerce.number()]);
 
-		const parsedNumber = schema.safeParse(formData.get("chosenNumber"));
+		const parsedNumber = z.union([z.literal("?"), z.coerce.number()]).safeParse(formData.get("chosenNumber"));
 		if (!parsedNumber.success) {
 			return fail(400, {
 				body: parsedNumber.error,
@@ -107,7 +88,7 @@ export const actions = {
 		}
 
 		await Promise.all([
-			Room.persistChosenNumberForDeviceId(params.id, locals.deviceId, parsedNumber.data).catch(() => {
+			new Room(params.id).setChoiceForDeviceId(locals.deviceId, parsedNumber.data).catch(() => {
 				return fail(400, {
 					body: "Something went wrong. Please try again later.",
 				});
@@ -119,34 +100,34 @@ export const actions = {
 		]);
 	},
 	reveal: async ({ params }) => {
-		const room = await getRoomOr404(params.id);
-
-		if (room.state.showResults) return;
-
-		room.invertShowResults();
-		await Promise.all([room.save(), trigger(params.id, "room:reveal", {})]);
+		await Promise.all([
+			new Room(params.id).reveal().catch(() => {
+				return fail(400, {
+					body: "Something went wrong. Please try again later.",
+				});
+			}),
+			trigger(params.id, "room:reveal", {}),
+		]);
 	},
 	setAllowUnknown: async ({ request, params, locals }) => {
 		const room = await getRoomOr404(params.id);
 
-		if (!isAdmin(room, locals))
+		if (!isRoomAdmin(room, locals))
 			return fail(403, {
 				body: "Only the admin can do this",
 			});
 
 		const formData = await request.formData();
-		const schema = z.coerce.boolean();
 
-		const parsedAllowUnknown = schema.safeParse(formData.get("allowUnknown"));
+		const parsedAllowUnknown = z.coerce.boolean().safeParse(formData.get("allowUnknown"));
 		if (!parsedAllowUnknown.success) {
 			return fail(400, {
 				body: parsedAllowUnknown.error.toString(),
 			});
 		}
 
-		room.state.config.allowUnknown = parsedAllowUnknown.data;
 		await Promise.all([
-			room.save(),
+			new Room(params.id).setAllowUnknown(parsedAllowUnknown.data),
 			trigger(params.id, "room:update-allow-unknown", {
 				allowUnknown: parsedAllowUnknown.data,
 			}),
@@ -155,60 +136,56 @@ export const actions = {
 	setAllowSnooping: async ({ request, params, locals }) => {
 		const room = await getRoomOr404(params.id);
 
-		if (!isAdmin(room, locals))
+		if (!isRoomAdmin(room, locals))
 			return fail(403, {
 				body: "Only the admin can do this",
 			});
 
 		const formData = await request.formData();
-		const schema = z.coerce.boolean();
 
-		const parsedAllowSnooping = schema.safeParse(formData.get("allowSnooping"));
+		const parsedAllowSnooping = z.coerce.boolean().safeParse(formData.get("allowSnooping"));
 		if (!parsedAllowSnooping.success) {
 			return fail(400, {
 				body: parsedAllowSnooping.error.toString(),
 			});
 		}
 
-		room.state.config.allowObserversToSnoop = parsedAllowSnooping.data;
 		await Promise.all([
-			room.save(),
+			new Room(params.id).setAllowSnooping(parsedAllowSnooping.data),
 			trigger(params.id, "room:update-allow-snooping", {
 				allowSnooping: parsedAllowSnooping.data,
 			}),
 		]);
 	},
+
 	setParticipation: async ({ request, params, locals }) => {
 		const room = await getRoomOr404(params.id);
 
 		const formData = await request.formData();
-		const deviceIdSchema = z.string();
-		const participatingSchema = z.coerce.boolean();
 
 		const formDeviceId = formData.get("deviceId");
 		const participating = formData.get("participating");
 
 		const isOwnDevice = locals.deviceId === formDeviceId;
-		if (!isAdmin(room, locals) && !isOwnDevice)
+		if (!isRoomAdmin(room, locals) && !isOwnDevice)
 			return fail(403, {
 				body: "Only the admin can do this",
 			});
 
-		const parsedDeviceId = deviceIdSchema.safeParse(formDeviceId);
+		const parsedDeviceId = z.string().safeParse(formDeviceId);
 		if (!parsedDeviceId.success)
 			return fail(400, {
 				body: parsedDeviceId.error.toString(),
 			});
 
-		const parsedParticipating = participatingSchema.safeParse(participating);
+		const parsedParticipating = z.coerce.boolean().safeParse(participating);
 		if (!parsedParticipating.success)
 			return fail(400, {
 				body: parsedParticipating.error.toString(),
 			});
 
-		room.setUserParticipation(parsedDeviceId.data, parsedParticipating.data);
 		await Promise.all([
-			room.save(),
+			new Room(params.id).setParticipation(parsedDeviceId.data, parsedParticipating.data),
 			trigger(params.id, "user:update-participation", {
 				id: locals.deviceId,
 				participating: parsedParticipating.data,
@@ -219,150 +196,152 @@ export const actions = {
 		const room = await getRoomOr404(params.id);
 
 		const formData = await request.formData();
-		const schema = z.string();
-
 		const formDeviceId = formData.get("deviceId");
 
-		if (!isAdmin(room, locals))
+		if (!isRoomAdmin(room, locals))
 			return fail(403, {
 				body: "Only the admin can do this",
 			});
 
-		const parsedDeviceId = schema.safeParse(formDeviceId);
+		const parsedDeviceId = z.string().safeParse(formDeviceId);
 		if (!parsedDeviceId.success)
 			return fail(400, {
 				body: parsedDeviceId.error.toString(),
 			});
 
-		const isAdminBeingRemoved = room.state.adminDeviceId === formDeviceId;
+		const isAdminBeingRemoved = room.adminDeviceId === formDeviceId;
 
 		if (isAdminBeingRemoved)
 			return fail(403, {
 				body: "The admin cannot be removed",
 			});
 
-		room.removeUser(parsedDeviceId.data);
-		await Promise.all([room.save(), trigger(params.id, "user:remove", { id: parsedDeviceId.data })]);
+		await Promise.all([
+			new Room(params.id).removeUser(parsedDeviceId.data),
+			trigger(params.id, "user:remove", { id: parsedDeviceId.data }),
+		]);
 	},
+
 	setAdmin: async ({ request, params, locals }) => {
 		const room = await getRoomOr404(params.id);
 
 		const formData = await request.formData();
-		const schema = z.string();
-
 		const formDeviceId = formData.get("deviceId");
 
-		if (!isAdmin(room, locals))
+		if (!isRoomAdmin(room, locals))
 			return fail(403, {
 				body: "Only the admin can do this",
 			});
 
-		const parsedDeviceId = schema.safeParse(formDeviceId);
+		const parsedDeviceId = z.string().safeParse(formDeviceId);
 		if (!parsedDeviceId.success)
 			return fail(400, {
 				body: parsedDeviceId.error.toString(),
 			});
 
-		room.setAdmin(parsedDeviceId.data);
-
-		await room.save(true);
+		return Promise.all([
+			new Room(params.id).setAdmin(parsedDeviceId.data),
+			trigger(params.id, "room:set-admin", {
+				adminDeviceId: parsedDeviceId.data,
+			}),
+		]);
 	},
 	clear: async ({ params }) => {
-		const room = await getRoomOr404(params.id);
-
-		room.clearSelectedNumbers();
-		await Promise.all([room.save(), trigger(params.id, "room:clear", {})]);
+		await Promise.all([
+			new Room(params.id).clearChoices().catch(() => {
+				return fail(400, {
+					body: "Something went wrong. Please try again later.",
+				});
+			}),
+			trigger(params.id, "room:clear", {}),
+		]);
 	},
 	addChoice: async ({ request, params, locals }) => {
 		const room = await getRoomOr404(params.id);
 
-		if (!isAdmin(room, locals))
+		if (!isRoomAdmin(room, locals))
 			return fail(403, {
 				body: "Only the admin can do this",
 			});
 
 		const formData = await request.formData();
-		const schema = z.coerce.number();
 
-		const parsedChoice = schema.safeParse(formData.get("choice"));
+		const parsedChoice = z.coerce.number().safeParse(formData.get("choice"));
 		if (!parsedChoice.success) {
 			return fail(400, {
 				body: parsedChoice.error.toString(),
 			});
 		}
 
-		const existingChoice = room.state.config.selectableNumbers.includes(parsedChoice.data);
+		const existingChoice = room.config.selectableNumbers.includes(parsedChoice.data);
 
 		if (existingChoice)
 			return fail(400, {
 				body: "This choice is already in the list",
 			});
 
-		room.updateSelectableNumbers([...room.state.config.selectableNumbers, parsedChoice.data]);
+		const newChoices = [...room.config.selectableNumbers, parsedChoice.data].sort((a, b) => a - b);
 		await Promise.all([
-			room.save(),
+			new Room(params.id).setChoices(newChoices),
 			trigger(params.id, "room:update-selectable-numbers", {
-				selectableNumbers: [...room.state.config.selectableNumbers, parsedChoice.data],
+				selectableNumbers: newChoices,
 			}),
 		]);
 	},
 	removeChoice: async ({ request, params, locals }) => {
 		const room = await getRoomOr404(params.id);
 
-		if (!isAdmin(room, locals))
+		if (!isRoomAdmin(room, locals))
 			return fail(403, {
 				body: "Only the admin can do this",
 			});
 
 		const formData = await request.formData();
-		const schema = z.coerce.number();
 
-		const parsedChoice = schema.safeParse(formData.get("choice"));
+		const parsedChoice = z.coerce.number().safeParse(formData.get("choice"));
 		if (!parsedChoice.success) {
 			return fail(400, {
 				body: parsedChoice.error.toString(),
 			});
 		}
-		const existingChoice = room.state.config.selectableNumbers.includes(parsedChoice.data);
+		const existingChoice = room.config.selectableNumbers.includes(parsedChoice.data);
 
 		if (!existingChoice)
 			return fail(400, {
 				body: "This choice is not in the list",
 			});
 
-		room.updateSelectableNumbers(room.state.config.selectableNumbers.filter((choice) => choice !== parsedChoice.data));
+		const newChoices = room.config.selectableNumbers.filter((choice) => choice !== parsedChoice.data);
 		await Promise.all([
-			room.save(),
+			new Room(params.id).setChoices(newChoices),
 			trigger(params.id, "room:update-selectable-numbers", {
-				selectableNumbers: room.state.config.selectableNumbers.filter((choice) => choice !== parsedChoice.data),
+				selectableNumbers: newChoices,
 			}),
 		]);
 	},
 	setCardBack: async ({ request, params, locals }) => {
-		const room = await getRoomOr404(params.id);
-
 		const formData = await request.formData();
-		const schema = z.union([
-			z.literal("default"),
-			z.literal("red"),
-			z.literal("blue"),
-			z.literal("green"),
-			z.literal("yellow"),
-			z.literal("pink"),
-			z.literal("purple"),
-			z.literal("magic"),
-		]);
 
-		const parsedCardBack = schema.safeParse(formData.get("cardBack"));
+		const parsedCardBack = z
+			.union([
+				z.literal("default"),
+				z.literal("red"),
+				z.literal("blue"),
+				z.literal("green"),
+				z.literal("yellow"),
+				z.literal("pink"),
+				z.literal("purple"),
+				z.literal("magic"),
+			])
+			.safeParse(formData.get("cardBack"));
 		if (!parsedCardBack.success) {
 			return fail(400, {
 				body: parsedCardBack.error.toString(),
 			});
 		}
 
-		room.setCardBackForDeviceId(locals.deviceId, parsedCardBack.data);
 		await Promise.all([
-			room.save(),
+			new DBUser(locals.deviceId).setCardBack(parsedCardBack.data),
 			trigger(params.id, "user:update-card-back", {
 				id: locals.deviceId,
 				cardBack: parsedCardBack.data,
@@ -372,13 +351,12 @@ export const actions = {
 	claimAdmin: async ({ params, locals }) => {
 		const room = await getRoomOr404(params.id);
 
-		const shouldSetAdmin = room.state.adminDeviceId === null || !(await isAdminInRoom(room));
+		const shouldSetAdmin = room.adminDeviceId === null || !(await isAdminInRoom(room));
 
 		if (!shouldSetAdmin) return;
 
-		room.setAdmin(locals.deviceId);
 		await Promise.all([
-			room.save(),
+			new Room(params.id).setAdmin(locals.deviceId),
 			trigger(params.id, "room:set-admin", {
 				adminDeviceId: locals.deviceId,
 			}),
@@ -386,38 +364,28 @@ export const actions = {
 	},
 } satisfies Actions;
 
+// todo: optimise loading so we don't send 3 separate requests to DB every time
 export const load: PageServerLoad = async ({ params, locals }) => {
-	const room = await Room.getRoom(params.id);
-	if (room === null)
-		return error(404, {
-			message: "That room doesn't exist",
-		});
-
-	if (locals.name && room.getDeviceIdFromName(locals.name) === null) {
-		room.setNameForDeviceId(locals.deviceId, locals.name);
-	}
+	let room = await getRoomOr404(params.id);
 
 	const usersInRoom = await getUsersInRoom(room.id);
 
 	const isOnlyUserInRoom = usersInRoom.length === 0 || (usersInRoom.length === 1 && usersInRoom[0] === locals.deviceId);
 
-	if (room.state.adminDeviceId === null || isOnlyUserInRoom) {
-		room.setAdmin(locals.deviceId);
+	if (room.adminDeviceId !== locals.deviceId && isOnlyUserInRoom) {
+		await new Room(params.id).setAdmin(locals.deviceId);
 	}
 
-	const inRoomAlready = room.state.users[locals.deviceId] !== undefined;
+	const inRoomAlready = room.users[locals.deviceId] !== undefined;
 	if (!inRoomAlready) {
-		const user = room.getUserOrDefault(locals.deviceId);
-		await trigger(params.id, "user:add", user);
-	}
-
-	if (room.isModified()) {
-		await room.save(true);
+		await new Room(params.id).addUser(locals.deviceId);
+		room = await getRoomOr404(params.id);
+		await trigger(params.id, "user:add", room.users[locals.deviceId]);
 	}
 
 	return {
 		deviceId: locals.deviceId,
 		name: locals.name,
-		roomState: room.state,
+		roomState: room,
 	};
 };

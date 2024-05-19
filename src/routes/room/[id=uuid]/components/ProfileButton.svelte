@@ -15,8 +15,6 @@
 	$deviceId = data.deviceId;
 	$presenceInfo = { [data.deviceId]: [] };
 
-	$inspect($roomState);
-
 	const deviceExistsInRoom = $derived(!!name && $deviceId in $roomState.users && $roomState.users[$deviceId].name);
 	const nameExistsInRoom = $derived(deviceExistsInRoom && $roomState.users[$deviceId].name === name);
 

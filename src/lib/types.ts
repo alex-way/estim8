@@ -14,6 +14,7 @@ export type RoomUser = {
 };
 
 export type RoomState = {
+	id: string;
 	// session
 	users: Record<string, RoomUser>;
 	showResults: boolean;

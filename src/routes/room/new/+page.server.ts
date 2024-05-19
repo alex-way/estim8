@@ -59,7 +59,7 @@ export const actions = {
 
 		return { choices };
 	},
-	createRoom: async ({ request }) => {
+	createRoom: async ({ request, locals }) => {
 		const formData = await request.formData();
 		const choices = formData.getAll("choices");
 
@@ -68,7 +68,7 @@ export const actions = {
 			return error(400, parsedChoices.error.message);
 		}
 
-		const room = await Room.createRoom({ choices: parsedChoices.data });
+		const room = await Room.createRoom({ choices: parsedChoices.data }, locals.deviceId);
 
 		return redirect(303, `/room/${room.id}`);
 	},

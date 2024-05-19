@@ -25,8 +25,6 @@
 	$deviceId = data.deviceId;
 	$presenceInfo = { [data.deviceId]: [] };
 
-	$inspect($roomState);
-
 	const jsConfetti = browser ? new JSConfetti() : undefined;
 	let presenceChannel: PresenceChannel | undefined;
 
@@ -149,6 +147,7 @@
 
 	const deviceExistsInRoom = $derived(!!name && $deviceId in $roomState.users && $roomState.users[$deviceId].name);
 	const nameExistsInRoom = $derived(deviceExistsInRoom && $roomState.users[$deviceId].name === name);
+
 	const setName = $derived($roomState.users[$deviceId]?.name);
 
 	const { participants, participantsVoted, participantsNotVoted, percentOfParticipantsVoted, consensusAchieved } =
