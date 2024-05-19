@@ -57,11 +57,6 @@
 
 		presenceChannel = pusher.subscribe(channelName) as PresenceChannel;
 
-		presenceChannel.bind('room-update', (newRoomState: RoomState) => {
-			dev && console.log('room-update', newRoomState);
-			$roomState = newRoomState;
-		});
-
 		presenceChannel.bind('pusher:subscription_succeeded', (members: PresenceSubscriptionData) => {
 			dev && console.log('subscription_succeeded', members);
 			$presenceInfo = members.members;
