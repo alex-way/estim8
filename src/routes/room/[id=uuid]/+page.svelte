@@ -131,7 +131,19 @@
 
 		presenceChannel.bind('room:reveal', () => {
 			$roomState.showResults = true;
-			if (jsConfetti && $consensusAchieved && $participantsVoted[0].choice !== '?') jsConfetti.addConfetti();
+			if (jsConfetti && $consensusAchieved && $participantsVoted[0].choice !== '?') {
+				const randomEmoji = ['🎊', '🎉', '🎈', '🎉', '🎊'];
+				const randomEmojiIndex = Math.floor(Math.random() * randomEmoji.length * 2);
+				const selectedEmoji = randomEmoji[randomEmojiIndex];
+
+				jsConfetti.addConfetti(
+					selectedEmoji
+						? {
+								emojis: [randomEmoji[randomEmojiIndex]]
+							}
+						: undefined
+				);
+			}
 		});
 
 		return () => {
