@@ -187,7 +187,7 @@ export const actions = {
 		await Promise.all([
 			new Room(params.id).setParticipation(parsedDeviceId.data, parsedParticipating.data),
 			trigger(params.id, "user:update-participation", {
-				id: locals.deviceId,
+				id: parsedDeviceId.data,
 				participating: parsedParticipating.data,
 			}),
 		]);
@@ -221,7 +221,6 @@ export const actions = {
 			trigger(params.id, "user:remove", { id: parsedDeviceId.data }),
 		]);
 	},
-
 	setAdmin: async ({ request, params, locals }) => {
 		const room = await getRoomOr404(params.id);
 
@@ -239,7 +238,7 @@ export const actions = {
 				body: parsedDeviceId.error.toString(),
 			});
 
-		return Promise.all([
+		await Promise.all([
 			new Room(params.id).setAdmin(parsedDeviceId.data),
 			trigger(params.id, "room:set-admin", {
 				adminDeviceId: parsedDeviceId.data,
