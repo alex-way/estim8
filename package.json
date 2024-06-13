@@ -14,7 +14,9 @@
 		"format": "biome format src && prettier --plugin-search-dir . --write .",
 		"test:integration": "playwright test",
 		"test:unit": "vitest",
-		"drizzle-kit": "drizzle-kit"
+		"drizzle-kit": "drizzle-kit",
+		"makemigrations": "drizzle-kit generate",
+		"migrate": "drizzle-kit migrate"
 	},
 	"dependencies": {
 		"@libsql/client": "0.6.2",

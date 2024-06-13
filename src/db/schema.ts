@@ -43,6 +43,7 @@ export const usersToRooms = sqliteTable(
 		isParticipant: integer("is_participant", { mode: "boolean" }).notNull().default(true),
 		createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(sql`CURRENT_TIMESTAMP`),
 		updatedAt: integer("updated_at", { mode: "timestamp" }).notNull().default(sql`CURRENT_TIMESTAMP`),
+		removedByAdmin: integer("removed_by_admin", { mode: "boolean" }).notNull().default(false),
 	},
 	(table) => ({
 		pk: primaryKey({ columns: [table.deviceId, table.roomId] }),

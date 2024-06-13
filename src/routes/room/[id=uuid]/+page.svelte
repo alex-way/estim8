@@ -13,7 +13,6 @@
 	import JSConfetti from 'js-confetti';
 	import Pusher, { type PresenceChannel } from 'pusher-js';
 	import { onMount } from 'svelte';
-	import { scale } from 'svelte/transition';
 	import ChoicePicker from './components/ChoicePicker.svelte';
 	import ProfileButton from './components/ProfileButton.svelte';
 	import ResultsPanel from './components/ResultsPanel.svelte';
@@ -30,7 +29,6 @@
 	let presenceChannel: PresenceChannel | undefined;
 
 	const channelName = getChannelName($page.params.id);
-	let confettiFired = $state(false);
 
 	type Member = {
 		id: string;
@@ -129,7 +127,6 @@
 			Object.keys($roomState.users).forEach((deviceId) => {
 				$roomState.users[deviceId].choice = null;
 			});
-			confettiFired = false;
 		});
 
 		presenceChannel.bind('room:reveal', () => {
@@ -146,7 +143,6 @@
 							}
 						: undefined
 				);
-				confettiFired = true;
 			}
 		});
 
@@ -241,9 +237,6 @@
 					</form>
 				</AlertDialog.Content>
 			</AlertDialog.Root>
-		{/if}
-		{#if confettiFired}
-			<img src="/pngkey.com-thumbs-up-png-141819.png" transition:scale alt="borat" class="mx-auto" />
 		{/if}
 	</div>
 	<div class="col-span-3 xl:col-span-2 border-white border-opacity-20 border-t-2 lg:border-t-0 lg:border-l-2">
