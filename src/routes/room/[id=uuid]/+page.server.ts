@@ -327,6 +327,7 @@ export const actions = {
 				z.literal("red"),
 				z.literal("blue"),
 				z.literal("green"),
+				z.literal("orange"),
 				z.literal("yellow"),
 				z.literal("pink"),
 				z.literal("purple"),

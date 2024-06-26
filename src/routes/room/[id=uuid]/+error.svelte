@@ -4,7 +4,7 @@
 	import { goto, invalidateAll } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { PUBLIC_PUSHER_APP_KEY } from '$env/static/public';
-	import { DEFAULT_CHOICES, getChannelName } from '$lib/constants';
+	import { SIMPLE_FIB_SEQ, getChannelName } from '$lib/constants';
 	import Pusher, { type PresenceChannel } from 'pusher-js';
 	import { onMount } from 'svelte';
 
@@ -59,7 +59,7 @@
 				};
 			}}
 		>
-			{#each DEFAULT_CHOICES as choice}
+			{#each SIMPLE_FIB_SEQ as choice}
 				<input type="hidden" name="choices" value={choice} />
 			{/each}
 			<input type="hidden" name="roomId" value={$page.params.id} />

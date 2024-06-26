@@ -1,4 +1,4 @@
-import { DEFAULT_CHOICES } from "$lib/constants";
+import { FIB_SEQ } from "$lib/constants";
 import { Room } from "$lib/roomState";
 import { error, redirect } from "@sveltejs/kit";
 import z from "zod";
@@ -89,7 +89,7 @@ export const load: PageServerLoad = async ({ cookies }) => {
 		})
 		.filter((choice) => choice !== null) as number[];
 
-	const choices = parsedChoices.length ? new Set(parsedChoices) : DEFAULT_CHOICES;
+	const choices = parsedChoices.length ? new Set(parsedChoices) : FIB_SEQ;
 
 	return {
 		choices,
