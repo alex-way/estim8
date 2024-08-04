@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { db } from "$db";
 import schema from "$db/schema";
 import type { CardBack, Choice, RoomState, RoomUser } from "$lib/types";
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 export class Room {
 	id: string;
