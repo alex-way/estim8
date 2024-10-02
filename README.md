@@ -1,22 +1,12 @@
-# create-svelte
+# estim8
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/master/packages/create-svelte).
-
-## Creating a project
-
-If you're seeing this, you've probably already done this step. Congrats!
-
-```bash
-# create a new project in the current directory
-pnpm create svelte@latest
-
-# create a new project in my-app
-pnpm create svelte@latest my-app
-```
+This is a minimal story point estimation tool for agile teams, built with Svelte, Tailwind CSS, [pusher](https://pusher.com), and [turso](https://turso.tech).
 
 ## Developing
 
-Once you've created a project and installed dependencies with `pnpm install` (or `ppnpm install` or `yarn`), start a development server:
+Once you've cloned the repo, you'll need to create a `.env` file in the root of the repo, which you can copy from `.env.example` as a basis. Each environment variable is described in the `.env.example` file.
+
+Once the `.env` file is ready, you can start a development server:
 
 ```bash
 pnpm run dev
@@ -30,9 +20,7 @@ pnpm run dev -- --open
 To create a production version of your app:
 
 ```bash
-pnpm run build
+pnpm build
 ```
 
-You can preview the production build with `pnpm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+You can preview the production build with `pnpm preview`.
