@@ -28,7 +28,7 @@
 		orange: 'bg-orange-700',
 		pink: 'bg-pink-800',
 		purple: 'bg-purple-950',
-		magic: 'bg-gradient-to-r from-pink-800 via-red-800 to-yellow-800 background-animate'
+		magic: 'bg-linear-to-r from-pink-800 via-red-800 to-yellow-800 background-animate'
 	};
 
 	const {

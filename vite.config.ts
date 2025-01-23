@@ -1,9 +1,10 @@
 import { sveltekit } from "@sveltejs/kit/vite";
+import tailwindcss from "@tailwindcss/vite";
 import basicSsl from "@vitejs/plugin-basic-ssl";
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
-	plugins: [basicSsl(), sveltekit()],
+	plugins: [basicSsl(), sveltekit(), tailwindcss()],
 	test: {
 		include: ["src/**/*.{test,spec}.{js,ts}"],
 	},
