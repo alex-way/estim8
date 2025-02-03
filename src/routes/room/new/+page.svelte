@@ -46,7 +46,7 @@
 				{#each choices as choice}
 					<input type="hidden" name="choices" value={choice} />
 					<button type="submit" name="toRemove" value={choice}
-						><Card reveal={true} revealText={choice.toString()} /></button
+						><Card reveal={true} revealText={choice.toString()} class="cursor-pointer" /></button
 					>
 				{/each}
 			</form>
