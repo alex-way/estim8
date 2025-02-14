@@ -10,7 +10,6 @@ export default defineConfig({
 	},
 	server: {
 		host: "estim8.127.0.0.1.nip.io",
-		proxy: {},
 	},
 	optimizeDeps: {
 		// Including to prevent constant re-building when developing

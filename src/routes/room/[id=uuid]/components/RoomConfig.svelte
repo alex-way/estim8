@@ -34,16 +34,18 @@
 			{#if !$isParticipating}
 				<input type="hidden" name="participating" value={1} />
 			{/if}
-			<Tooltip.Root openDelay={200}>
-				<Tooltip.Trigger asChild let:builder>
-					<Button builders={[builder]} type="submit" size="sm" class="inline-block"
-						>{$isParticipating ? 'Participating' : 'Observing'}</Button
-					>
-				</Tooltip.Trigger>
-				<Tooltip.Content>
-					<p>Changing this option allows you to sit out of the voting and observe the results.</p>
-				</Tooltip.Content>
-			</Tooltip.Root>
+			<Tooltip.Provider>
+				<Tooltip.Root>
+					<Tooltip.Trigger>
+						<Button type="submit" size="sm" class="inline-block"
+							>{$isParticipating ? 'Participating' : 'Observing'}</Button
+						>
+					</Tooltip.Trigger>
+					<Tooltip.Content>
+						<p>Changing this option allows you to sit out of the voting and observe the results.</p>
+					</Tooltip.Content>
+				</Tooltip.Root>
+			</Tooltip.Provider>
 		</form>
 
 		<form
@@ -58,16 +60,18 @@
 			{#if !$roomState.config.allowObserversToSnoop}
 				<input type="hidden" name="allowSnooping" value={1} />
 			{/if}
-			<Tooltip.Root openDelay={200}>
-				<Tooltip.Trigger asChild let:builder>
-					<Button builders={[builder]} type="submit" size="sm" class="inline-block" disabled={!$isRoomAdmin}
-						>{$roomState.config.allowObserversToSnoop ? 'Disable Snooping' : 'Allow Snooping'}</Button
-					>
-				</Tooltip.Trigger>
-				<Tooltip.Content>
-					<p>Snooping allows observers to view results before they've been revealed.</p>
-				</Tooltip.Content>
-			</Tooltip.Root>
+			<Tooltip.Provider>
+				<Tooltip.Root>
+					<Tooltip.Trigger>
+						<Button type="submit" size="sm" class="inline-block" disabled={!$isRoomAdmin}
+							>{$roomState.config.allowObserversToSnoop ? 'Disable Snooping' : 'Allow Snooping'}</Button
+						>
+					</Tooltip.Trigger>
+					<Tooltip.Content>
+						<p>Snooping allows observers to view results before they've been revealed.</p>
+					</Tooltip.Content>
+				</Tooltip.Root>
+			</Tooltip.Provider>
 		</form>
 
 		<form
@@ -82,16 +86,18 @@
 			{#if !$roomState.config.allowUnknown}
 				<input type="hidden" name="allowUnknown" value={1} />
 			{/if}
-			<Tooltip.Root openDelay={200}>
-				<Tooltip.Trigger asChild let:builder>
-					<Button builders={[builder]} type="submit" size="sm" class="inline-block" disabled={!$isRoomAdmin}
-						>{$roomState.config.allowUnknown ? 'Disallow Unknown' : 'Allow Unknown'}</Button
-					>
-				</Tooltip.Trigger>
-				<Tooltip.Content>
-					<p>Snooping allows observers to view results before they've been revealed.</p>
-				</Tooltip.Content>
-			</Tooltip.Root>
+			<Tooltip.Provider>
+				<Tooltip.Root>
+					<Tooltip.Trigger>
+						<Button type="submit" size="sm" class="inline-block" disabled={!$isRoomAdmin}
+							>{$roomState.config.allowUnknown ? 'Disallow Unknown' : 'Allow Unknown'}</Button
+						>
+					</Tooltip.Trigger>
+					<Tooltip.Content>
+						<p>Snooping allows observers to view results before they've been revealed.</p>
+					</Tooltip.Content>
+				</Tooltip.Root>
+			</Tooltip.Provider>
 		</form>
 		{@render additionalButtons?.()}
 	</div>
